@@ -5,12 +5,12 @@
 
 //Engine
 #include "Camera/CameraComponent.h"
+#include "MyPlayerController.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Engine/LocalPlayer.h"
+#include "EnhancedInputComponent.h"
 
 // Sets default values
 APlayerCamera::APlayerCamera()
@@ -18,20 +18,25 @@ APlayerCamera::APlayerCamera()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-    // Create and set up the camera boom
-    SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-    SpringArm->SetupAttachment(RootComponent);
-    SpringArm->TargetArmLength = 300.0f; // Default zoom
-    SpringArm->bUsePawnControlRotation = false;
+	GetCapsuleComponent()->InitCapsuleSize(25.f, 50.0f);
 
-    // Create and set up the third-person camera
-    ThirdPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
-    ThirdPersonCamera->SetupAttachment(SpringArm);
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
+	SpringArm->SetupAttachment(GetCapsuleComponent());
+	SpringArm->bUsePawnControlRotation = true;
 
-    // Initialize default values
-    CameraRotationRate = 100.0f;
-    MinZoom = 200.0f;
-    MaxZoom = 500.0f;
+
+	ThirdPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
+	ThirdPersonCameraComponent->SetupAttachment(SpringArm);
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Overlap);
+
+
+    MinZoom = 100.0f;
+    MaxZoom = 1000.0f;
+    ZoomSpeed = 30.0f;
+
 
 }
 
@@ -62,10 +67,15 @@ void APlayerCamera::Look(const FInputActionValue& Value)
 
 void APlayerCamera::Zoom(const FInputActionValue& Value)
 {
-	float ZoomAxis = Value.Get<float>();
-	float NewLength = SpringArm->TargetArmLength + ZoomAxis * 100.0f;
-	SpringArm->TargetArmLength = FMath::Clamp(NewLength, MinZoom, MaxZoom);
+    float ZoomAxis = Value.Get<float>();
+
+    // Adjust the speed of the zoom
+    float NewLength = SpringArm->TargetArmLength + (ZoomAxis * ZoomSpeed);
+
+    // Clamp the arm length to the specified range
+    SpringArm->TargetArmLength = FMath::Clamp(NewLength, MinZoom, MaxZoom);
 }
+
 
 
 

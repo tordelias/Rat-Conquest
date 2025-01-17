@@ -20,15 +20,11 @@ public:
 	APlayerCamera();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	UCameraComponent* ThirdPersonCamera;
+	UCameraComponent* ThirdPersonCameraComponent;
 
 	// Spring arm component to position the camera behind the character
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	USpringArmComponent* SpringArm;
-
-	// Rotation rate for the camera
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-	float CameraRotationRate;
 
 	// Zoom range for the camera
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
@@ -36,6 +32,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float MaxZoom;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	float ZoomSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Look;
