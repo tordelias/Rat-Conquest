@@ -14,6 +14,7 @@ enum class EInteractionType : uint8
 	IT_Pickup UMETA(DisplayName = "Pickup"),
 	IT_Interact UMETA(DisplayName = "Interact"),
 	IT_Enemy UMETA(DisplayName = "Enemy"), 
+	IT_GridCell UMETA(DisplayName = "GridCell")
 
 };
 

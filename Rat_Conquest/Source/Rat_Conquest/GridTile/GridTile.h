@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Rat_Conquest/Components/InteractionInterface.h"
 #include "GridTile.generated.h"
 
 UCLASS()
-class RAT_CONQUEST_API AGridTile : public AActor
+class RAT_CONQUEST_API AGridTile : public AActor, public IInteractionInterface
 {
 	GENERATED_BODY()
 	
@@ -20,6 +21,17 @@ public:
 
 	bool bIsOccupied;
 	FVector2D GridPosition;
+
+	virtual void BeginFocus() override;
+	virtual void EndFocus() override;
+	virtual void Interact(APlayerCamera* PlayerCharacter) override;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Pickup")
+	FInteractableData InstanceInteractableData;
+
+	void UpdateInteractableData();
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

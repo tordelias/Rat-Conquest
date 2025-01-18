@@ -62,6 +62,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Zoom;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Interact;
+
 private: 
 	void Look(const FInputActionValue& Value);
 
@@ -107,6 +110,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void SetCurrentUnit(APlayerUnit* NewUnit) { CurrentUnit = NewUnit; };
+
+	APlayerUnit* GetCurrentUnit() const { return CurrentUnit; }
 
 	FORCEINLINE bool bIsInteracting() const { return GetWorldTimerManager().IsTimerActive(TimerHandleInteraction); }
 
