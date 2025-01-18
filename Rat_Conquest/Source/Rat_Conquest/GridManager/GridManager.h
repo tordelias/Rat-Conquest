@@ -29,7 +29,7 @@ public:
 private:
 
 	UPROPERTY()
-	TArray<AActor*> GridTiles;
+	TMap<FVector2D, AActor*> GridTiles;
 
 	// The class type of the tiles to spawn
 	UPROPERTY(EditAnywhere, Category = "Grid")

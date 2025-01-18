@@ -11,7 +11,7 @@ AGridManager::AGridManager()
 // Generate the grid of tiles
 void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float TileSize)
 {
-    GridTiles.SetNum(Rows * Columns);
+    GridTiles.Empty(); // Clear any existing tiles
 
     FActorSpawnParameters SpawnParams;
     SpawnParams.Owner = this;
@@ -28,20 +28,19 @@ void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float TileSize)
                 AActor* Tile = GetWorld()->SpawnActor<AActor>(GridTileClass, Location, FRotator::ZeroRotator, SpawnParams);
                 if (Tile)
                 {
-                    int32 Index = i * Columns + j;
-                    GridTiles[Index] = Tile;
+                    FVector2D GridPosition(i, j);
+                    GridTiles.Add(GridPosition, Tile);
+
                     AGridTile* GridTile = Cast<AGridTile>(Tile);
                     if (GridTile)
                     {
-                        GridTile->GridPosition = FVector2D(i, j);
+                        GridTile->GridPosition = GridPosition;
                         UE_LOG(LogTemp, Display, TEXT("Spawned tile at (%d, %d)"), i, j);
                     }
                     else
                     {
                         UE_LOG(LogTemp, Warning, TEXT("Failed to cast spawned tile to AGridTile at (%d, %d)"), i, j);
                     }
-                    
-                   
                 }
                 else
                 {
@@ -64,43 +63,26 @@ void AGridManager::GetCenterTile(int32 Row, int32 Column)
         return;
     }
 
-    int32 CenterRow = Row / 2;
-    int32 CenterColumn = Column / 2;
-
-    int32 CenterIndex = CenterRow * Column + CenterColumn;
-    if (GridTiles.IsValidIndex(CenterIndex))
-    {
-        AActor* CenterTile = GridTiles[CenterIndex];
-        UE_LOG(LogTemp, Display, TEXT("Center tile is at Row: %d, Column: %d (Index: %d)"), CenterRow, CenterColumn, CenterIndex);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Center tile index is invalid!"));
-    }
+    
 }
 
 
 // Get the tile at a specific grid coordinate
 AActor* AGridManager::GetTileAt(int32 Row, int32 Column)
 {
-	if (Row < 0 || Column < 0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid grid coordinates! Row: %d, Column: %d"), Row, Column);
-		return nullptr;
-	}
+    FVector2D GridPosition(Row, Column);
 
-	int32 Index = Row * Column + Column;
-	if (GridTiles.IsValidIndex(Index))
-	{
-		AActor* Tile = GridTiles[Index];
-		UE_LOG(LogTemp, Display, TEXT("Found tile at Row: %d, Column: %d (Index: %d)"), Row, Column, Index);
-		return Tile;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Tile index is invalid!"));
-		return nullptr;
-	}
+    if (GridTiles.Contains(GridPosition))
+    {
+        AActor* Tile = GridTiles[GridPosition];
+        UE_LOG(LogTemp, Display, TEXT("Found tile at Row: %d, Column: %d"), Row, Column);
+        return Tile;
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No tile found at Row: %d, Column: %d"), Row, Column);
+        return nullptr;
+    }
 
 }
 
@@ -108,12 +90,12 @@ AActor* AGridManager::GetTileAt(int32 Row, int32 Column)
 void AGridManager::BeginPlay()
 {
 	Super::BeginPlay();
-	int32 Rows = 8;
-	int32 Columns = 8;
+	int32 Rows = 10;
+	int32 Columns = 12;
 
 	GenerateGrid(Rows, Columns, 100.0f);
-	GetTileAt(3, 2);
-	GetCenterTile(Rows, Columns);
+	//GetTileAt(3, 2);
+	//GetCenterTile(Rows, Columns);
 }
 
 // Called every frame
