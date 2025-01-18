@@ -10,6 +10,7 @@ class UInputAction;
 class USpringArmComponent;
 class UCameraComponent;
 class IInteractionInterface; 
+class APlayerUnit;
 
 USTRUCT()
 struct FInteractionData
@@ -71,6 +72,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	//Interaction
 	UPROPERTY(VisibleInstanceOnly, Category = "Interaction")
 	TScriptInterface<IInteractionInterface> TargetInteractable;
 
@@ -94,12 +96,17 @@ protected:
 
 	void Interact();
 
+	//PlayerUnit movement
+	APlayerUnit* CurrentUnit;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void SetCurrentUnit(APlayerUnit* NewUnit) { CurrentUnit = NewUnit; };
 
 	FORCEINLINE bool bIsInteracting() const { return GetWorldTimerManager().IsTimerActive(TimerHandleInteraction); }
 

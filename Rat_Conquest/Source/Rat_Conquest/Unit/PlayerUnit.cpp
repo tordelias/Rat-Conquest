@@ -7,6 +7,7 @@
 
 //includes
 #include "Rat_Conquest/GridManager/GridManager.h"
+#include "Rat_Conquest/Player/PlayerCamera.h"
 
 // Sets default values
 APlayerUnit::APlayerUnit()
@@ -56,6 +57,12 @@ void APlayerUnit::EndFocus()
 
 void APlayerUnit::Interact(APlayerCamera* PlayerCharacter)
 {
+	if (PlayerCharacter)
+	{
+		// hopefully removed at a later stage 
+		PlayerCharacter->SetCurrentUnit(this);
+		UpdateInteractableData();
+	}
 }
 
 // Called when the game starts or when spawned

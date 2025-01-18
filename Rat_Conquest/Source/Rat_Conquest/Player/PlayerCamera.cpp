@@ -19,6 +19,7 @@
 
 //includes
 #include "Rat_Conquest/Components/InteractionInterface.h"
+#include "Rat_Conquest/Unit/PlayerUnit.h"
 
 // Sets default values
 APlayerCamera::APlayerCamera()
