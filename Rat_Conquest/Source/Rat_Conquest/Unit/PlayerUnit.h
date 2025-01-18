@@ -19,6 +19,10 @@ public:
 	APlayerUnit();
 	void MoveToTile(FVector2D NewGridPosition);
 
+	void ExecutePlayerTurn();
+	void ExecuteAITurn();
+	void FinishTurn();
+
 	//should be skeleton mesh
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* mesh;
@@ -29,16 +33,25 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	AGridManager* GridManager;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	bool bIsPlayerUnit = true;
+
+
+	//the amount of tiles the unit can move pr turn
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	int movementSpeed = 3;
+
 	virtual void BeginFocus() override;
 	virtual void EndFocus() override;
 	virtual void Interact(APlayerCamera* PlayerCharacter) override;
 
-	bool bInputPressed = false;
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleInstanceOnly, Category = "Pickup")
+	UPROPERTY(VisibleInstanceOnly, Category = "Interact")
 	FInteractableData InstanceInteractableData;
 
 	void UpdateInteractableData();

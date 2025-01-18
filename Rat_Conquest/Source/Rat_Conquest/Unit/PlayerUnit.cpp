@@ -8,6 +8,8 @@
 //includes
 #include "Rat_Conquest/GridManager/GridManager.h"
 #include "Rat_Conquest/Player/PlayerCamera.h"
+#include "Rat_Conquest/GameManager/GameManager.h"
+#include "Kismet/GameplayStatics.h" // Include for UGameplayStatics
 
 // Sets default values
 APlayerUnit::APlayerUnit()
@@ -37,6 +39,27 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	CurrentGridPosition = NewGridPosition;
 	UE_LOG(LogTemp, Error, TEXT("Moving"));
 
+}
+
+void APlayerUnit::ExecutePlayerTurn()
+{
+	//some logic here
+
+	FinishTurn();
+}
+
+void APlayerUnit::ExecuteAITurn()
+{
+	//Some AI logic here
+}
+
+void APlayerUnit::FinishTurn()
+{
+	AGameManager* GameManager = Cast<AGameManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass()));
+	if (GameManager)
+	{
+		GameManager->EndUnitTurn();
+	}
 }
 
 void APlayerUnit::BeginFocus()

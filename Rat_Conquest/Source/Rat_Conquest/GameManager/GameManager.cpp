@@ -23,14 +23,14 @@ void AGameManager::InitalizeUntis()
     for (TActorIterator<APlayerUnit> It(GetWorld()); It; ++It)
     {
         APlayerUnit* Unit = *It;
-        /* if (Unit->bIsPlayerUnit)
+         if (Unit->bIsPlayerUnit)
          {
              PlayerUnits.Add(Unit);
          }
          else
          {
              EnemyUnits.Add(Unit);
-         }*/
+         }
     }
 }
 
@@ -58,8 +58,15 @@ void AGameManager::ExecuteTurn()
     if (!CurrentUnit)
         return;
 
-    //if player turn do player stuff
-    //if AI turn do AI stuff
+    if (CurrentUnit->bIsPlayerUnit) {
+        CurrentUnit->ExecutePlayerTurn();
+
+    }
+    else {
+        CurrentUnit->ExecuteAITurn();
+
+    }
+   
 
    
 }
@@ -91,6 +98,8 @@ void AGameManager::BeginPlay()
     Super::BeginPlay();
 
     TogglePlayerTurn();
+
+    StartTurnOrder();
 
    
 }
