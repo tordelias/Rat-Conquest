@@ -65,7 +65,7 @@ void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float TileSize)
                 if (GridTile != nullptr)
                 {
                     GridTile->GridPosition = GridPosition;
-                    UE_LOG(LogTemp, Display, TEXT("Spawned tile at (%d, %d)"), i, j);
+                    //UE_LOG(LogTemp, Display, TEXT("Spawned tile at (%d, %d)"), i, j);
                 }
                 else
                 {
@@ -112,6 +112,41 @@ AActor* AGridManager::GetTileAt(int32 Row, int32 Column)
 
 }
 
+void AGridManager::GetNeighbourTiles(int32 Row, int32 Column, int32 GridRows, int32 GridColumns)
+{
+    if (Row <= 0 || Column <= 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Invalid grid dimensions! Row: %d, Column: %d"), Row, Column);
+        return;
+    }
+
+    int32 StartRow = FMath::Max(0, Row - 1);
+    int32 EndRow = FMath::Min(Row + 1, GridRows - 1);
+    int32 StartColumn = FMath::Max(0, Column - 1);
+    int32 EndColumn = FMath::Min(Column + 1, GridColumns - 1);
+
+    for (int32 i = StartRow; i <= EndRow; ++i)
+    {
+        for (int32 j = StartColumn; j <= EndColumn; ++j)
+        {
+            if (i == Row && j == Column)
+            {
+                continue; // Skip the center tile
+            }
+
+            AActor* Tile = GetTileAt(i, j);
+            if (Tile != nullptr)
+            {
+                UE_LOG(LogTemp, Display, TEXT("Found neighbor tile at Row: %d, Column: %d"), i, j);
+            }
+            else
+            {
+                UE_LOG(LogTemp, Warning, TEXT("No tile found at Row: %d, Column: %d"), i, j);
+            }
+        }
+    }
+}
+
 // Called when the game starts or when spawned
 void AGridManager::BeginPlay()
 {
@@ -122,6 +157,7 @@ void AGridManager::BeginPlay()
 	GenerateGrid(Rows, Columns, 100.0f);
 	//GetTileAt(3, 2);
 	//GetCenterTile(Rows, Columns);
+    GetNeighbourTiles(2, 1,Rows,Columns);
 }
 
 // Called every frame

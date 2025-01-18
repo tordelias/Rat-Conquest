@@ -19,6 +19,8 @@ public:
 	void GetCenterTile(int32 Row, int32 Column);
 
 	AActor* GetTileAt(int32 Row, int32 Column);
+
+	void GetNeighbourTiles(int32 Row, int32 Column, int32 GridRows, int32 GridColumns);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

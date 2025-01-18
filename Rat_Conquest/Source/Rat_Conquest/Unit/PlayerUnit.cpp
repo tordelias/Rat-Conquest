@@ -9,6 +9,7 @@
 #include "Rat_Conquest/GridManager/GridManager.h"
 #include "Rat_Conquest/Player/PlayerCamera.h"
 #include "Rat_Conquest/GameManager/GameManager.h"
+#include "Rat_Conquest/GridTile/GridTile.h"
 #include "Kismet/GameplayStatics.h" // Include for UGameplayStatics
 
 // Sets default values
@@ -31,8 +32,35 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	AActor* TargetTile = GridManager->GetTileAt(NewGridPosition.X, NewGridPosition.Y);
 	if (!TargetTile)
 		return;
-
+	
 	FVector TargetPosition = TargetTile->GetActorLocation();
+	AGridTile* GridTile = Cast<AGridTile>(TargetTile);
+	if (GridTile)
+	{
+
+		if (GridTile->bIsOccupied) {
+			return;
+		}
+		// Example: Set a boolean on the tile
+		GridTile->bIsOccupied = true; // Make sure you have this boolean in your AGridTile class
+		UE_LOG(LogTemp, Display, TEXT("Target tile is an AGridTile. Setting bIsOccupied to true."));
+	}
+	else {
+		return;
+	}
+	AActor* OldTile = GridManager->GetTileAt(CurrentGridPosition.X,CurrentGridPosition.Y);
+	if (OldTile) {
+		AGridTile* OldGridTile = Cast<AGridTile>(OldTile);
+		if (OldGridTile)
+		{
+			// Example: Set a boolean on the tile
+			OldGridTile->bIsOccupied = false; // Make sure you have this boolean in your AGridTile class
+			UE_LOG(LogTemp, Display, TEXT("Target tile is an AGridTile. Setting bIsOccupied to false."));
+		}
+
+
+	}
+		
 
 	SetActorLocation(TargetPosition);
 
@@ -44,13 +72,15 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 void APlayerUnit::ExecutePlayerTurn()
 {
 	//some logic here
-
+	UE_LOG(LogTemp, Error, TEXT("Player did something"));
 	FinishTurn();
 }
 
 void APlayerUnit::ExecuteAITurn()
 {
 	//Some AI logic here
+	UE_LOG(LogTemp, Error, TEXT("AI did something"));
+	FinishTurn();
 }
 
 void APlayerUnit::FinishTurn()

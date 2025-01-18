@@ -18,7 +18,7 @@ void AGameManager::TogglePlayerTurn()
 
 }
 
-void AGameManager::InitalizeUntis()
+void AGameManager::InitalizeUnits()
 {
     for (TActorIterator<APlayerUnit> It(GetWorld()); It; ++It)
     {
@@ -50,6 +50,7 @@ void AGameManager::StartTurnOrder()
         CurrentUnit = TurnQueue[0];
 
     }
+    ExecuteTurn();
     
 }
 
@@ -98,7 +99,7 @@ void AGameManager::BeginPlay()
     Super::BeginPlay();
 
     TogglePlayerTurn();
-
+    InitalizeUnits();
     StartTurnOrder();
 
    

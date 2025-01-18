@@ -20,7 +20,7 @@ public:
 	// Add a public function to toggle the turn between players
 	void TogglePlayerTurn();
 
-	void InitalizeUntis();
+	void InitalizeUnits();
 
 	void StartTurnOrder();
 
