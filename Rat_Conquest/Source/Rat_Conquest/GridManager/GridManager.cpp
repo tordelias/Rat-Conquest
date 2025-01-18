@@ -13,47 +13,73 @@ void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float TileSize)
 {
     GridTiles.Empty(); // Clear any existing tiles
 
+    // Check if the GridTileClass is set
+    if (GridTileClass == nullptr)
+    {
+        UE_LOG(LogTemp, Error, TEXT("GridTileClass is not set!"));
+        return;
+    }
+
     FActorSpawnParameters SpawnParams;
     SpawnParams.Owner = this;
     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
+    // Calculate offsets to center the grid
+    int32 RowOffset;
+    if (Rows % 2 == 0)
+    {
+        RowOffset = Rows / 2;
+    }
+    else
+    {
+        RowOffset = (Rows / 2) + 1;
+    }
+
+    int32 ColumnOffset;
+    if (Columns % 2 == 0)
+    {
+        ColumnOffset = Columns / 2;
+    }
+    else
+    {
+        ColumnOffset = (Columns / 2) + 1;
+    }
+
+    // Loop through rows and columns to create the grid
     for (int32 i = 0; i < Rows; i++)
     {
         for (int32 j = 0; j < Columns; j++)
         {
-            FVector Location = FVector(i * TileSize, j * TileSize, 0.0f);
+            float XPosition = (i - RowOffset + 0.5f) * TileSize;
+            float YPosition = (j - ColumnOffset + 0.5f) * TileSize;
+            FVector Location(XPosition, YPosition, 0.0f);
 
-            if (GridTileClass)
+            // Spawn the tile
+            AActor* Tile = GetWorld()->SpawnActor<AActor>(GridTileClass, Location, FRotator::ZeroRotator, SpawnParams);
+            if (Tile != nullptr)
             {
-                AActor* Tile = GetWorld()->SpawnActor<AActor>(GridTileClass, Location, FRotator::ZeroRotator, SpawnParams);
-                if (Tile)
-                {
-                    FVector2D GridPosition(i, j);
-                    GridTiles.Add(GridPosition, Tile);
+                FVector2D GridPosition(i, j);
+                GridTiles.Add(GridPosition, Tile);
 
-                    AGridTile* GridTile = Cast<AGridTile>(Tile);
-                    if (GridTile)
-                    {
-                        GridTile->GridPosition = GridPosition;
-                        UE_LOG(LogTemp, Display, TEXT("Spawned tile at (%d, %d)"), i, j);
-                    }
-                    else
-                    {
-                        UE_LOG(LogTemp, Warning, TEXT("Failed to cast spawned tile to AGridTile at (%d, %d)"), i, j);
-                    }
+                AGridTile* GridTile = Cast<AGridTile>(Tile);
+                if (GridTile != nullptr)
+                {
+                    GridTile->GridPosition = GridPosition;
+                    UE_LOG(LogTemp, Display, TEXT("Spawned tile at (%d, %d)"), i, j);
                 }
                 else
                 {
-                    UE_LOG(LogTemp, Error, TEXT("Failed to spawn tile at (%d, %d)"), i, j);
+                    UE_LOG(LogTemp, Warning, TEXT("Failed to cast spawned tile to AGridTile at (%d, %d)"), i, j);
                 }
             }
             else
             {
-                UE_LOG(LogTemp, Error, TEXT("GridTileClass is not set!"));
+                UE_LOG(LogTemp, Error, TEXT("Failed to spawn tile at (%d, %d)"), i, j);
             }
         }
     }
 }
+
 
 void AGridManager::GetCenterTile(int32 Row, int32 Column)
 {

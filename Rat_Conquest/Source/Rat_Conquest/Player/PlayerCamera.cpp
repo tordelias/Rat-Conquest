@@ -181,23 +181,37 @@ void APlayerCamera::EndInteract()
 
 void APlayerCamera::Interact()
 {
-   if( IsValid(TargetInteractable.GetObject()))
-   {
-	   TargetInteractable->Interact(this);
-   }
+    if (APlayerController* PC = Cast<APlayerController>(GetController()))
+    {
+        if (!PC->IsInputKeyDown(EKeys::RightMouseButton))
+        {
+            if (IsValid(TargetInteractable.GetObject()))
+            {
+                TargetInteractable->Interact(this);
+            }
+        }
+    }
 }
 
 
 void APlayerCamera::Look(const FInputActionValue& Value)
 {
-	FVector2D LookAxis = Value.Get<FVector2D>();
-    if (Controller != nullptr)
+    // Check if the Right Mouse Button (RMB) is held down
+    if (APlayerController* PC = Cast<APlayerController>(GetController()))
     {
-        // add yaw and pitch input to controller
-        AddControllerYawInput(-LookAxis.X);
-        AddControllerPitchInput(LookAxis.Y);
+        if (PC->IsInputKeyDown(EKeys::RightMouseButton))
+        {
+            FVector2D LookAxis = Value.Get<FVector2D>();
+            if (Controller != nullptr)
+            {
+                // Add yaw and pitch input to controller
+                AddControllerYawInput(-LookAxis.X);
+                AddControllerPitchInput(LookAxis.Y);
+            }
+        }
     }
 }
+
 
 void APlayerCamera::Zoom(const FInputActionValue& Value)
 {
