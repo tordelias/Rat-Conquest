@@ -13,5 +13,8 @@ UCLASS()
 class RAT_CONQUEST_API AMainHUD : public AHUD
 {
 	GENERATED_BODY()
+
+protected: 
+	virtual void BeginPlay() override;
 	
 };

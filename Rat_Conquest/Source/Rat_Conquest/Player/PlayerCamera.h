@@ -9,6 +9,25 @@ struct FInputActionValue;
 class UInputAction;
 class USpringArmComponent;
 class UCameraComponent;
+class IInteractionInterface; 
+
+USTRUCT()
+struct FInteractionData
+{
+	GENERATED_USTRUCT_BODY()
+
+	FInteractionData() : CurrentInteractable(nullptr), LastInteractionCheckTime(0.0f)
+	{
+
+	};
+
+
+	UPROPERTY()
+	AActor* CurrentInteractable;
+
+	UPROPERTY()
+	float LastInteractionCheckTime;
+};
 
 UCLASS()
 class RAT_CONQUEST_API APlayerCamera : public ACharacter
@@ -52,11 +71,36 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleInstanceOnly, Category = "Interaction")
+	TScriptInterface<IInteractionInterface> TargetInteractable;
+
+	float InteractionCheckFrequency;
+
+	float InteractionCheckDistance;
+
+	FTimerHandle TimerHandleInteraction;
+
+	FInteractionData InteractionData;
+	
+	void PerformInteractionCheck();
+
+	void FoundInteractable(AActor* newInteractable);
+
+	void NoInteractableFound();
+
+	void BeginInteract();
+
+	void EndInteract();
+
+	void Interact();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	FORCEINLINE bool bIsInteracting() const { return GetWorldTimerManager().IsTimerActive(TimerHandleInteraction); }
 
 };

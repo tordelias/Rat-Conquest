@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Rat_Conquest/GridManager/GridManager.h"
+#include "Rat_Conquest/Components/InteractionInterface.h"
 #include "PlayerUnit.generated.h"
 
+class AGridManager;
+
 UCLASS()
-class RAT_CONQUEST_API APlayerUnit : public AActor
+class RAT_CONQUEST_API APlayerUnit : public AActor, public IInteractionInterface
 {
 	GENERATED_BODY()
 	
@@ -17,6 +19,7 @@ public:
 	APlayerUnit();
 	void MoveToTile(FVector2D NewGridPosition);
 
+	//should be skeleton mesh
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* mesh;
 
@@ -26,10 +29,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	AGridManager* GridManager;
 
+	virtual void BeginFocus() override;
+	virtual void EndFocus() override;
+	virtual void Interact(APlayerCamera* PlayerCharacter) override;
+
 	bool bInputPressed = false;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Pickup")
+	FInteractableData InstanceInteractableData;
+
+	void UpdateInteractableData();
 
 public:	
 	// Called every frame

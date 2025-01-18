@@ -3,12 +3,19 @@
 
 #include "PlayerUnit.h"
 
+//Engine
+
+//includes
+#include "Rat_Conquest/GridManager/GridManager.h"
+
 // Sets default values
 APlayerUnit::APlayerUnit()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	UpdateInteractableData();
 }
 
 void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
@@ -31,6 +38,26 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 
 }
 
+void APlayerUnit::BeginFocus()
+{
+	if (mesh)
+	{
+		mesh->SetRenderCustomDepth(true);
+	}
+}
+
+void APlayerUnit::EndFocus()
+{
+	if (mesh)
+	{
+		mesh->SetRenderCustomDepth(false);
+	}
+}
+
+void APlayerUnit::Interact(APlayerCamera* PlayerCharacter)
+{
+}
+
 // Called when the game starts or when spawned
 void APlayerUnit::BeginPlay()
 {
@@ -42,6 +69,13 @@ void APlayerUnit::BeginPlay()
 	MoveToTile(CurrentGridPosition);
 
 
+}
+
+void APlayerUnit::UpdateInteractableData()
+{
+	InstanceInteractableData.InteractableType = EInteractionType::IT_Interact;
+
+	//Add more data here
 }
 
 // Called every frame

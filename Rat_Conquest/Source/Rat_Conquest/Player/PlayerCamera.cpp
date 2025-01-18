@@ -11,6 +11,14 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
+#include "Engine/LocalPlayer.h"
+#include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
+#include "TimerManager.h"
+
+
+//includes
+#include "Rat_Conquest/Components/InteractionInterface.h"
 
 // Sets default values
 APlayerCamera::APlayerCamera()
@@ -37,13 +45,13 @@ APlayerCamera::APlayerCamera()
     MaxZoom = 1000.0f;
     ZoomSpeed = 30.0f;
 
-
 }
 
 // Called when the game starts or when spawned
 void APlayerCamera::BeginPlay()
 {
     Super::BeginPlay();
+    InteractionCheckDistance = 3000.f;
 
 }
 
@@ -52,7 +60,132 @@ void APlayerCamera::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    if (GetWorld()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionCheckFrequency)
+    {
+        PerformInteractionCheck();
+    }
+
 }
+
+void APlayerCamera::PerformInteractionCheck()
+{
+    // Get mouse world position and direction
+    FVector MouseWorldLocation, MouseWorldDirection;
+    if (APlayerController* PC = Cast<APlayerController>(GetController()))
+    {
+        PC->DeprojectMousePositionToWorld(MouseWorldLocation, MouseWorldDirection);
+    }
+    else
+    {
+        NoInteractableFound();
+        return;
+    }
+
+    FVector TraceEnd = MouseWorldLocation + (MouseWorldDirection * InteractionCheckDistance);
+
+    // Perform a line trace from the mouse location into the world
+    FHitResult MouseHit;
+    FCollisionQueryParams QueryParams;
+    QueryParams.AddIgnoredActor(this);
+
+    bool bHitSomething = GetWorld()->LineTraceSingleByChannel(MouseHit, MouseWorldLocation, TraceEnd, ECC_Visibility, QueryParams);
+
+    AActor* HitActor = nullptr;
+    if (bHitSomething)
+    {
+        HitActor = MouseHit.GetActor();
+    }
+
+    if (HitActor && HitActor->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+    {
+        if (HitActor != InteractionData.CurrentInteractable)
+        {
+            FoundInteractable(HitActor);
+            return;
+        }
+
+    }
+    NoInteractableFound();
+}
+
+void APlayerCamera::FoundInteractable(AActor* newInteractable)
+{
+    if (bIsInteracting())
+    {
+        EndInteract();
+    }
+    if (InteractionData.CurrentInteractable)
+    {
+        TargetInteractable = InteractionData.CurrentInteractable;
+        TargetInteractable->EndFocus();
+    }
+
+    InteractionData.CurrentInteractable = newInteractable;
+    TargetInteractable = newInteractable;
+
+	//Show & Update Widget
+
+    TargetInteractable->BeginFocus();
+}
+
+void APlayerCamera::NoInteractableFound()
+{
+    if (bIsInteracting())
+    {
+        GetWorldTimerManager().ClearTimer(TimerHandleInteraction);
+    }
+    if (InteractionData.CurrentInteractable)
+    {
+        if (IsValid(TargetInteractable.GetObject()))
+        {
+            TargetInteractable->EndFocus();
+        }
+
+        //Close Widget
+
+        InteractionData.CurrentInteractable = nullptr;
+        TargetInteractable = nullptr;
+    }
+}
+
+void APlayerCamera::BeginInteract()
+{
+	PerformInteractionCheck();
+    if (InteractionData.CurrentInteractable)
+    {
+        if (IsValid(TargetInteractable.GetObject()))
+        {
+            TargetInteractable->BeginInteract();
+            if (FMath::IsNearlyZero(TargetInteractable->InteractableData.InteractionDuration, 0.1f))
+            {
+                Interact();
+            }
+            else
+            {
+                GetWorldTimerManager().SetTimer(TimerHandleInteraction, this, &APlayerCamera::Interact, TargetInteractable->InteractableData.InteractionDuration, false);
+            }
+        }
+    }
+}
+
+void APlayerCamera::EndInteract()
+{
+    GetWorldTimerManager().ClearTimer(TimerHandleInteraction);
+
+    if (IsValid(TargetInteractable.GetObject()))
+    {
+        TargetInteractable->EndInteract();
+    }
+}
+
+void APlayerCamera::Interact()
+{
+   if( IsValid(TargetInteractable.GetObject()))
+   {
+	   TargetInteractable->Interact(this);
+   }
+}
+
 
 void APlayerCamera::Look(const FInputActionValue& Value)
 {

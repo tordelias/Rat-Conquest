@@ -3,3 +3,8 @@
 
 #include "MainHUD.h"
 
+void AMainHUD::BeginPlay()
+{
+	GetOwningPlayerController()->SetInputMode(FInputModeGameAndUI());
+	GetOwningPlayerController()->bShowMouseCursor = true;
+}
