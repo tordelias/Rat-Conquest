@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "CombatManager.generated.h"
 
+
+class APlayerUnit;
 UCLASS()
 class RAT_CONQUEST_API ACombatManager : public AActor
 {
@@ -14,8 +16,9 @@ class RAT_CONQUEST_API ACombatManager : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ACombatManager();
-
-
+	void DealDamageToUnit(APlayerUnit* Attackerunit, APlayerUnit* Defenderunit);
+	void TakeDamage(APlayerUnit* unit, float amount);
+	void KillUnit(APlayerUnit* unit);
 
 protected:
 	// Called when the game starts or when spawned

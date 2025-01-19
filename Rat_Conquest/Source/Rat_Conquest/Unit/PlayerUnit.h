@@ -43,6 +43,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	int movementSpeed = 3;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	int health = 3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	int damage = 1;
+
 	bool bFirstMove = true;
 
 
