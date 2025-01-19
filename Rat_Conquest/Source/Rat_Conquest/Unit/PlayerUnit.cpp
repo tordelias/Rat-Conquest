@@ -20,6 +20,8 @@ APlayerUnit::APlayerUnit()
 
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	UpdateInteractableData();
+
+	GridStartPosition = FVector2D(0, 0);
 }
 
 // Called when the game starts or when spawned
@@ -60,9 +62,14 @@ void APlayerUnit::Tick(float DeltaTime)
 
 
 	}
+	if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Q))
+	{
+		if(!bIsPlayerUnit)
+		{
+			this->MoveToGridPsoition();
+		}
+	}
 }
-
-
 
 void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 {
@@ -80,19 +87,19 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 		return;
 
 	AActor* OldTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
+	AGridTile* OldGridTile = Cast<AGridTile>(OldTile);
 	if (OldTile) {
-		AGridTile* OldGridTile = Cast<AGridTile>(OldTile);
 		if (OldGridTile) {
 			OldGridTile->bIsOccupied = false;
-			OldGridTile->RemoveUnitRefrence();
-		}
+			
+		} 
 			
 	}
 	
 
 	if (GridManager->GetDistanceBetweenTiles(TargetTile, OldTile) > movementSpeed)
 		return;
-
+	OldGridTile->RemoveUnitRefrence();
 	
 	// Mark new tile as occupied
 	GridTile->bIsOccupied = true;
@@ -131,7 +138,7 @@ void APlayerUnit::DelayedInitalPosition()
 {
 	if (GridManager && GridManager->bIsGridFinished())
 	{
-		SetInitalPosition(FVector2D(0,0));
+		SetInitalPosition(GridStartPosition);
 	}
 	else
 	{
@@ -152,6 +159,7 @@ void APlayerUnit::ExecuteAITurn()
 {
 	//Some AI logic here
 	UE_LOG(LogTemp, Error, TEXT("AI did something"));
+	this->MoveToGridPsoition();
 	FinishTurn();
 }
 
@@ -199,4 +207,160 @@ void APlayerUnit::UpdateInteractableData()
 	//Add more data here
 }
 
+
+//AI stuff (Should be moved to a AI controller)
+void APlayerUnit::MoveToGridPsoition()
+{
+		auto closestEnemy = this->FindEnemyunit();
+
+		if (IsValid(closestEnemy))
+		{
+			float Distance = FVector2D::Distance(CurrentGridPosition, closestEnemy->CurrentGridPosition);
+
+			if (Distance <= movementSpeed)
+			{
+				this->Attack(closestEnemy);
+			}
+			else
+			{
+				this->MoveToClosestPossibleTile(closestEnemy);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("No valid enemy found"));
+		}
+}
+
+APlayerUnit* APlayerUnit::FindEnemyunit()
+{
+	FVector2D closestUnitPos = FVector2D::ZeroVector;
+	APlayerUnit* closestUnit = nullptr;
+
+	if (!GridManager)
+	{
+		UE_LOG(LogTemp, Error, TEXT("GridManager is not valid or has not been possessed"));
+		return nullptr;
+	}
+
+	int numTilesChecked = 0;
+
+	// Iterate over the TMap of GridTiles
+	for (const auto& TilePair : GridManager->GridTiles)
+	{
+		// Cast the AActor* value to AGridTile*
+		AGridTile* Tile = Cast<AGridTile>(TilePair.Value);
+		if (!Tile)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Invalid tile found in GridTiles"));
+			continue;
+		}
+
+		// Access the unit reference
+		APlayerUnit* Unit = Tile->unitRefrence;
+		if (!Unit)
+		{
+			UE_LOG(LogTemp, Verbose, TEXT("Tile at position %s has no unit reference"), *TilePair.Key.ToString());
+			continue;
+		}
+
+		// Skip self-reference
+		if (Unit == this)
+		{
+			UE_LOG(LogTemp, Verbose, TEXT("Skipping self"));
+			//continue;
+		}
+
+		// Check if the unit is a "friendly" (same bIsPlayerUnit value as this AI)
+		if (Unit->bIsPlayerUnit != this->bIsPlayerUnit)
+		{
+			UE_LOG(LogTemp, Verbose, TEXT("Skipping enemy unit: %s"), *Unit->GetName());
+			//continue;
+		}
+
+		// Find the closest friendly unit
+		if (!closestUnit || FVector2D::Distance(this->CurrentGridPosition, Unit->CurrentGridPosition) < FVector2D::Distance(this->CurrentGridPosition, closestUnitPos))
+		{
+			closestUnitPos = Unit->CurrentGridPosition;
+			closestUnit = Unit;
+			UE_LOG(LogTemp, Log, TEXT("Found a closer FriendlyUnit: %s at location: %s"), *Unit->GetName(), *closestUnitPos.ToString());
+		}
+
+		numTilesChecked++;
+	}
+
+	if (!closestUnit)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No FriendlyUnit found in the grid after checking %d tiles"), numTilesChecked);
+	}
+
+	return closestUnit;
+}
+
+
+void APlayerUnit::MoveToClosestPossibleTile(APlayerUnit* Enemy)
+{
+	if (GridManager)
+	{
+		// Get the current grid position of the AI unit
+		FVector CurrentPosition = this->GetActorLocation();
+		TArray<AGridTile*> PossibleTiles;
+
+		// Get all the neighboring tiles or nearby tiles
+		PossibleTiles = GridManager->GetNeighbourTiles(this->CurrentGridPosition.X, this->CurrentGridPosition.Y);
+
+		AGridTile* ClosestTile = nullptr;
+		float ClosestDistance = FLT_MAX; // Start with an infinitely large distance
+
+		// Iterate through all the possible tiles
+		for (AGridTile* Tile : PossibleTiles)
+		{
+			// Calculate the distance from the AI's current position to this tile
+			float DistanceToTile = FVector::Dist(CurrentPosition, Tile->GetActorLocation());
+
+			// Check if this tile is within the AI unit's movement range
+			if (DistanceToTile <= this->movementSpeed)
+			{
+				// Check if it's the closest tile so far
+				if (DistanceToTile < ClosestDistance)
+				{
+					ClosestDistance = DistanceToTile;
+					ClosestTile = Tile;
+				}
+			}
+		}
+
+		if (ClosestTile && !bIsPlayerUnit)
+		{
+			this->MoveToTile(ClosestTile->GridPosition);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("No valid tile found within range"));
+			// If no valid tile is found within range, the AI cannot move
+			// Optionally, handle this case (e.g., stay put, move randomly, etc.)
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("GridManager is not valid or has not been possessed"));
+	}
+}
+
+void APlayerUnit::Attack(APlayerUnit* Enemy)
+{
+	if (GridManager && !bIsPlayerUnit)
+	{
+		TArray<AGridTile*> NeighbourTiles = GridManager->GetNeighbourTiles(Enemy->CurrentGridPosition.X, Enemy->CurrentGridPosition.Y);
+		for (auto& Tile : NeighbourTiles)
+		{
+			if (Tile->bIsOccupied == false)
+			{
+				this->MoveToTile(Tile->GridPosition);
+				//Atack code here
+				return;
+			}
+		}
+	}
+}
 

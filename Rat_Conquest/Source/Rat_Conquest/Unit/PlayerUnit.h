@@ -36,6 +36,9 @@ public:
 	AGridManager* GridManager;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	FVector2D GridStartPosition;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	bool bIsPlayerUnit = true;
 
 
@@ -75,5 +78,12 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	//AI stuff (Should be moved to a AI controller)
+	void MoveToGridPsoition();
+	APlayerUnit* FindEnemyunit();
+	void MoveToClosestPossibleTile(APlayerUnit* Enemy);
+
+	void Attack(APlayerUnit* Enemy);
 
 };
