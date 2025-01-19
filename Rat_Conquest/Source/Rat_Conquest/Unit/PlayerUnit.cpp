@@ -22,6 +22,42 @@ APlayerUnit::APlayerUnit()
 	UpdateInteractableData();
 }
 
+// Called when the game starts or when spawned
+void APlayerUnit::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//if (bIsPlayerUnit) {
+	//	DelayedInitalPosition();
+	//}
+	DelayedInitalPosition();
+}
+// Called every frame
+void APlayerUnit::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (bIsMoving)
+	{
+		MovementProgress += DeltaTime / MovementDuration;
+
+		if (MovementProgress >= 1.0f)
+		{
+			MovementProgress = 1.0f;
+			bIsMoving = false;
+			SetActorLocation(TargetPosition);
+			UE_LOG(LogTemp, Display, TEXT("Finished moving to new tile: %s"), *TargetPosition.ToString());
+		}
+		else
+		{
+			FVector NewPosition = FMath::Lerp(StartPosition, TargetPosition, MovementProgress);
+			SetActorLocation(NewPosition);
+		}
+	}
+}
+
+
+
 void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 {
 	if (!GridManager) {
@@ -71,16 +107,30 @@ void APlayerUnit::SetInitalPosition(FVector2D position)
 	}
 
 	AActor* TargetTile = GridManager->GetTileAt(position.X, position.Y);
-	if (!TargetTile)
+	if (!TargetTile) {
+		UE_LOG(LogTemp, Warning, TEXT("Invalid target tile at (%f, %f)"), position.X, position.Y);
 		return;
+	}
 
-	StartPosition = GetActorLocation();
 	TargetPosition = TargetTile->GetActorLocation();
-	MovementProgress = 0.0f;  // Reset progress
-	bIsMoving = true;         // Start movement
-
+	SetActorLocation(TargetPosition);
 	CurrentGridPosition = position;
+	UE_LOG(LogTemp, Display, TEXT("Player unit set to grid position (%f, %f)"), position.X, position.Y);
 }
+
+void APlayerUnit::DelayedInitalPosition()
+{
+	if (GridManager && GridManager->bIsGridFinished())
+	{
+		SetInitalPosition(FVector2D(0,0));
+	}
+	else
+	{
+		FTimerHandle TimerHandle;
+		GetWorldTimerManager().SetTimerForNextTick(this, &APlayerUnit::DelayedInitalPosition);
+	}
+}
+
 
 void APlayerUnit::ExecutePlayerTurn()
 {
@@ -131,24 +181,7 @@ void APlayerUnit::Interact(APlayerCamera* PlayerCharacter)
 	}
 }
 
-// Called when the game starts or when spawned
-void APlayerUnit::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	
-	// Initialize the player's grid position
-	if (bIsPlayerUnit) {
-		TargetPosition = FVector(0, 0, 0); // Start at (0, 0) or any desired position
-		SetInitalPosition(FVector2D(1,0));
-		MoveToTile(FVector2D(1,1));
-	}
-	
-	
-	
 
-
-}
 
 void APlayerUnit::UpdateInteractableData()
 {
@@ -157,31 +190,4 @@ void APlayerUnit::UpdateInteractableData()
 	//Add more data here
 }
 
-// Called every frame
-void APlayerUnit::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-
-	if (bIsMoving)
-	{
-		MovementProgress += DeltaTime / MovementDuration; // Increment progress
-
-		if (MovementProgress >= 1.0f)
-		{
-			// Finish movement
-			MovementProgress = 1.0f;
-			bIsMoving = false;
-			SetActorLocation(TargetPosition);
-			UE_LOG(LogTemp, Display, TEXT("Finished moving to new tile."));
-		}
-		else
-		{
-			// Interpolate position
-			FVector NewPosition = FMath::Lerp(StartPosition, TargetPosition, MovementProgress);
-			SetActorLocation(NewPosition);
-		}
-	}
-	
-}
 

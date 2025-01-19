@@ -15,6 +15,8 @@ AGridTile::AGridTile()
 
 	UpdateInteractableData();
 
+	TileMesh->SetRenderCustomDepth(true);
+
 }
 
 void AGridTile::BeginFocus()
@@ -27,10 +29,10 @@ void AGridTile::BeginFocus()
 
 void AGridTile::EndFocus()
 {
-	if (TileMesh)
-	{
-		TileMesh->SetRenderCustomDepth(false);
-	}
+	//if (TileMesh)
+	//{
+	//	TileMesh->SetRenderCustomDepth(false);
+	//}
 }
 
 void AGridTile::Interact(APlayerCamera* PlayerCharacter)

@@ -19,6 +19,7 @@ public:
 	APlayerUnit();
 	void MoveToTile(FVector2D NewGridPosition);
 	void SetInitalPosition(FVector2D position);
+	void DelayedInitalPosition();
 
 	void ExecutePlayerTurn();
 	void ExecuteAITurn();

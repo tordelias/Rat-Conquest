@@ -34,6 +34,7 @@ void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float TileSize)
     {
         for (int32 j = 0; j < Columns; j++)
         {
+            // Calculate world position (centered around origin)
             float XPosition = (i - RowOffset) * TileSize;
             float YPosition = (j - ColumnOffset) * TileSize;
             FVector Location(XPosition, YPosition, 0.0f);
@@ -42,14 +43,22 @@ void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float TileSize)
             AActor* Tile = GetWorld()->SpawnActor<AActor>(GridTileClass, Location, FRotator::ZeroRotator, SpawnParams);
             if (Tile != nullptr)
             {
-                FVector2D GridPosition(i, j);
-                GridTiles.Add(GridPosition, Tile);
+                // Logical position with (0,0) as bottom-left corner
+                FVector2D LogicalGridPosition(i, j);
 
+                // Map to bottom-left corner logical indexing
+                LogicalGridPosition.Y = j;    // Columns stay as-is
+                LogicalGridPosition.X = Rows - 1 - i; // Reverse row index for bottom-left origin
+
+                // Store in the map
+                GridTiles.Add(LogicalGridPosition, Tile);
+
+                // Set GridPosition on the tile
                 AGridTile* GridTile = Cast<AGridTile>(Tile);
                 if (GridTile != nullptr)
                 {
-                    GridTile->GridPosition = GridPosition;
-                    //UE_LOG(LogTemp, Display, TEXT("Spawned tile at (%d, %d)"), i, j);
+                    GridTile->GridPosition = LogicalGridPosition;
+                    //UE_LOG(LogTemp, Display, TEXT("Spawned tile at LogicalGridPosition: (%d, %d)"), LogicalGridPosition.X, LogicalGridPosition.Y);
                 }
                 else
                 {
