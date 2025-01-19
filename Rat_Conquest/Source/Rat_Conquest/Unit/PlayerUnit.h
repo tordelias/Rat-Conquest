@@ -20,6 +20,7 @@ public:
 	void MoveToTile(FVector2D NewGridPosition);
 	void SetInitalPosition(FVector2D position);
 	void DelayedInitalPosition();
+	void PlayerAttack();
 
 	void ExecutePlayerTurn();
 	void ExecuteAITurn();
@@ -80,7 +81,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	//AI stuff (Should be moved to a AI controller)
-	void MoveToGridPsoition();
+	void MoveToGridPosition();
 	APlayerUnit* FindEnemyunit();
 	void MoveToClosestPossibleTile(APlayerUnit* Enemy);
 

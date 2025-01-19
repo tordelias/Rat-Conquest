@@ -3,6 +3,8 @@
 
 #include "GameManager.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
+#include "Rat_Conquest/Player/PlayerCamera.h"
+#include "Kismet/GameplayStatics.h"
 #include "EngineUtils.h" 
 // Sets default values
 AGameManager::AGameManager()
@@ -44,12 +46,29 @@ void AGameManager::StartTurnOrder()
         TurnQueue.Append(EnemyUnits);
 
     }
+    else {
+        TurnQueue.Append(PlayerUnits);
+        UE_LOG(LogTemp, Warning, TEXT("No unit to execute turn."));
+    }
 
-
+    
     if (TurnQueue.Num() > 0) {
         CurrentUnit = TurnQueue[0];
+        APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+        if (CurrentUnit->bIsPlayerUnit && PlayerCharacter) {
+            PlayerCharacter->SetCurrentUnit(CurrentUnit);
+        }
+        else if(PlayerCharacter) {
+            PlayerCharacter->SetCurrentUnit(nullptr);
+        }
+
 
     }
+    else {
+        UE_LOG(LogTemp, Warning, TEXT("TurnQueue is empty! No unit to execute turn."));
+        return;
+    }
+
     ExecuteTurn();
     
 }
@@ -97,9 +116,8 @@ void AGameManager::EndUnitTurn()
 void AGameManager::BeginPlay()
 {
     Super::BeginPlay();
-
-    TogglePlayerTurn();
     InitalizeUnits();
+    TogglePlayerTurn();
     StartTurnOrder();
 
    

@@ -66,7 +66,7 @@ void APlayerUnit::Tick(float DeltaTime)
 	{
 		if(!bIsPlayerUnit)
 		{
-			this->MoveToGridPsoition();
+			this->MoveToGridPosition();
 		}
 	}
 }
@@ -112,7 +112,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 
 	CurrentGridPosition = NewGridPosition;
 	UE_LOG(LogTemp, Display, TEXT("Started moving to new tile."));
-	
+	FinishTurn();
 }
 
 void APlayerUnit::SetInitalPosition(FVector2D position)
@@ -147,19 +147,26 @@ void APlayerUnit::DelayedInitalPosition()
 	}
 }
 
+void APlayerUnit::PlayerAttack()
+{
+	//TArray<AGridTile*> NeighbourTiles = GridManager->GetNeighbourTiles(EnemyPosition.X, EnemyPosition.Y);
+
+
+}
+
 
 void APlayerUnit::ExecutePlayerTurn()
 {
 	//some logic here
 	UE_LOG(LogTemp, Error, TEXT("Player did something"));
-	FinishTurn();
+	//FinishTurn();
 }
 
 void APlayerUnit::ExecuteAITurn()
 {
 	//Some AI logic here
 	UE_LOG(LogTemp, Error, TEXT("AI did something"));
-	this->MoveToGridPsoition();
+	this->MoveToGridPosition();
 	FinishTurn();
 }
 
@@ -192,9 +199,9 @@ void APlayerUnit::Interact(APlayerCamera* PlayerCharacter)
 {
 	if (PlayerCharacter)
 	{
-		// hopefully removed at a later stage 
-		PlayerCharacter->SetCurrentUnit(this);
+	
 		UpdateInteractableData();
+		
 	}
 }
 
@@ -209,7 +216,7 @@ void APlayerUnit::UpdateInteractableData()
 
 
 //AI stuff (Should be moved to a AI controller)
-void APlayerUnit::MoveToGridPsoition()
+void APlayerUnit::MoveToGridPosition()
 {
 		auto closestEnemy = this->FindEnemyunit();
 
@@ -342,11 +349,13 @@ void APlayerUnit::MoveToClosestPossibleTile(APlayerUnit* Enemy)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("No valid tile found within range"));
 			// Handle the case where no valid tile is found (e.g., stay put)
+			FinishTurn();
 		}
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("GridManager or Enemy is not valid"));
+		FinishTurn();
 	}
 }
 
