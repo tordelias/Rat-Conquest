@@ -28,19 +28,15 @@ APlayerCamera::APlayerCamera()
     GetCapsuleComponent()->InitCapsuleSize(25.f, 50.0f);
 
     SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
-    SpringArm->SetupAttachment(RootComponent);
-    SpringArm->bUsePawnControlRotation = false;
+    SpringArm->SetupAttachment(GetCapsuleComponent());
+    SpringArm->bUsePawnControlRotation = true;
 
     ThirdPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
     ThirdPersonCameraComponent->SetupAttachment(SpringArm);
     bUseControllerRotationYaw = false;
 
-    FVector FixedCameraLocation(0.0f, 0.0f, 100.0f);
-    ThirdPersonCameraComponent->SetWorldLocation(FixedCameraLocation);
-
-
     GetCharacterMovement()->bOrientRotationToMovement = false;
-    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Overlap);
 
     MinZoom = 100.0f;
