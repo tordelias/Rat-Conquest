@@ -159,7 +159,7 @@ TArray<AGridTile*> AGridManager::GetNeighbourTiles(int32 Row, int32 Column)
             }
 
             AGridTile* Tile = Cast<AGridTile>(GetTileAt(i, j)); // Assuming GetTileAt returns an AActor
-            if (Tile != nullptr && Tile->bIsOccupied) // Check if the tile is occupied
+            if (Tile != nullptr /*&& Tile->bIsOccupied*/) // Check if the tile is occupied
             {
                 UE_LOG(LogTemp, Display, TEXT("Found occupied tile at Row: %d, Column: %d"), i, j);
                 OccupiedTiles.Add(Tile);

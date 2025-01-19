@@ -29,6 +29,9 @@ public:
 	TArray<AGridTile*> GetNeighbourTiles(int32 Row, int32 Column);
 
 	bool bIsGridFinished() { return GridTiles.Num() > 0; };
+
+	UPROPERTY()
+	TMap<FVector2D, AActor*> GridTiles;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -39,8 +42,6 @@ public:
 private:
 
 	FVector2D GridSize;
-	UPROPERTY()
-	TMap<FVector2D, AActor*> GridTiles;
 
 	// The class type of the tiles to spawn
 	UPROPERTY(EditAnywhere, Category = "Grid")
