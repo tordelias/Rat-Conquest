@@ -32,41 +32,54 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	AActor* TargetTile = GridManager->GetTileAt(NewGridPosition.X, NewGridPosition.Y);
 	if (!TargetTile)
 		return;
-	
-	FVector TargetPosition = TargetTile->GetActorLocation();
-	AGridTile* GridTile = Cast<AGridTile>(TargetTile);
-	if (GridTile)
-	{
 
-		if (GridTile->bIsOccupied) {
-			return;
-		}
-		// Example: Set a boolean on the tile
-		GridTile->bIsOccupied = true; // Make sure you have this boolean in your AGridTile class
-		UE_LOG(LogTemp, Display, TEXT("Target tile is an AGridTile. Setting bIsOccupied to true."));
-	}
-	else {
+	AGridTile* GridTile = Cast<AGridTile>(TargetTile);
+	if (!GridTile || GridTile->bIsOccupied)
 		return;
-	}
-	AActor* OldTile = GridManager->GetTileAt(CurrentGridPosition.X,CurrentGridPosition.Y);
+
+	AActor* OldTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
 	if (OldTile) {
 		AGridTile* OldGridTile = Cast<AGridTile>(OldTile);
 		if (OldGridTile)
-		{
-			// Example: Set a boolean on the tile
-			OldGridTile->bIsOccupied = false; // Make sure you have this boolean in your AGridTile class
-			UE_LOG(LogTemp, Display, TEXT("Target tile is an AGridTile. Setting bIsOccupied to false."));
-		}
-
-
+			OldGridTile->bIsOccupied = false;
 	}
-		
+	
 
-	SetActorLocation(TargetPosition);
+	if (GridManager->GetDistanceBetweenTiles(TargetTile, OldTile) > movementSpeed)
+		return;
+
+	
+	// Mark new tile as occupied
+	GridTile->bIsOccupied = true;
+
+	// Set up lerp variables
+	StartPosition = GetActorLocation();
+	TargetPosition = TargetTile->GetActorLocation();
+	MovementProgress = 0.0f;  // Reset progress
+	bIsMoving = true;         // Start movement
 
 	CurrentGridPosition = NewGridPosition;
-	UE_LOG(LogTemp, Error, TEXT("Moving"));
+	UE_LOG(LogTemp, Display, TEXT("Started moving to new tile."));
+	
+}
 
+void APlayerUnit::SetInitalPosition(FVector2D position)
+{
+	if (!GridManager) {
+		UE_LOG(LogTemp, Error, TEXT("NO MANAGER"));
+		return;
+	}
+
+	AActor* TargetTile = GridManager->GetTileAt(position.X, position.Y);
+	if (!TargetTile)
+		return;
+
+	StartPosition = GetActorLocation();
+	TargetPosition = TargetTile->GetActorLocation();
+	MovementProgress = 0.0f;  // Reset progress
+	bIsMoving = true;         // Start movement
+
+	CurrentGridPosition = position;
 }
 
 void APlayerUnit::ExecutePlayerTurn()
@@ -123,10 +136,16 @@ void APlayerUnit::BeginPlay()
 {
 	Super::BeginPlay();
 	
-
+	
 	// Initialize the player's grid position
-	CurrentGridPosition = FVector2D(0, 0); // Start at (0, 0) or any desired position
-	MoveToTile(CurrentGridPosition);
+	if (bIsPlayerUnit) {
+		TargetPosition = FVector(0, 0, 0); // Start at (0, 0) or any desired position
+		SetInitalPosition(FVector2D(1,0));
+		MoveToTile(FVector2D(1,1));
+	}
+	
+	
+	
 
 
 }
@@ -144,11 +163,24 @@ void APlayerUnit::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-	if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::E))
+	if (bIsMoving)
 	{
-		MoveToTile(FVector2D(1, 0));
+		MovementProgress += DeltaTime / MovementDuration; // Increment progress
 
-		
+		if (MovementProgress >= 1.0f)
+		{
+			// Finish movement
+			MovementProgress = 1.0f;
+			bIsMoving = false;
+			SetActorLocation(TargetPosition);
+			UE_LOG(LogTemp, Display, TEXT("Finished moving to new tile."));
+		}
+		else
+		{
+			// Interpolate position
+			FVector NewPosition = FMath::Lerp(StartPosition, TargetPosition, MovementProgress);
+			SetActorLocation(NewPosition);
+		}
 	}
 	
 }

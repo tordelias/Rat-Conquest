@@ -18,6 +18,7 @@ public:
 	// Sets default values for this actor's properties
 	APlayerUnit();
 	void MoveToTile(FVector2D NewGridPosition);
+	void SetInitalPosition(FVector2D position);
 
 	void ExecutePlayerTurn();
 	void ExecuteAITurn();
@@ -41,11 +42,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	int movementSpeed = 3;
 
+	bool bFirstMove = true;
+
+
 	virtual void BeginFocus() override;
 	virtual void EndFocus() override;
 	virtual void Interact(APlayerCamera* PlayerCharacter) override;
 
-
+private:
+	bool bIsMoving = false;                 
+	FVector StartPosition;                  
+	FVector TargetPosition;                 
+	float MovementProgress = 0.0f;          
+	float MovementDuration = 0.5f;
 
 protected:
 	// Called when the game starts or when spawned

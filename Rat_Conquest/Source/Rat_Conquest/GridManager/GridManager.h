@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "GridManager.generated.h"
 
+
+class AGridTile;
 UCLASS()
 class RAT_CONQUEST_API AGridManager : public AActor
 {
@@ -17,10 +19,14 @@ public:
 
 	void GenerateGrid(int32 Rows, int32 Columns, float TileSize);
 	void GetCenterTile(int32 Row, int32 Column);
+	void SetGridSize(int32 Rows, int32 Colums);
+	FVector2D GetGridSize();
+
+	float GetDistanceBetweenTiles(AActor* Tile1, AActor* Tile2);
 
 	AActor* GetTileAt(int32 Row, int32 Column);
 
-	void GetNeighbourTiles(int32 Row, int32 Column, int32 GridRows, int32 GridColumns);
+	void GetNeighbourTiles(int32 Row, int32 Column);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -30,6 +36,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 private:
 
+	FVector2D GridSize;
 	UPROPERTY()
 	TMap<FVector2D, AActor*> GridTiles;
 

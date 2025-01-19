@@ -6,6 +6,7 @@ AGridManager::AGridManager()
 {
 	// Set this actor to call Tick() every frame. Turn this off for better performance if not needed.
 	PrimaryActorTick.bCanEverTick = true;
+    
 }
 
 // Generate the grid of tiles
@@ -25,33 +26,16 @@ void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float TileSize)
     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
     // Calculate offsets to center the grid
-    int32 RowOffset;
-    if (Rows % 2 == 0)
-    {
-        RowOffset = Rows / 2;
-    }
-    else
-    {
-        RowOffset = (Rows / 2) + 1;
-    }
-
-    int32 ColumnOffset;
-    if (Columns % 2 == 0)
-    {
-        ColumnOffset = Columns / 2;
-    }
-    else
-    {
-        ColumnOffset = (Columns / 2) + 1;
-    }
+    int32 RowOffset = (Rows - 1) / 2;
+    int32 ColumnOffset = (Columns - 1) / 2;
 
     // Loop through rows and columns to create the grid
     for (int32 i = 0; i < Rows; i++)
     {
         for (int32 j = 0; j < Columns; j++)
         {
-            float XPosition = (i - RowOffset + 0.5f) * TileSize;
-            float YPosition = (j - ColumnOffset + 0.5f) * TileSize;
+            float XPosition = (i - RowOffset) * TileSize;
+            float YPosition = (j - ColumnOffset) * TileSize;
             FVector Location(XPosition, YPosition, 0.0f);
 
             // Spawn the tile
@@ -92,6 +76,36 @@ void AGridManager::GetCenterTile(int32 Row, int32 Column)
     
 }
 
+void AGridManager::SetGridSize(int32 Rows, int32 Colums)
+{
+    GridSize.X = Rows;
+    GridSize.Y = Colums;
+
+}
+
+FVector2D AGridManager::GetGridSize()
+{
+    return GridSize;
+}
+
+float AGridManager::GetDistanceBetweenTiles(AActor* Tile1, AActor* Tile2)
+{
+    if (!Tile1 || !Tile2)
+        return 9999;
+
+    AGridTile* GridTile1 = Cast<AGridTile>(Tile1);
+    AGridTile* GridTile2 = Cast<AGridTile>(Tile2);
+    if (!GridTile1 || !GridTile2)
+        return 9999;
+
+    FVector2D tile1Pos = GridTile1->GridPosition;
+    FVector2D tile2Pos = GridTile2->GridPosition;
+
+    float Distance = FVector2D::Distance(tile1Pos, tile2Pos);
+    UE_LOG(LogTemp, Display, TEXT("Distance between tiles: %f"), Distance);
+    return Distance;
+}
+
 
 // Get the tile at a specific grid coordinate
 AActor* AGridManager::GetTileAt(int32 Row, int32 Column)
@@ -112,18 +126,18 @@ AActor* AGridManager::GetTileAt(int32 Row, int32 Column)
 
 }
 
-void AGridManager::GetNeighbourTiles(int32 Row, int32 Column, int32 GridRows, int32 GridColumns)
+void AGridManager::GetNeighbourTiles(int32 Row, int32 Column)
 {
-    if (Row <= 0 || Column <= 0)
+    if (Row <= 0 || Column <= 0 || GridSize == FVector2D::ZeroVector)
     {
         UE_LOG(LogTemp, Warning, TEXT("Invalid grid dimensions! Row: %d, Column: %d"), Row, Column);
         return;
     }
 
     int32 StartRow = FMath::Max(0, Row - 1);
-    int32 EndRow = FMath::Min(Row + 1, GridRows - 1);
+    int32 EndRow = FMath::Min(Row + 1, GridSize.X - 1);
     int32 StartColumn = FMath::Max(0, Column - 1);
-    int32 EndColumn = FMath::Min(Column + 1, GridColumns - 1);
+    int32 EndColumn = FMath::Min(Column + 1, GridSize.Y - 1);
 
     for (int32 i = StartRow; i <= EndRow; ++i)
     {
@@ -151,13 +165,13 @@ void AGridManager::GetNeighbourTiles(int32 Row, int32 Column, int32 GridRows, in
 void AGridManager::BeginPlay()
 {
 	Super::BeginPlay();
-	int32 Rows = 10;
-	int32 Columns = 12;
-
-	GenerateGrid(Rows, Columns, 100.0f);
+    SetGridSize(10, 12);
+	GenerateGrid(GridSize.X, GridSize.Y, 100.0f);
 	//GetTileAt(3, 2);
 	//GetCenterTile(Rows, Columns);
-    GetNeighbourTiles(2, 1,Rows,Columns);
+    //GetNeighbourTiles(2, 1,Rows,Columns);
+    GetDistanceBetweenTiles(GetTileAt(2, 3), GetTileAt(3, 1));
+
 }
 
 // Called every frame
