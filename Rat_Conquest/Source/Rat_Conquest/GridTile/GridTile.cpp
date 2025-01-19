@@ -52,6 +52,16 @@ void AGridTile::UpdateInteractableData()
 	InstanceInteractableData.InteractableType = EInteractionType::IT_GridCell;
 }
 
+void AGridTile::SetUnitRefrence(APlayerUnit* unit)
+{
+	unitRefrence = unit;
+}
+
+void AGridTile::RemoveUnitRefrence()
+{
+	unitRefrence = nullptr;
+}
+
 // Called when the game starts or when spawned
 void AGridTile::BeginPlay()
 {

@@ -26,7 +26,7 @@ public:
 
 	AActor* GetTileAt(int32 Row, int32 Column);
 
-	void GetNeighbourTiles(int32 Row, int32 Column);
+	TArray<AGridTile*> GetNeighbourTiles(int32 Row, int32 Column);
 
 	bool bIsGridFinished() { return GridTiles.Num() > 0; };
 protected:

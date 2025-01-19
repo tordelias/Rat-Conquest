@@ -135,12 +135,13 @@ AActor* AGridManager::GetTileAt(int32 Row, int32 Column)
 
 }
 
-void AGridManager::GetNeighbourTiles(int32 Row, int32 Column)
+TArray<AGridTile*> AGridManager::GetNeighbourTiles(int32 Row, int32 Column)
 {
+    TArray<AGridTile*> OccupiedTiles;
     if (Row <= 0 || Column <= 0 || GridSize == FVector2D::ZeroVector)
     {
         UE_LOG(LogTemp, Warning, TEXT("Invalid grid dimensions! Row: %d, Column: %d"), Row, Column);
-        return;
+        return OccupiedTiles;
     }
 
     int32 StartRow = FMath::Max(0, Row - 1);
@@ -157,17 +158,19 @@ void AGridManager::GetNeighbourTiles(int32 Row, int32 Column)
                 continue; // Skip the center tile
             }
 
-            AActor* Tile = GetTileAt(i, j);
-            if (Tile != nullptr)
+            AGridTile* Tile = Cast<AGridTile>(GetTileAt(i, j)); // Assuming GetTileAt returns an AActor
+            if (Tile != nullptr && Tile->bIsOccupied) // Check if the tile is occupied
             {
-                UE_LOG(LogTemp, Display, TEXT("Found neighbor tile at Row: %d, Column: %d"), i, j);
+                UE_LOG(LogTemp, Display, TEXT("Found occupied tile at Row: %d, Column: %d"), i, j);
+                OccupiedTiles.Add(Tile);
             }
             else
             {
-                UE_LOG(LogTemp, Warning, TEXT("No tile found at Row: %d, Column: %d"), i, j);
+                UE_LOG(LogTemp, Warning, TEXT("No occupied tile found at Row: %d, Column: %d"), i, j);
             }
         }
     }
+    return OccupiedTiles;
 }
 
 // Called when the game starts or when spawned

@@ -7,6 +7,9 @@
 #include "Rat_Conquest/Components/InteractionInterface.h"
 #include "GridTile.generated.h"
 
+
+class APlayerUnit;
+
 UCLASS()
 class RAT_CONQUEST_API AGridTile : public AActor, public IInteractionInterface
 {
@@ -22,6 +25,7 @@ public:
 	bool bIsOccupied;
 	FVector2D GridPosition;
 
+
 	virtual void BeginFocus() override;
 	virtual void EndFocus() override;
 	virtual void Interact(APlayerCamera* PlayerCharacter) override;
@@ -29,8 +33,10 @@ public:
 	UPROPERTY(VisibleInstanceOnly, Category = "Pickup")
 	FInteractableData InstanceInteractableData;
 
+	APlayerUnit* unitRefrence;
 	void UpdateInteractableData();
-
+	void SetUnitRefrence(APlayerUnit* unit);
+	void RemoveUnitRefrence();
 
 protected:
 	// Called when the game starts or when spawned

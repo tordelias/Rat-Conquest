@@ -54,6 +54,12 @@ void APlayerUnit::Tick(float DeltaTime)
 			SetActorLocation(NewPosition);
 		}
 	}
+	if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::E))
+	{
+		TArray<AGridTile*> listofTiles = GridManager->GetNeighbourTiles(CurrentGridPosition.X,CurrentGridPosition.Y);
+
+
+	}
 }
 
 
@@ -76,8 +82,11 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	AActor* OldTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
 	if (OldTile) {
 		AGridTile* OldGridTile = Cast<AGridTile>(OldTile);
-		if (OldGridTile)
+		if (OldGridTile) {
 			OldGridTile->bIsOccupied = false;
+			OldGridTile->RemoveUnitRefrence();
+		}
+			
 	}
 	
 
@@ -87,7 +96,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	
 	// Mark new tile as occupied
 	GridTile->bIsOccupied = true;
-
+	GridTile->SetUnitRefrence(this);
 	// Set up lerp variables
 	StartPosition = GetActorLocation();
 	TargetPosition = TargetTile->GetActorLocation();
