@@ -147,9 +147,47 @@ void APlayerUnit::DelayedInitalPosition()
 	}
 }
 
-void APlayerUnit::PlayerAttack()
+void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 {
-	//TArray<AGridTile*> NeighbourTiles = GridManager->GetNeighbourTiles(EnemyPosition.X, EnemyPosition.Y);
+	auto Enemy = PlayerCharacter->GetCurrentUnit();
+	if (GridManager && Enemy)
+	{
+		// Get the current position of the player and the enemy
+		FVector2D PlayerPosition = this->CurrentGridPosition;
+		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
+
+		// Retrieve all neighboring tiles around the enemy
+		TArray<AGridTile*> NeighbourTiles = GridManager->GetNeighbourTiles(EnemyPosition.X, EnemyPosition.Y);
+
+		AGridTile* BestTile = nullptr;
+		float ClosestDistanceToEnemy = FLT_MAX;
+
+		// Check if there are valid, unoccupied tiles around the enemy
+		for (AGridTile* Tile : NeighbourTiles)
+		{
+			if (Tile && !Tile->bIsOccupied)
+			{
+				// Calculate distance to the enemy from this tile
+				float DistanceToEnemy = FVector2D::Distance(Tile->GridPosition, EnemyPosition);
+
+				// Prioritize the closest tile
+				if (DistanceToEnemy < ClosestDistanceToEnemy)
+				{
+					ClosestDistanceToEnemy = DistanceToEnemy;
+					BestTile = Tile;
+				}
+			}
+		}
+
+		if (BestTile)
+		{
+			UE_LOG(LogTemp, Log, TEXT("Player moving to tile (%f, %f) to attack the enemy"), BestTile->GridPosition.X, BestTile->GridPosition.Y);
+			this->MoveToTile(BestTile->GridPosition);
+
+			// Perform the attack logic (optional)
+			// this->PerformAttack(Enemy);
+		}
+	}
 
 
 }
@@ -201,6 +239,7 @@ void APlayerUnit::Interact(APlayerCamera* PlayerCharacter)
 	{
 	
 		UpdateInteractableData();
+		PlayerAttack(PlayerCharacter);
 		
 	}
 }

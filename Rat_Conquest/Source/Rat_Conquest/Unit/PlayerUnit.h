@@ -20,7 +20,7 @@ public:
 	void MoveToTile(FVector2D NewGridPosition);
 	void SetInitalPosition(FVector2D position);
 	void DelayedInitalPosition();
-	void PlayerAttack();
+	void PlayerAttack(class APlayerCamera* PlayerCharacter);
 
 	void ExecutePlayerTurn();
 	void ExecuteAITurn();
