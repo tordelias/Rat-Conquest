@@ -8,7 +8,7 @@
 #include "PlayerUnit.generated.h"
 
 class AGridManager;
-
+class ACombatManager;
 UCLASS()
 class RAT_CONQUEST_API APlayerUnit : public AActor, public IInteractionInterface
 {
@@ -35,6 +35,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	AGridManager* GridManager;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat Manager")
+	ACombatManager* combatManager;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	FVector2D GridStartPosition;

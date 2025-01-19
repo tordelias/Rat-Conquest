@@ -10,6 +10,7 @@
 #include "Rat_Conquest/Player/PlayerCamera.h"
 #include "Rat_Conquest/GameManager/GameManager.h"
 #include "Rat_Conquest/GridTile/GridTile.h"
+#include "Rat_Conquest/CombatManager/CombatManager.h"
 #include "Kismet/GameplayStatics.h" // Include for UGameplayStatics
 
 // Sets default values
@@ -185,7 +186,8 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 			this->MoveToTile(BestTile->GridPosition);
 
 			// Perform the attack logic (optional)
-			// this->PerformAttack(Enemy);
+			// 
+			combatManager->DealDamageToUnit(Enemy, this);
 		}
 	}
 
@@ -436,7 +438,7 @@ void APlayerUnit::Attack(APlayerUnit* Enemy)
 			UE_LOG(LogTemp, Log, TEXT("AI moving to tile (%f, %f) to attack the enemy"), BestTile->GridPosition.X, BestTile->GridPosition.Y);
 			this->MoveToTile(BestTile->GridPosition);
 			// Call the attack logic (ensure attack can happen here)
-			//this->PerformAttack(Enemy);
+			combatManager->DealDamageToUnit(this, Enemy);
 		}
 		else
 		{
