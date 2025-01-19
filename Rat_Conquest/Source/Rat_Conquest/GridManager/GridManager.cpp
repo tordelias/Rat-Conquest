@@ -138,7 +138,7 @@ AActor* AGridManager::GetTileAt(int32 Row, int32 Column)
 TArray<AGridTile*> AGridManager::GetNeighbourTiles(int32 Row, int32 Column)
 {
     TArray<AGridTile*> OccupiedTiles;
-    if (Row <= 0 || Column <= 0 || GridSize == FVector2D::ZeroVector)
+    if (Row < 0 || Column < 0 || GridSize == FVector2D::ZeroVector)
     {
         UE_LOG(LogTemp, Warning, TEXT("Invalid grid dimensions! Row: %d, Column: %d"), Row, Column);
         return OccupiedTiles;
