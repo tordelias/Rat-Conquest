@@ -132,6 +132,12 @@ void APlayerUnit::SetInitalPosition(FVector2D position)
 	TargetPosition = TargetTile->GetActorLocation();
 	SetActorLocation(TargetPosition);
 	CurrentGridPosition = position;
+	//set the unit pointer on the grid tile
+	AGridTile* GridTile = Cast<AGridTile>(TargetTile);
+	if (GridTile) {
+		GridTile->SetUnitRefrence(this);
+		GridTile->bIsOccupied = true;
+	}
 	UE_LOG(LogTemp, Display, TEXT("Player unit set to grid position (%f, %f)"), position.X, position.Y);
 }
 
@@ -157,6 +163,17 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		FVector2D PlayerPosition = this->CurrentGridPosition;
 		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
 
+		// Define attack range
+		float AttackRange = 2.0f; // Example value, adjust as needed
+		float DistanceToEnemy = FVector2D::Distance(PlayerPosition, EnemyPosition);
+
+		// Check if the player is within attack range
+		if (DistanceToEnemy > AttackRange)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Player is out of range to attack the enemy."));
+			return;
+		}
+
 		// Retrieve all neighboring tiles around the enemy
 		TArray<AGridTile*> NeighbourTiles = GridManager->GetNeighbourTiles(EnemyPosition.X, EnemyPosition.Y);
 
@@ -169,30 +186,35 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 			if (Tile && !Tile->bIsOccupied)
 			{
 				// Calculate distance to the enemy from this tile
-				float DistanceToEnemy = FVector2D::Distance(Tile->GridPosition, EnemyPosition);
+				float TileDistanceToEnemy = FVector2D::Distance(Tile->GridPosition, EnemyPosition);
 
 				// Prioritize the closest tile
-				if (DistanceToEnemy < ClosestDistanceToEnemy)
+				if (TileDistanceToEnemy < ClosestDistanceToEnemy && TileDistanceToEnemy < movementSpeed)
 				{
-					ClosestDistanceToEnemy = DistanceToEnemy;
+					ClosestDistanceToEnemy = TileDistanceToEnemy;
 					BestTile = Tile;
 				}
 			}
 		}
 
-		if (BestTile)
+		if (BestTile && ClosestDistanceToEnemy < movementSpeed)
 		{
 			UE_LOG(LogTemp, Log, TEXT("Player moving to tile (%f, %f) to attack the enemy"), BestTile->GridPosition.X, BestTile->GridPosition.Y);
 			this->MoveToTile(BestTile->GridPosition);
 
-			// Perform the attack logic (optional)
-			// 
-			combatManager->DealDamageToUnit(Enemy, this);
+			// Only attack if the player has reached the correct tile
+			if (this->CurrentGridPosition == BestTile->GridPosition)
+			{
+				combatManager->DealDamageToUnit(Enemy, this);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("No valid tile found or player is out of movement range."));
 		}
 	}
-
-
 }
+
 
 
 void APlayerUnit::ExecutePlayerTurn()
@@ -241,7 +263,11 @@ void APlayerUnit::Interact(APlayerCamera* PlayerCharacter)
 	{
 	
 		UpdateInteractableData();
-		PlayerAttack(PlayerCharacter);
+
+		if(!this->bIsPlayerUnit)
+		{
+			PlayerAttack(PlayerCharacter);
+		}
 		
 	}
 }
