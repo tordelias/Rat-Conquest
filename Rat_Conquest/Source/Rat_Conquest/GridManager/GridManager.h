@@ -8,6 +8,7 @@
 
 
 class AGridTile;
+class AStaticMeshActor;
 UCLASS()
 class RAT_CONQUEST_API AGridManager : public AActor
 {
@@ -20,6 +21,7 @@ public:
 	void GenerateGrid(int32 Rows, int32 Columns, float TileSize);
 	void GetCenterTile(int32 Row, int32 Column);
 	void SetGridSize(int32 Rows, int32 Colums);
+	void ScanWorldForObjects();
 	FVector2D GetGridSize();
 
 	float GetDistanceBetweenTiles(AActor* Tile1, AActor* Tile2);

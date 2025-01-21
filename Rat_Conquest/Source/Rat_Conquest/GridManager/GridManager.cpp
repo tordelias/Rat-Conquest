@@ -92,6 +92,36 @@ void AGridManager::SetGridSize(int32 Rows, int32 Colums)
 
 }
 
+void AGridManager::ScanWorldForObjects()
+{
+    for (auto& TilePair : GridTiles)
+    {
+        AGridTile* Tile = Cast<AGridTile>(TilePair.Value);
+        if (!Tile)
+            continue;
+
+        // Clear existing occupants
+        Tile->tileObjects.Empty();
+        Tile->bIsOccupied = false;
+
+        // Check for overlapping actors
+        TArray<AActor*> OverlappingActors;
+        Tile->TileMesh->GetOverlappingActors(OverlappingActors); // Assumes TileMesh is set to query overlaps
+
+        for (AActor* Actor : OverlappingActors)
+        {
+            // Check if Actor is a GridTile and matches testTile
+            AGridTile* OverlappingTile = Cast<AGridTile>(Actor);
+            if (OverlappingTile && OverlappingTile->testTile)
+            {
+                
+                Tile->AddOccupant(Actor);
+                UE_LOG(LogTemp, Display, TEXT("Found test tile at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
+            }
+        }
+    }
+}
+
 FVector2D AGridManager::GetGridSize()
 {
     return GridSize;
@@ -183,7 +213,13 @@ void AGridManager::BeginPlay()
 	//GetCenterTile(Rows, Columns);
     //GetNeighbourTiles(2, 1,Rows,Columns);
     GetDistanceBetweenTiles(GetTileAt(2, 3), GetTileAt(3, 1));
+	ScanWorldForObjects();
+    if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::T))
+    {
+        ScanWorldForObjects();
 
+
+    }
 }
 
 // Called every frame

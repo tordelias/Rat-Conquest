@@ -23,6 +23,8 @@ public:
 	UStaticMeshComponent* TileMesh;
 
 	bool bIsOccupied;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	bool testTile = false;
 	FVector2D GridPosition;
 
 
@@ -38,6 +40,13 @@ public:
 	void SetUnitRefrence(APlayerUnit* unit);
 	void RemoveUnitRefrence();
 
+
+	UPROPERTY(VisibleAnywhere, Category = "Occupants")
+	TArray<AActor*> tileObjects;
+
+	void AddOccupant(AActor* tileObj);
+	void RemoveOccupant(AActor* tileObj);
+	bool IsTileOccupied();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
