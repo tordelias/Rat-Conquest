@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CombatManager.h"
+#include "Rat_Conquest/Player/PlayerCamera.h"
+#include "Kismet/GameplayStatics.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
 
 // Sets default values
@@ -40,6 +42,7 @@ void ACombatManager::TakeDamage(APlayerUnit* unit, float amount)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("has been killed!"));
 		KillUnit(unit);
+		
 	}
 	else
 	{
@@ -55,17 +58,15 @@ void ACombatManager::KillUnit(APlayerUnit* unit)
 		return;
 	}
 
-	
-
-	if (unit->IsA(AActor::StaticClass()))
+	// If there's a player character, clear the current unit reference
+	APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (PlayerCharacter)
 	{
-		unit->Destroy();
-		
+		PlayerCharacter->SetCurrentUnit(nullptr);
 	}
-	else
-	{
-		
-	}
+	unit->DestoryUnit();
+	// Destroy the unit
+	unit->Destroy();
 }
 
 // Called when the game starts or when spawned

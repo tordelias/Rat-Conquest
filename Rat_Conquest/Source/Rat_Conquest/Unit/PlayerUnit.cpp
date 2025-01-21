@@ -241,6 +241,22 @@ void APlayerUnit::FinishTurn()
 	}
 }
 
+void APlayerUnit::DestoryUnit()
+{
+	if (GridManager)
+	{
+		AActor* Tile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
+		AGridTile* GridTile = Cast<AGridTile>(Tile);
+		if (GridTile)
+		{
+			GridTile->RemoveUnitRefrence();
+			GridTile->bIsOccupied = false;
+		}
+	}
+
+	
+}
+
 void APlayerUnit::BeginFocus()
 {
 	if (mesh)

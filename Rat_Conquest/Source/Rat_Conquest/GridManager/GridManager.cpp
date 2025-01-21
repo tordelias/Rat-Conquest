@@ -103,7 +103,6 @@ void AGridManager::ScanWorldForObjects()
         // Clear existing occupants
         Tile->tileObjects.Empty();
         Tile->bIsOccupied = false;
-
         // Check for overlapping actors
         TArray<AActor*> OverlappingActors;
         Tile->TileMesh->GetOverlappingActors(OverlappingActors); // Assumes TileMesh is set to query overlaps
@@ -117,6 +116,13 @@ void AGridManager::ScanWorldForObjects()
                 
                 Tile->AddOccupant(Actor);
                 UE_LOG(LogTemp, Display, TEXT("Found test tile at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
+            }
+            UStaticMeshComponent* StaticMeshComp = Actor->FindComponentByClass<UStaticMeshComponent>();
+            if (StaticMeshComp && Actor->ActorHasTag(TEXT("GridObj")))
+            {
+                // The overlapping actor has a StaticMeshComponent
+                Tile->AddOccupant(Actor);
+                UE_LOG(LogTemp, Display, TEXT("Found actor with StaticMesh at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
             }
         }
     }
@@ -214,16 +220,17 @@ void AGridManager::BeginPlay()
     //GetNeighbourTiles(2, 1,Rows,Columns);
     GetDistanceBetweenTiles(GetTileAt(2, 3), GetTileAt(3, 1));
 	ScanWorldForObjects();
-    if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::T))
-    {
-        ScanWorldForObjects();
-
-
-    }
+    
 }
 
 // Called every frame
 void AGridManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+    if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::T))
+    {
+        ScanWorldForObjects();
+		UE_LOG(LogTemp, Display, TEXT("Scanning for objects!"));
+
+    }
 }

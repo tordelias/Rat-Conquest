@@ -25,6 +25,7 @@ public:
 	void ExecutePlayerTurn();
 	void ExecuteAITurn();
 	void FinishTurn();
+	void DestoryUnit();
 
 	//should be skeleton mesh
 	UPROPERTY(EditAnywhere, Category = "Mesh")

@@ -14,8 +14,9 @@ AGridTile::AGridTile()
 	TileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TileMesh"));
 	RootComponent = TileMesh;
 	TileMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	TileMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
-	TileMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap); // Example: only overlap with pawns
+	TileMesh->SetCollisionResponseToAllChannels(ECR_Ignore); // Ignore everything by default
+	TileMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap); // Overlap with pawns
+	TileMesh->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap); // Overlap with dynamic objects
 	TileMesh->SetGenerateOverlapEvents(true);
 	UpdateInteractableData();
 

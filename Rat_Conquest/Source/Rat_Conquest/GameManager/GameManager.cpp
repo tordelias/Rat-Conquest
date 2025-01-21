@@ -28,10 +28,12 @@ void AGameManager::InitalizeUnits()
          if (Unit->bIsPlayerUnit)
          {
              PlayerUnits.Add(Unit);
+			 UE_LOG(LogTemp, Warning, TEXT("Player unit added"));
          }
          else
          {
              EnemyUnits.Add(Unit);
+             UE_LOG(LogTemp, Warning, TEXT("Enemy unit added"));
          }
     }
 }
@@ -47,8 +49,10 @@ void AGameManager::StartTurnOrder()
 
     }
     else {
+		
         TurnQueue.Append(PlayerUnits);
-        UE_LOG(LogTemp, Warning, TEXT("No unit to execute turn."));
+        TurnQueue.Append(EnemyUnits);
+        
     }
 
     
@@ -79,6 +83,13 @@ void AGameManager::ExecuteTurn()
         return;
 
     if (CurrentUnit->bIsPlayerUnit) {
+        APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+        if (CurrentUnit->bIsPlayerUnit && PlayerCharacter) {
+            PlayerCharacter->SetCurrentUnit(CurrentUnit);
+        }
+        else if (PlayerCharacter) {
+            PlayerCharacter->SetCurrentUnit(nullptr);
+        }
         CurrentUnit->ExecutePlayerTurn();
 
     }
@@ -107,7 +118,7 @@ void AGameManager::EndUnitTurn()
 
     }
     else {
-        bisPlayersturn = !bisPlayersturn;
+        bisPlayersturn = false;
         StartTurnOrder();
     }
 }
