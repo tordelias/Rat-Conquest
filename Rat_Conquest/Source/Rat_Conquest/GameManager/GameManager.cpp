@@ -59,16 +59,21 @@ void AGameManager::StartTurnOrder()
     if (TurnQueue.Num() > 0) {
         CurrentUnit = TurnQueue[0];
         APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-        if (CurrentUnit->bIsPlayerUnit && PlayerCharacter) {
+        if (CurrentUnit->bIsPlayerUnit && PlayerCharacter) 
+        {
             PlayerCharacter->SetCurrentUnit(CurrentUnit);
+			CurrentUnit->BeginFocus();
         }
-        else if(PlayerCharacter) {
+        else if(PlayerCharacter) 
+        {
+			CurrentUnit->EndFocus();
             PlayerCharacter->SetCurrentUnit(nullptr);
         }
 
 
     }
-    else {
+    else 
+    {
         UE_LOG(LogTemp, Warning, TEXT("TurnQueue is empty! No unit to execute turn."));
         return;
     }
@@ -82,18 +87,24 @@ void AGameManager::ExecuteTurn()
     if (!CurrentUnit)
         return;
 
-    if (CurrentUnit->bIsPlayerUnit) {
+    if (CurrentUnit->bIsPlayerUnit) 
+    {
         APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-        if (CurrentUnit->bIsPlayerUnit && PlayerCharacter) {
+        if (CurrentUnit->bIsPlayerUnit && PlayerCharacter) 
+        {
             PlayerCharacter->SetCurrentUnit(CurrentUnit);
+			CurrentUnit->BeginFocus();
         }
-        else if (PlayerCharacter) {
+        else if (PlayerCharacter) 
+        {
+			CurrentUnit->EndFocus();
             PlayerCharacter->SetCurrentUnit(nullptr);
         }
         CurrentUnit->ExecutePlayerTurn();
 
     }
-    else {
+    else 
+    {
         CurrentUnit->ExecuteAITurn();
 
     }

@@ -30,6 +30,8 @@ public:
 
 	TArray<AGridTile*> GetNeighbourTiles(int32 Row, int32 Column);
 
+	TArray<AGridTile*> GetMovableTiles(int32 Row, int32 Column, int32 MovementRange);
+
 	bool bIsGridFinished() { return GridTiles.Num() > 0; };
 
 	UPROPERTY()

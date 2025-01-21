@@ -9,6 +9,7 @@
 
 class AGridManager;
 class ACombatManager;
+class AGridTile;
 UCLASS()
 class RAT_CONQUEST_API APlayerUnit : public AActor, public IInteractionInterface
 {
@@ -70,6 +71,8 @@ private:
 	FVector TargetPosition;                 
 	float MovementProgress = 0.0f;          
 	float MovementDuration = 0.5f;
+
+	TArray<AGridTile*> MovedTiles;
 
 protected:
 	// Called when the game starts or when spawned

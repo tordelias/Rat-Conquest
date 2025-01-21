@@ -263,6 +263,12 @@ void APlayerUnit::BeginFocus()
 	{
 		mesh->SetRenderCustomDepth(true);
 	}
+	auto movableTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, movementSpeed);
+	for (auto tile : movableTiles)
+	{
+		tile->BeginFocus();
+	}
+	MovedTiles = movableTiles;
 }
 
 void APlayerUnit::EndFocus()
@@ -270,6 +276,10 @@ void APlayerUnit::EndFocus()
 	if (mesh)
 	{
 		mesh->SetRenderCustomDepth(false);
+	}
+	for (auto tile : MovedTiles)
+	{
+		tile->EndFocus();
 	}
 }
 

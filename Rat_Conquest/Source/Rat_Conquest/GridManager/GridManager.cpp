@@ -209,6 +209,59 @@ TArray<AGridTile*> AGridManager::GetNeighbourTiles(int32 Row, int32 Column)
     return OccupiedTiles;
 }
 
+TArray<AGridTile*> AGridManager::GetMovableTiles(int32 Row, int32 Column, int32 MovementRange)
+{
+    TSet<AGridTile*> VisitedTiles; // Use a TSet to prevent duplicate tiles
+    TQueue<FIntPoint> TilesToVisit; // Use a queue for breadth-first search (BFS)
+
+    // Add the starting tile
+    AActor* StartingTileActor = GetTileAt(Row, Column);
+    AGridTile* StartingTile = Cast<AGridTile>(StartingTileActor);
+    if (StartingTile)
+    {
+        TilesToVisit.Enqueue(FIntPoint(Row, Column));
+        VisitedTiles.Add(StartingTile);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Starting tile is not valid at Row: %d, Column: %d"), Row, Column);
+        return TArray<AGridTile*>();
+    }
+
+    while (!TilesToVisit.IsEmpty())
+    {
+        FIntPoint Current = FIntPoint::ZeroValue;
+        TilesToVisit.Dequeue(Current);
+
+        int32 CurrentRow = Current.X;
+        int32 CurrentColumn = Current.Y;
+
+        // Get neighbors of the current tile
+        TArray<AGridTile*> Neighbors = GetNeighbourTiles(CurrentRow, CurrentColumn);
+
+        for (AGridTile* Neighbor : Neighbors)
+        {
+            if (!Neighbor || Neighbor->bIsOccupied) continue;
+
+            int32 NeighborRow = Neighbor->GridPosition.X;
+            int32 NeighborColumn = Neighbor->GridPosition.Y;
+
+            // Calculate Manhattan distance
+            int32 Distance = FMath::Abs(NeighborRow - Row) + FMath::Abs(NeighborColumn - Column);
+
+            if (Distance <= MovementRange && !VisitedTiles.Contains(Neighbor))
+            {
+                VisitedTiles.Add(Neighbor);
+                TilesToVisit.Enqueue(FIntPoint(NeighborRow, NeighborColumn));
+            }
+        }
+    }
+
+    // Convert TSet to TArray for return
+    return VisitedTiles.Array();
+}
+
+
 // Called when the game starts or when spawned
 void AGridManager::BeginPlay()
 {
