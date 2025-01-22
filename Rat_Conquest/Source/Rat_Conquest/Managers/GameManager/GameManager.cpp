@@ -41,16 +41,28 @@ void AGameManager::InitalizeUnits()
 void AGameManager::StartTurnOrder()
 {
     TurnQueue.Empty();
-
+   
     if (bisPlayersturn)
     {
-        TurnQueue.Append(PlayerUnits);
-        TurnQueue.Append(EnemyUnits);
+        if (PlayerUnits.Num() > 0)
+        {
+            TurnQueue.Append(PlayerUnits);
+        }
+        if (EnemyUnits.Num() > 0)
+        {
+            TurnQueue.Append(EnemyUnits);
+        }
     }
     else
     {
-        TurnQueue.Append(EnemyUnits);
-        TurnQueue.Append(PlayerUnits);
+        if (EnemyUnits.Num() > 0)
+        {
+            TurnQueue.Append(EnemyUnits);
+        }
+        if (PlayerUnits.Num() > 0)
+        {
+            TurnQueue.Append(PlayerUnits);
+        }
     }
 
     if (TurnQueue.Num() > 0)
@@ -63,7 +75,7 @@ void AGameManager::StartTurnOrder()
         UE_LOG(LogTemp, Warning, TEXT("TurnQueue is empty! No unit to execute turn."));
         return;
     }
-
+    UE_LOG(LogTemp, Warning, TEXT("Size of TurnQueue: %d"), TurnQueue.Num());
     ExecuteTurn();
 }
 
@@ -80,6 +92,7 @@ void AGameManager::ExecuteTurn()
             PlayerCharacter->SetCurrentUnit(CurrentUnit);
         }
         CurrentUnit->ExecutePlayerTurn();
+		UE_LOG(LogTemp, Warning, TEXT("Player unit turn executed"));
     }
     else
     {
@@ -89,9 +102,17 @@ void AGameManager::ExecuteTurn()
 
 void AGameManager::EndUnitTurn()
 {
+    if (PlayerUnits.Num() == 0 || EnemyUnits.Num() == 0)
+    {
+		UE_LOG(LogTemp, Warning, TEXT("No more units to take turn!"));
+        return;
+    }
+
     if (TurnQueue.Num() == 0)
     {
-        return;
+        
+        UE_LOG(LogTemp, Warning, TEXT("TurnQueue is empty! No unit to execute turn."));
+		return;
     }
 
     TurnQueue.RemoveAt(0);
@@ -107,6 +128,32 @@ void AGameManager::EndUnitTurn()
         bisPlayersturn = !bisPlayersturn;
         StartTurnOrder();
     }
+   
+}
+
+void AGameManager::RemoveUnitFromQueue(APlayerUnit* unit)
+{
+    if (!unit)
+    {
+        UE_LOG(LogTemp, Error, TEXT("RemoveUnitFromQueue failed: Unit is null!"));
+        return;
+    }
+
+    // Remove the unit from the turn queue
+    TurnQueue.Remove(unit);
+
+    // Remove the unit from PlayerUnits or EnemyUnits
+    if (unit->bIsPlayerUnit)
+    {
+        PlayerUnits.Remove(unit);
+    }
+    else
+    {
+        EnemyUnits.Remove(unit);
+    }
+
+    // Log for debugging
+    UE_LOG(LogTemp, Display, TEXT("Unit removed from queue and lists."));
 }
 
 void AGameManager::HighlightUnitAndTiles(APlayerUnit* NewUnit)
@@ -168,4 +215,18 @@ void AGameManager::BeginPlay()
 void AGameManager::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+    if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::F))
+    {
+	
+       // UE_LOG(LogTemp, Warning, "current TurnQueue size: %d", TurnQueue.Num());
+		for (APlayerUnit* unit : TurnQueue)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Unit: %s"), *unit->GetName());
+		}
+		for (APlayerUnit* unit : PlayerUnits)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Player Unit: %s"), *unit->GetName());
+		}
+        UE_LOG(LogTemp, Warning, TEXT("Size of TurnQueue: %d"), TurnQueue.Num());
+    }
 }

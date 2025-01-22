@@ -4,6 +4,7 @@
 #include "Rat_Conquest/Player/PlayerCamera.h"
 #include "Kismet/GameplayStatics.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
+#include "Rat_Conquest/Managers/GameManager/GameManager.h"
 
 // Sets default values
 ACombatManager::ACombatManager()
@@ -26,7 +27,7 @@ void ACombatManager::DealDamageToUnit(APlayerUnit* Attackerunit, APlayerUnit* De
 	TakeDamage(Defenderunit, Attackerunit->damage);
 }
 
-void ACombatManager::TakeDamage(APlayerUnit* unit, float amount)
+void ACombatManager::TakeDamage(APlayerUnit* unit, int amount)
 {
 	if (!unit)
 	{
@@ -36,7 +37,7 @@ void ACombatManager::TakeDamage(APlayerUnit* unit, float amount)
 
 	unit->health -= amount;
 
-	//UE_LOG(LogTemp, Warning, TEXT("took %f damage. Remaining health: %f", ),amount, unit->health);
+	UE_LOG(LogTemp, Warning, TEXT("took %d damage"),amount);
 
 	if (unit->health <= 0)
 	{
@@ -46,7 +47,7 @@ void ACombatManager::TakeDamage(APlayerUnit* unit, float amount)
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Display, TEXT(" survived with %f health remaining"), unit->health);
+		//UE_LOG(LogTemp, Display, TEXT(" survived with %d health remaining"), unit->health);
 	}
 }
 
@@ -63,6 +64,12 @@ void ACombatManager::KillUnit(APlayerUnit* unit)
 	if (PlayerCharacter)
 	{
 		PlayerCharacter->SetCurrentUnit(nullptr);
+	}
+	AGameManager* GameManager = Cast<AGameManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass()));
+	if (GameManager)
+	{
+		GameManager->RemoveUnitFromQueue(unit);
+		GameManager->EndUnitTurn();
 	}
 	unit->DestoryUnit();
 	// Destroy the unit

@@ -6,7 +6,7 @@ AGridManager::AGridManager()
 {
 	// Set this actor to call Tick() every frame. Turn this off for better performance if not needed.
 	PrimaryActorTick.bCanEverTick = true;
-    
+    SetGridSize(10, 12);
 }
 
 // Generate the grid of tiles
@@ -29,15 +29,18 @@ void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float TileSize)
     int32 RowOffset = (Rows - 1) / 2;
     int32 ColumnOffset = (Columns - 1) / 2;
 
+    // Get the starting position from the actor's location
+    FVector StartingPosition = GetActorLocation();
+
     // Loop through rows and columns to create the grid
     for (int32 i = 0; i < Rows; i++)
     {
         for (int32 j = 0; j < Columns; j++)
         {
-            // Calculate world position (centered around origin)
-            float XPosition = (i - RowOffset) * TileSize;
-            float YPosition = (j - ColumnOffset) * TileSize;
-            FVector Location(XPosition, YPosition, 0.0f);
+            // Calculate world position (centered around actor's location)
+            float XPosition = StartingPosition.X + (i - RowOffset) * TileSize;
+            float YPosition = StartingPosition.Y + (j - ColumnOffset) * TileSize;
+            FVector Location(XPosition, YPosition, StartingPosition.Z);
 
             // Spawn the tile
             AActor* Tile = GetWorld()->SpawnActor<AActor>(GridTileClass, Location, FRotator::ZeroRotator, SpawnParams);
@@ -58,7 +61,7 @@ void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float TileSize)
                 if (GridTile != nullptr)
                 {
                     GridTile->GridPosition = LogicalGridPosition;
-                    //UE_LOG(LogTemp, Display, TEXT("Spawned tile at LogicalGridPosition: (%d, %d)"), LogicalGridPosition.X, LogicalGridPosition.Y);
+                    UE_LOG(LogTemp, Display, TEXT("Spawned tile at LogicalGridPosition: (%f, %f)"), LogicalGridPosition.X, LogicalGridPosition.Y);
                 }
                 else
                 {
@@ -160,12 +163,12 @@ AActor* AGridManager::GetTileAt(int32 Row, int32 Column)
     if (GridTiles.Contains(GridPosition))
     {
         AActor* Tile = GridTiles[GridPosition];
-        UE_LOG(LogTemp, Display, TEXT("Found tile at Row: %d, Column: %d"), Row, Column);
+        //UE_LOG(LogTemp, Display, TEXT("Found tile at Row: %d, Column: %d"), Row, Column);
         return Tile;
     }
     else
     {
-        UE_LOG(LogTemp, Warning, TEXT("No tile found at Row: %d, Column: %d"), Row, Column);
+       // UE_LOG(LogTemp, Warning, TEXT("No tile found at Row: %d, Column: %d"), Row, Column);
         return nullptr;
     }
 
@@ -197,7 +200,7 @@ TArray<AGridTile*> AGridManager::GetNeighbourTiles(int32 Row, int32 Column)
             AGridTile* Tile = Cast<AGridTile>(GetTileAt(i, j)); // Assuming GetTileAt returns an AActor
             if (Tile != nullptr /*&& Tile->bIsOccupied*/) // Check if the tile is occupied
             {
-                UE_LOG(LogTemp, Display, TEXT("Found occupied tile at Row: %d, Column: %d"), i, j);
+                //UE_LOG(LogTemp, Display, TEXT("Found occupied tile at Row: %d, Column: %d"), i, j);
                 OccupiedTiles.Add(Tile);
             }
             else
@@ -266,7 +269,7 @@ TArray<AGridTile*> AGridManager::GetMovableTiles(int32 Row, int32 Column, int32 
 void AGridManager::BeginPlay()
 {
 	Super::BeginPlay();
-    SetGridSize(10, 12);
+    
 	GenerateGrid(GridSize.X, GridSize.Y, 100.0f);
 	//GetTileAt(3, 2);
 	//GetCenterTile(Rows, Columns);

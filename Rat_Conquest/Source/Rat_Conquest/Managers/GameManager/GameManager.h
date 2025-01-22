@@ -28,6 +28,8 @@ public:
 
 	void EndUnitTurn();
 
+	void RemoveUnitFromQueue(APlayerUnit* unit);
+
 	UPROPERTY()
 	TArray<APlayerUnit*> PlayerUnits;
 

@@ -44,7 +44,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 private:
-
+	UPROPERTY(EditAnywhere, Category = "Grid")
 	FVector2D GridSize;
 
 	// The class type of the tiles to spawn

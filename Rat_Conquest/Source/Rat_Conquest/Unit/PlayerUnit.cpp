@@ -113,7 +113,10 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 
 	CurrentGridPosition = NewGridPosition;
 	UE_LOG(LogTemp, Display, TEXT("Started moving to new tile."));
-	FinishTurn();
+	if (bIsPlayerUnit)
+	{
+		FinishTurn();
+	}
 }
 
 void APlayerUnit::SetInitalPosition(FVector2D position)
@@ -159,42 +162,51 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 	auto Enemy = PlayerCharacter->GetCurrentUnit();
 	if (GridManager && Enemy)
 	{
+		// Get the current position of the player and the enemy
 		FVector2D PlayerPosition = this->CurrentGridPosition;
 		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
 
-		float AttackRange = movementSpeed;  
+		// Define attack range, which is based on movement range
+		float AttackRange = movementSpeed; // Player's movement range
 		float DistanceToEnemy = FVector2D::Distance(PlayerPosition, EnemyPosition);
 
+		// Check if the enemy is within movement range of the player
 		if (DistanceToEnemy > AttackRange)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Player is out of range to attack the enemy."));
-			return;
+			UE_LOG(LogTemp, Warning, TEXT("Player is out of range to move to the enemy's neighboring tiles."));
+			return; // Player can't attack if they can't move to a neighboring tile
 		}
 
+		// Retrieve all neighboring tiles around the enemy
 		TArray<AGridTile*> NeighbourTiles = GridManager->GetNeighbourTiles(EnemyPosition.X, EnemyPosition.Y);
 
 		AGridTile* BestTile = nullptr;
 		float ClosestDistanceToEnemy = FLT_MAX;
 
+		// Find the closest valid, unoccupied neighboring tile around the enemy
 		for (AGridTile* Tile : NeighbourTiles)
 		{
 			if (Tile && !Tile->bIsOccupied)
 			{
-				float TileDistanceToEnemy = FVector2D::Distance(Tile->GridPosition, EnemyPosition);
+				// Calculate distance to the player from this tile
+				float TileDistanceToPlayer = FVector2D::Distance(Tile->GridPosition, PlayerPosition);
 
-				if (TileDistanceToEnemy <= AttackRange)
+				// Prioritize the closest tile within the movement range
+				if (TileDistanceToPlayer < ClosestDistanceToEnemy && TileDistanceToPlayer <= movementSpeed)
 				{
+					ClosestDistanceToEnemy = TileDistanceToPlayer;
 					BestTile = Tile;
-					break;  
 				}
 			}
 		}
 
 		if (BestTile)
 		{
+			// Move the player to the closest neighboring tile around the enemy
 			UE_LOG(LogTemp, Log, TEXT("Player moving to tile (%f, %f) to attack the enemy"), BestTile->GridPosition.X, BestTile->GridPosition.Y);
-
 			this->MoveToTile(BestTile->GridPosition);
+
+			// Only attack if the player has reached the correct tile
 			if (this->CurrentGridPosition == BestTile->GridPosition)
 			{
 				combatManager->DealDamageToUnit(Enemy, this);
@@ -202,11 +214,10 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("No valid tile found or player is out of movement range."));
+			UE_LOG(LogTemp, Warning, TEXT("No valid neighboring tile found within movement range."));
 		}
 	}
 }
-
 
 
 void APlayerUnit::ExecutePlayerTurn()
@@ -220,7 +231,7 @@ void APlayerUnit::ExecuteAITurn()
 {
 	//Some AI logic here
 	UE_LOG(LogTemp, Error, TEXT("AI did something"));
-	this->MoveToGridPosition();
+	MoveToGridPosition();
 	FinishTurn();
 }
 
@@ -243,6 +254,8 @@ void APlayerUnit::DestoryUnit()
 		{
 			GridTile->RemoveUnitRefrence();
 			GridTile->bIsOccupied = false;
+			UE_LOG(LogTemp, Error, TEXT("AHH YOU KILLED ME!! from grid tile at (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);
+			
 		}
 	}
 
@@ -350,6 +363,7 @@ void APlayerUnit::MoveToGridPosition()
 		else
 		{
 			UE_LOG(LogTemp, Error, TEXT("No valid enemy found"));
+		
 		}
 }
 
@@ -389,9 +403,11 @@ APlayerUnit* APlayerUnit::FindEnemyunit()
 			continue;
 		}
 
-		if (Unit->bIsPlayerUnit != this->bIsPlayerUnit)
+		if (!Unit->bIsPlayerUnit)
 		{
 			UE_LOG(LogTemp, Verbose, TEXT("Skipping enemy unit: %s"), *Unit->GetName());
+			continue;
+			
 		}
 
 		if (!closestUnit || FVector2D::Distance(this->CurrentGridPosition, Unit->CurrentGridPosition) < FVector2D::Distance(this->CurrentGridPosition, closestUnitPos))
@@ -443,27 +459,27 @@ void APlayerUnit::MoveToClosestPossibleTile(APlayerUnit* Enemy)
 			}
 		}
 
-		if (BestTile && !bIsPlayerUnit)
+		if (BestTile && !this->bIsPlayerUnit)
 		{
 			this->MoveToTile(BestTile->GridPosition);
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("No valid tile found within range"));
-			FinishTurn();
+			
 		}
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("GridManager or Enemy is not valid"));
-		FinishTurn();
+		
 	}
 }
 
 
 void APlayerUnit::Attack(APlayerUnit* Enemy)
 {
-	if (GridManager && !bIsPlayerUnit && Enemy)
+	if (GridManager && !this->bIsPlayerUnit && Enemy)
 	{
 		FVector2D AIPosition = this->CurrentGridPosition;
 		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
@@ -487,7 +503,7 @@ void APlayerUnit::Attack(APlayerUnit* Enemy)
 			}
 		}
 
-		if (BestTile)
+		if (BestTile && Enemy->bIsPlayerUnit)
 		{
 			UE_LOG(LogTemp, Log, TEXT("AI moving to tile (%f, %f) to attack the enemy"), BestTile->GridPosition.X, BestTile->GridPosition.Y);
 			this->MoveToTile(BestTile->GridPosition);
@@ -505,7 +521,7 @@ void APlayerUnit::Attack(APlayerUnit* Enemy)
 		if (!Enemy) UE_LOG(LogTemp, Error, TEXT("Enemy is null"));
 		if (bIsPlayerUnit) UE_LOG(LogTemp, Warning, TEXT("Player-controlled units cannot use this AI logic"));
 	}
-
+	
 
 }
 
