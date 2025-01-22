@@ -11,11 +11,16 @@ AGridTile::AGridTile()
 
     TileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TileMesh"));
     RootComponent = TileMesh;
-    TileMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+   // TileMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     TileMesh->SetCollisionResponseToAllChannels(ECR_Ignore); // Ignore everything by default
     TileMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap); // Overlap with pawns
     TileMesh->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap); // Overlap with dynamic objects
     TileMesh->SetGenerateOverlapEvents(true);
+
+	TileMesh->SetupAttachment(RootComponent);
+    TileMesh->SetVisibility(false);
+	TileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	TileMesh->SetRenderCustomDepth(false);
 
     bIsHighlightedByUnit = false;
     bIsHighlightedByGameManager = false;
@@ -28,6 +33,7 @@ void AGridTile::BeginFocus()
     if (!bIsHighlightedByGameManager) // Do not override GameManager highlights
     {
         TileMesh->SetRenderCustomDepth(true);
+        TileMesh->SetVisibility(true);
         bIsHighlightedByUnit = true;
     }
 }
@@ -37,6 +43,7 @@ void AGridTile::EndFocus()
     if (bIsHighlightedByUnit) // Only affect unit-specific highlighting
     {
         TileMesh->SetRenderCustomDepth(false);
+        TileMesh->SetVisibility(false);
         bIsHighlightedByUnit = false;
     }
 }

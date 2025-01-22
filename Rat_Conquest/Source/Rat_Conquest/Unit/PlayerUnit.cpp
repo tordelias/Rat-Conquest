@@ -339,6 +339,19 @@ void APlayerUnit::UpdateInteractableData()
 {
 	InstanceInteractableData.InteractableType = EInteractionType::IT_Interact;
 
+	if (bIsPlayerUnit)
+	{
+		InstanceInteractableData.UnitName = FText::FromString("SwordsMan");
+	}
+	else
+	{
+		InstanceInteractableData.UnitName = FText::FromString("Rat");
+	}
+
+	InstanceInteractableData.UnitHealth = health;
+	InstanceInteractableData.UnitDamage = damage;
+	InstanceInteractableData.UnitMovementSpeed = movementSpeed;
+
 }
 
 
