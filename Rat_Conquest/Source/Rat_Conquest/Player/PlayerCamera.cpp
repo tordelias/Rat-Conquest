@@ -40,7 +40,7 @@ APlayerCamera::APlayerCamera()
     GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Overlap);
 
     MinZoom = 100.0f;
-    MaxZoom = 1000.0f;
+    MaxZoom = 1200.0f;
     ZoomSpeed = 30.0f;
 }
 
@@ -48,7 +48,7 @@ APlayerCamera::APlayerCamera()
 void APlayerCamera::BeginPlay()
 {
     Super::BeginPlay();
-    InteractionCheckDistance = 1650.f; 
+    InteractionCheckDistance = 1750.f; 
     InteractionCheckFrequency = 0.05f;
 }
 
