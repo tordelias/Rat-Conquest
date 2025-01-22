@@ -1,23 +1,23 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "GameManager.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
 #include "Rat_Conquest/Player/PlayerCamera.h"
 #include "Kismet/GameplayStatics.h"
-#include "EngineUtils.h" 
+#include "Rat_Conquest/Managers/GridManager/GridManager.h"
+#include "Rat_Conquest/GridTile/GridTile.h"
+#include "EngineUtils.h"
+
 // Sets default values
 AGameManager::AGameManager()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+    // Set this actor to call Tick() every frame. You can turn this off to improve performance if you don't need it.
+    PrimaryActorTick.bCanEverTick = true;
 }
 
 void AGameManager::TogglePlayerTurn()
 {
-	bisPlayersturn = true;
-
+    bisPlayersturn = true;
 }
 
 void AGameManager::InitalizeUnits()
@@ -25,16 +25,16 @@ void AGameManager::InitalizeUnits()
     for (TActorIterator<APlayerUnit> It(GetWorld()); It; ++It)
     {
         APlayerUnit* Unit = *It;
-         if (Unit->bIsPlayerUnit)
-         {
-             PlayerUnits.Add(Unit);
-			 UE_LOG(LogTemp, Warning, TEXT("Player unit added"));
-         }
-         else
-         {
-             EnemyUnits.Add(Unit);
-             UE_LOG(LogTemp, Warning, TEXT("Enemy unit added"));
-         }
+        if (Unit->bIsPlayerUnit)
+        {
+            PlayerUnits.Add(Unit);
+            UE_LOG(LogTemp, Warning, TEXT("Player unit added"));
+        }
+        else
+        {
+            EnemyUnits.Add(Unit);
+            UE_LOG(LogTemp, Warning, TEXT("Enemy unit added"));
+        }
     }
 }
 
@@ -42,44 +42,29 @@ void AGameManager::StartTurnOrder()
 {
     TurnQueue.Empty();
 
-    if (bisPlayersturn) {
-
+    if (bisPlayersturn)
+    {
         TurnQueue.Append(PlayerUnits);
         TurnQueue.Append(EnemyUnits);
-
     }
-    else {
+    else
+    {
         TurnQueue.Append(EnemyUnits);
         TurnQueue.Append(PlayerUnits);
-        
-        
     }
 
-    
-    if (TurnQueue.Num() > 0) {
+    if (TurnQueue.Num() > 0)
+    {
         CurrentUnit = TurnQueue[0];
-        APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-        if (CurrentUnit->bIsPlayerUnit && PlayerCharacter) 
-        {
-            PlayerCharacter->SetCurrentUnit(CurrentUnit);
-			CurrentUnit->BeginFocus();
-        }
-        else if(PlayerCharacter) 
-        {
-			CurrentUnit->EndFocus();
-            PlayerCharacter->SetCurrentUnit(nullptr);
-        }
-
-
+        HighlightUnitAndTiles(CurrentUnit);
     }
-    else 
+    else
     {
         UE_LOG(LogTemp, Warning, TEXT("TurnQueue is empty! No unit to execute turn."));
         return;
     }
 
     ExecuteTurn();
-    
 }
 
 void AGameManager::ExecuteTurn()
@@ -87,50 +72,86 @@ void AGameManager::ExecuteTurn()
     if (!CurrentUnit)
         return;
 
-    if (CurrentUnit->bIsPlayerUnit) 
+    if (CurrentUnit->bIsPlayerUnit)
     {
         APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-        if (CurrentUnit->bIsPlayerUnit && PlayerCharacter) 
+        if (PlayerCharacter)
         {
             PlayerCharacter->SetCurrentUnit(CurrentUnit);
-			CurrentUnit->BeginFocus();
-        }
-        else if (PlayerCharacter) 
-        {
-			CurrentUnit->EndFocus();
-            PlayerCharacter->SetCurrentUnit(nullptr);
         }
         CurrentUnit->ExecutePlayerTurn();
-
     }
-    else 
+    else
     {
         CurrentUnit->ExecuteAITurn();
-
     }
-   
-
-   
 }
 
 void AGameManager::EndUnitTurn()
 {
-
-    // each unti should also have a finish turn that runs this function
-    if (TurnQueue.Num() == 0) {
+    if (TurnQueue.Num() == 0)
+    {
         return;
     }
 
     TurnQueue.RemoveAt(0);
 
-    if (TurnQueue.Num() > 0) {
+    if (TurnQueue.Num() > 0)
+    {
         CurrentUnit = TurnQueue[0];
+        HighlightUnitAndTiles(CurrentUnit);
         ExecuteTurn();
-
     }
-    else {
+    else
+    {
         bisPlayersturn = !bisPlayersturn;
         StartTurnOrder();
+    }
+}
+
+void AGameManager::HighlightUnitAndTiles(APlayerUnit* NewUnit)
+{
+    // Unhighlight the previous unit and its tiles
+    if (CurrentlyFocusedUnit)
+    {
+        CurrentlyFocusedUnit->EndFocus();
+
+        for (AGridTile* Tile : CurrentlyFocusedTiles)
+        {
+            if (Tile)
+            {
+                Tile->EndFocus();
+            }
+        }
+        CurrentlyFocusedTiles.Empty();
+    }
+
+    // Highlight the new unit
+    if (NewUnit)
+    {
+        CurrentlyFocusedUnit = NewUnit;
+        CurrentlyFocusedUnit->BeginFocus();
+
+        // Highlight movable tiles
+        AGridManager* GridManager = Cast<AGridManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AGridManager::StaticClass()));
+        if (GridManager)
+        {
+            TArray<AGridTile*> MovableTiles = GridManager->GetMovableTiles(
+                NewUnit->CurrentGridPosition.X, NewUnit->CurrentGridPosition.Y, NewUnit->movementSpeed);
+
+            for (AGridTile* Tile : MovableTiles)
+            {
+                if (Tile)
+                {
+                    Tile->BeginFocus();
+                    CurrentlyFocusedTiles.Add(Tile);
+                }
+            }
+        }
+    }
+    else
+    {
+        CurrentlyFocusedUnit = nullptr;
     }
 }
 
@@ -141,14 +162,10 @@ void AGameManager::BeginPlay()
     InitalizeUnits();
     TogglePlayerTurn();
     StartTurnOrder();
-
-   
 }
 
 // Called every frame
 void AGameManager::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-
+    Super::Tick(DeltaTime);
 }
-

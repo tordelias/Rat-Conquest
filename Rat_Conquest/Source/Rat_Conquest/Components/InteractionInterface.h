@@ -52,8 +52,8 @@ class RAT_CONQUEST_API IInteractionInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	virtual void BeginFocus();
-	virtual void EndFocus();
+	virtual void BeginMouseHoverFocus();
+	virtual void EndMouseHoverFocus();
 	virtual void BeginInteract();
 	virtual void EndInteract();
 	virtual void Interact(APlayerCamera* PlayerCharacter);

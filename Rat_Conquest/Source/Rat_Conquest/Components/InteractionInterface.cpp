@@ -6,11 +6,11 @@
 
 // Add default functionality here for any IInteractionInterface functions that are not pure virtual.
 
-void IInteractionInterface::BeginFocus()
+void IInteractionInterface::BeginMouseHoverFocus()
 {
 }
 
-void IInteractionInterface::EndFocus()
+void IInteractionInterface::EndMouseHoverFocus()
 {
 }
 

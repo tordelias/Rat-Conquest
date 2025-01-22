@@ -41,6 +41,8 @@ public:
 	UPROPERTY()
 	APlayerUnit* CurrentUnit;
 
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -51,4 +53,8 @@ public:
 
 private:
 	bool bisPlayersturn = true;
+
+	TArray<class AGridTile*> CurrentlyFocusedTiles;
+	APlayerUnit* CurrentlyFocusedUnit = nullptr;
+	void HighlightUnitAndTiles(APlayerUnit* NewUnit); 
 };

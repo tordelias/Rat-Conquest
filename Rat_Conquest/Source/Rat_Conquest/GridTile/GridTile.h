@@ -7,52 +7,63 @@
 #include "Rat_Conquest/Components/InteractionInterface.h"
 #include "GridTile.generated.h"
 
-
 class APlayerUnit;
 
 UCLASS()
 class RAT_CONQUEST_API AGridTile : public AActor, public IInteractionInterface
 {
-	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	AGridTile();
+    GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* TileMesh;
+public:
+    // Sets default values for this actor's properties
+    AGridTile();
 
-	bool bIsOccupied;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	bool testTile = false;
-	FVector2D GridPosition;
+    UPROPERTY(VisibleAnywhere)
+    UStaticMeshComponent* TileMesh;
 
+    bool bIsOccupied;
 
-	virtual void BeginFocus() override;
-	virtual void EndFocus() override;
-	virtual void Interact(APlayerCamera* PlayerCharacter) override;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+    bool testTile = false;
 
-	UPROPERTY(VisibleInstanceOnly, Category = "Pickup")
-	FInteractableData InstanceInteractableData;
+    FVector2D GridPosition;
 
-	APlayerUnit* unitRefrence;
-	void UpdateInteractableData();
-	void SetUnitRefrence(APlayerUnit* unit);
-	void RemoveUnitRefrence();
+    void BeginFocus();
+    void EndFocus();
+    virtual void BeginMouseHoverFocus() override;
+    virtual void EndMouseHoverFocus() override;
+    virtual void Interact(APlayerCamera* PlayerCharacter) override;
 
+    UPROPERTY(VisibleInstanceOnly, Category = "Pickup")
+    FInteractableData InstanceInteractableData;
 
-	UPROPERTY(VisibleAnywhere, Category = "Occupants")
-	TArray<AActor*> tileObjects;
+    APlayerUnit* unitRefrence;
 
-	void AddOccupant(AActor* tileObj);
-	void RemoveOccupant(AActor* tileObj);
-	bool IsTileOccupied();
+    void UpdateInteractableData();
+    void SetUnitRefrence(APlayerUnit* unit);
+    void RemoveUnitRefrence();
+
+    UPROPERTY(VisibleAnywhere, Category = "Occupants")
+    TArray<AActor*> tileObjects;
+
+    void AddOccupant(AActor* tileObj);
+    void RemoveOccupant(AActor* tileObj);
+    bool IsTileOccupied();
+
+    // GameManager highlight management
+    void SetGameManagerHighlight();
+    void ClearGameManagerHighlight();
+
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+    // Called when the game starts or when spawned
+    virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+public:
+    // Called every frame
+    virtual void Tick(float DeltaTime) override;
 
+    // Flags for highlighting
+    bool bIsHighlightedByUnit = false;
+    bool bIsHighlightedByGameManager = false;
+    bool bIsHovered;
 };

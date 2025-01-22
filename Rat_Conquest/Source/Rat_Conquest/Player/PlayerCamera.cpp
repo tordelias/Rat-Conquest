@@ -130,13 +130,13 @@ void APlayerCamera::FoundInteractable(AActor* NewInteractable)
     if (InteractionData.CurrentInteractable)
     {
         TargetInteractable = InteractionData.CurrentInteractable;
-        TargetInteractable->EndFocus();
+        TargetInteractable->EndMouseHoverFocus();
     }
 
     InteractionData.CurrentInteractable = NewInteractable;
     TargetInteractable = NewInteractable;
 
-    TargetInteractable->BeginFocus();
+    TargetInteractable->BeginMouseHoverFocus();
     InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
 }
 
@@ -156,7 +156,7 @@ void APlayerCamera::NoInteractableFound()
     {
         if (IsValid(TargetInteractable.GetObject()))
         {
-            TargetInteractable->EndFocus();
+            TargetInteractable->EndMouseHoverFocus();
         }
 
         // Close widget
@@ -175,7 +175,7 @@ void APlayerCamera::BeginInteract()
     {
         if (IsValid(TargetInteractable.GetObject()))
         {
-            TargetInteractable->BeginInteract();
+            TargetInteractable->BeginMouseHoverFocus();
             if (FMath::IsNearlyZero(TargetInteractable->InteractableData.InteractionDuration, 0.1f))
             {
                 Interact();

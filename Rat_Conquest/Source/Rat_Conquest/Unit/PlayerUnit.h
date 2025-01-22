@@ -61,8 +61,10 @@ public:
 	bool bFirstMove = true;
 
 
-	virtual void BeginFocus() override;
-	virtual void EndFocus() override;
+	void BeginFocus();
+	void EndFocus();
+	virtual void BeginMouseHoverFocus() override; 
+	virtual void EndMouseHoverFocus() override;
 	virtual void Interact(APlayerCamera* PlayerCharacter) override;
 
 private:
@@ -93,5 +95,8 @@ public:
 	void MoveToClosestPossibleTile(APlayerUnit* Enemy);
 
 	void Attack(APlayerUnit* Enemy);
+
+private: 
+
 
 };
