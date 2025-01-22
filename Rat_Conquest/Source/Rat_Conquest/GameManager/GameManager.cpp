@@ -49,9 +49,9 @@ void AGameManager::StartTurnOrder()
 
     }
     else {
-		
-        TurnQueue.Append(PlayerUnits);
         TurnQueue.Append(EnemyUnits);
+        TurnQueue.Append(PlayerUnits);
+        
         
     }
 
@@ -129,7 +129,7 @@ void AGameManager::EndUnitTurn()
 
     }
     else {
-        bisPlayersturn = false;
+        bisPlayersturn = !bisPlayersturn;
         StartTurnOrder();
     }
 }
