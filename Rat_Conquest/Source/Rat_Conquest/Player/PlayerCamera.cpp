@@ -18,6 +18,7 @@
 // Includes
 #include "Rat_Conquest/Components/InteractionInterface.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
+#include "Rat_Conquest/Widgets/MainHUD.h"
 
 // Sets default values
 APlayerCamera::APlayerCamera()
@@ -48,6 +49,9 @@ APlayerCamera::APlayerCamera()
 void APlayerCamera::BeginPlay()
 {
     Super::BeginPlay();
+
+	mainHUD = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+
     InteractionCheckDistance = 1750.f; 
     InteractionCheckFrequency = 0.05f;
 }
@@ -117,10 +121,10 @@ void APlayerCamera::PerformInteractionCheck()
 
 void APlayerCamera::FoundInteractable(AActor* NewInteractable)
 {
-    if (InteractionData.CurrentInteractable == NewInteractable)
-    {
-        return;
-    }
+    //if (InteractionData.CurrentInteractable == NewInteractable)
+    //{
+    //    return;
+    //}
 
     if (bIsInteracting())
     {
@@ -135,6 +139,30 @@ void APlayerCamera::FoundInteractable(AActor* NewInteractable)
 
     InteractionData.CurrentInteractable = NewInteractable;
     TargetInteractable = NewInteractable;
+
+    if (TargetInteractable)
+    {
+        APlayerUnit* PlayerUnit = Cast<APlayerUnit>(TargetInteractable.GetObject());
+
+        if (PlayerUnit)
+        {
+            UE_LOG(LogTemp, Error, TEXT("Successfully casted to APlayerUnit"));
+            if (mainHUD)
+            {
+                mainHUD->ShowStatWidget();
+				mainHUD->UpdateStatWidget(&PlayerUnit->InstanceInteractableData);
+
+                // Log data
+                UE_LOG(LogTemp, Error, TEXT("Updated widget with data"));
+                UE_LOG(LogTemp, Error, TEXT("Unit Name: %s"), *PlayerUnit->InteractableData.UnitName.ToString());
+                UE_LOG(LogTemp, Error, TEXT("Unit Health: %d"), PlayerUnit->InteractableData.UnitHealth);
+                UE_LOG(LogTemp, Error, TEXT("Unit Damage: %d"), PlayerUnit->InteractableData.UnitDamage);
+                UE_LOG(LogTemp, Error, TEXT("Unit Movement Speed: %d"), PlayerUnit->InteractableData.UnitMovementSpeed);
+            }
+        }
+    }
+
+
 
     TargetInteractable->BeginMouseHoverFocus();
     InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
@@ -160,6 +188,11 @@ void APlayerCamera::NoInteractableFound()
         }
 
         // Close widget
+
+        if (mainHUD)
+        {
+            mainHUD->CloseStatWidget();
+        }
         InteractionData.CurrentInteractable = nullptr;
         TargetInteractable = nullptr;
     }

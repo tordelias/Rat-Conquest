@@ -11,6 +11,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class IInteractionInterface; 
 class APlayerUnit;
+class AMainHUD; 
 
 USTRUCT()
 struct FInteractionData
@@ -101,6 +102,8 @@ protected:
 
 	//PlayerUnit movement
 	APlayerUnit* CurrentUnit;
+
+	AMainHUD* mainHUD; 
 
 public:	
 	// Called every frame

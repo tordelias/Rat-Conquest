@@ -80,14 +80,14 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleInstanceOnly, Category = "Interact")
-	FInteractableData InstanceInteractableData;
-
 	void UpdateInteractableData();
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Interact")
+	FInteractableData InstanceInteractableData;
 
 	//AI stuff (Should be moved to a AI controller)
 	void MoveToGridPosition();

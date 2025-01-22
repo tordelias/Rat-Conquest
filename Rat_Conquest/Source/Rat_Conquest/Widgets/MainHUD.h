@@ -6,6 +6,8 @@
 #include "GameFramework/HUD.h"
 #include "MainHUD.generated.h"
 
+struct FInteractableData; 
+class UUnitStatWidget; 
 /**
  * 
  */
@@ -16,5 +18,17 @@ class RAT_CONQUEST_API AMainHUD : public AHUD
 
 protected: 
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UUnitStatWidget> UnitWidgetclass;
+
+	UPROPERTY()
+	UUnitStatWidget* StatWidget;
+
+public: 
+
+	void ShowStatWidget();
+	void CloseStatWidget();
+	void UpdateStatWidget(FInteractableData* data);
 	
 };
