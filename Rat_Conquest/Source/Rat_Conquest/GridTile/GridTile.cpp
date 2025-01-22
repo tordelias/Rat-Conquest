@@ -52,6 +52,7 @@ void AGridTile::BeginMouseHoverFocus()
 {
     if (!bIsHighlightedByGameManager && !bIsHighlightedByUnit) // Avoid double-highlighting
     {
+        TileMesh->SetVisibility(true);
         TileMesh->SetRenderCustomDepth(true);
     }
 }
@@ -61,6 +62,7 @@ void AGridTile::EndMouseHoverFocus()
     if (!bIsHighlightedByUnit && !bIsHighlightedByGameManager) // Preserve GameManager highlights
     {
         TileMesh->SetRenderCustomDepth(false);
+        TileMesh->SetVisibility(false);
     }
 }
 

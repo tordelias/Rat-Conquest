@@ -121,10 +121,10 @@ void APlayerCamera::PerformInteractionCheck()
 
 void APlayerCamera::FoundInteractable(AActor* NewInteractable)
 {
-    //if (InteractionData.CurrentInteractable == NewInteractable)
-    //{
-    //    return;
-    //}
+    if (InteractionData.CurrentInteractable == NewInteractable)
+    {
+        return;
+    }
 
     if (bIsInteracting())
     {
@@ -139,6 +139,8 @@ void APlayerCamera::FoundInteractable(AActor* NewInteractable)
 
     InteractionData.CurrentInteractable = NewInteractable;
     TargetInteractable = NewInteractable;
+    TargetInteractable->BeginMouseHoverFocus();
+    InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
 
     if (TargetInteractable)
     {
@@ -146,26 +148,14 @@ void APlayerCamera::FoundInteractable(AActor* NewInteractable)
 
         if (PlayerUnit)
         {
-            UE_LOG(LogTemp, Error, TEXT("Successfully casted to APlayerUnit"));
+            //UE_LOG(LogTemp, Error, TEXT("Successfully casted to APlayerUnit"));
             if (mainHUD)
             {
                 mainHUD->ShowStatWidget();
 				mainHUD->UpdateStatWidget(&PlayerUnit->InstanceInteractableData);
-
-                // Log data
-                UE_LOG(LogTemp, Error, TEXT("Updated widget with data"));
-                UE_LOG(LogTemp, Error, TEXT("Unit Name: %s"), *PlayerUnit->InteractableData.UnitName.ToString());
-                UE_LOG(LogTemp, Error, TEXT("Unit Health: %d"), PlayerUnit->InteractableData.UnitHealth);
-                UE_LOG(LogTemp, Error, TEXT("Unit Damage: %d"), PlayerUnit->InteractableData.UnitDamage);
-                UE_LOG(LogTemp, Error, TEXT("Unit Movement Speed: %d"), PlayerUnit->InteractableData.UnitMovementSpeed);
             }
         }
     }
-
-
-
-    TargetInteractable->BeginMouseHoverFocus();
-    InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
 }
 
 void APlayerCamera::NoInteractableFound()
