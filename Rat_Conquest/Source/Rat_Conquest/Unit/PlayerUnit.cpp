@@ -48,13 +48,13 @@ void APlayerUnit::Tick(float DeltaTime)
 		{
 			MovementProgress = 1.0f;
 			bIsMoving = false;
-			SetActorLocation(TargetPosition);
+			SetActorLocation(FVector(TargetPosition.X,TargetPosition.Y,GetActorLocation().Z));
 			UE_LOG(LogTemp, Display, TEXT("Finished moving to new tile: %s"), *TargetPosition.ToString());
 		}
 		else
 		{
 			FVector NewPosition = FMath::Lerp(StartPosition, TargetPosition, MovementProgress);
-			SetActorLocation(NewPosition);
+			SetActorLocation(FVector(NewPosition.X, NewPosition.Y, GetActorLocation().Z));
 		}
 	}
 	if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::E))
@@ -133,7 +133,7 @@ void APlayerUnit::SetInitalPosition(FVector2D position)
 	}
 
 	TargetPosition = TargetTile->GetActorLocation();
-	SetActorLocation(TargetPosition);
+	SetActorLocation(FVector(TargetPosition.X, TargetPosition.Y, GetActorLocation().Z));
 	CurrentGridPosition = position;
 	//set the unit pointer on the grid tile
 	AGridTile* GridTile = Cast<AGridTile>(TargetTile);
