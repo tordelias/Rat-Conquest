@@ -9,24 +9,28 @@ AGridTile::AGridTile()
 {
     PrimaryActorTick.bCanEverTick = true;
 
+    // Create the static mesh component and set it as the root
     TileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TileMesh"));
     RootComponent = TileMesh;
-   // TileMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+    // Set collision settings
     TileMesh->SetCollisionResponseToAllChannels(ECR_Ignore); // Ignore everything by default
     TileMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap); // Overlap with pawns
     TileMesh->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap); // Overlap with dynamic objects
     TileMesh->SetGenerateOverlapEvents(true);
 
-	TileMesh->SetupAttachment(RootComponent);
+    // Initialize visibility and render settings
     TileMesh->SetVisibility(false);
-	TileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	TileMesh->SetRenderCustomDepth(false);
+    TileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    TileMesh->SetRenderCustomDepth(false);
 
+    // Initialize variables
     bIsHighlightedByUnit = false;
     bIsHighlightedByGameManager = false;
 
     UpdateInteractableData();
 }
+
 
 void AGridTile::BeginFocus()
 {
