@@ -6,11 +6,11 @@
 //Engine
 
 //includes
-#include "Rat_Conquest/GridManager/GridManager.h"
+#include "Rat_Conquest/Managers/GridManager/GridManager.h"
 #include "Rat_Conquest/Player/PlayerCamera.h"
-#include "Rat_Conquest/GameManager/GameManager.h"
+#include "Rat_Conquest/Managers/GameManager/GameManager.h"
 #include "Rat_Conquest/GridTile/GridTile.h"
-#include "Rat_Conquest/CombatManager/CombatManager.h"
+#include "Rat_Conquest/Managers/CombatManager/CombatManager.h"
 #include "Kismet/GameplayStatics.h" // Include for UGameplayStatics
 
 // Sets default values
