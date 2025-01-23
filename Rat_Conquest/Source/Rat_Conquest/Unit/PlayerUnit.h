@@ -10,6 +10,7 @@
 class AGridManager;
 class ACombatManager;
 class AGridTile;
+class AItem;
 UCLASS()
 class RAT_CONQUEST_API APlayerUnit : public AActor, public IInteractionInterface
 {
@@ -28,6 +29,9 @@ public:
 	void FinishTurn();
 	void DestoryUnit();
 
+	//item stuff
+	void CheckForItems();
+	void CalculateStats();
 	//should be skeleton mesh
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* mesh;
@@ -75,6 +79,7 @@ private:
 	float MovementDuration = 0.5f;
 
 	TArray<AGridTile*> MovedTiles;
+	AItem* WeaponSlot;
 
 protected:
 	// Called when the game starts or when spawned

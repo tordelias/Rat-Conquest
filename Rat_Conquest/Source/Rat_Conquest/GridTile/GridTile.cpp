@@ -3,6 +3,7 @@
 #include "GridTile.h"
 #include "Rat_Conquest/Player/PlayerCamera.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
+#include "Rat_Conquest/Items/Item.h"
 
 // Sets default values
 AGridTile::AGridTile()

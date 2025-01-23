@@ -1,5 +1,6 @@
 #include "GridManager.h"
 #include "Rat_Conquest/GridTile/GridTile.h"
+#include "Rat_Conquest/Items/Item.h"
 
 // Sets default values
 AGridManager::AGridManager()
@@ -114,21 +115,56 @@ void AGridManager::ScanWorldForObjects()
         {
             // Check if Actor is a GridTile and matches testTile
             AGridTile* OverlappingTile = Cast<AGridTile>(Actor);
-            if (OverlappingTile && OverlappingTile->testTile)
-            {
-                
-                Tile->AddOccupant(Actor);
-                UE_LOG(LogTemp, Display, TEXT("Found test tile at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
-            }
             UStaticMeshComponent* StaticMeshComp = Actor->FindComponentByClass<UStaticMeshComponent>();
+            AItem* Item = Cast<AItem>(Actor);
             if (StaticMeshComp && Actor->ActorHasTag(TEXT("GridObj")))
             {
                 // The overlapping actor has a StaticMeshComponent
                 Tile->AddOccupant(Actor);
                 UE_LOG(LogTemp, Display, TEXT("Found actor with StaticMesh at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
             }
+			if (StaticMeshComp && Item)
+			{
+				
+				Tile->itemSlot = Item;
+				UE_LOG(LogTemp, Error, TEXT("Found item at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
+			}
+
         }
     }
+}
+
+AActor* AGridManager::GetClosestAvailableTile(FVector2D Location)
+{
+    AActor* ClosestTile = nullptr;
+    float MinDistance = FLT_MAX;
+
+    for (auto& TilePair : GridTiles)
+    {
+		// Check if the tile is valid and not occupied
+        AGridTile* Tile = Cast<AGridTile>(TilePair.Value);
+        if (Tile && !Tile->bIsOccupied) // Check if the tile is valid and not occupied
+        {
+            FVector2D TileLocation(Tile->GridPosition.X, Tile->GridPosition.Y);
+            float Distance = FVector2D::Distance(Location, TileLocation);
+
+            if (Distance < MinDistance)
+            {
+                MinDistance = Distance;
+                ClosestTile = Tile;
+            }
+        }
+    }
+
+    if (ClosestTile)
+    {
+        AGridTile* Tile = Cast<AGridTile>(ClosestTile);
+		UE_LOG(LogTemp, Display, TEXT("Found closest tile at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
+        return ClosestTile;
+    }
+
+	// If no available tile is found, return an nullptr
+    return nullptr;
 }
 
 FVector2D AGridManager::GetGridSize()

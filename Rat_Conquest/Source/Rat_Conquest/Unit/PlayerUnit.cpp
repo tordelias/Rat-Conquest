@@ -11,6 +11,7 @@
 #include "Rat_Conquest/Managers/GameManager/GameManager.h"
 #include "Rat_Conquest/GridTile/GridTile.h"
 #include "Rat_Conquest/Managers/CombatManager/CombatManager.h"
+#include "Rat_Conquest/Items/Item.h"
 #include "Kismet/GameplayStatics.h" // Include for UGameplayStatics
 
 // Sets default values
@@ -113,6 +114,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 
 	CurrentGridPosition = NewGridPosition;
 	UE_LOG(LogTemp, Display, TEXT("Started moving to new tile."));
+	CheckForItems();
 	if (bIsPlayerUnit)
 	{
 		FinishTurn();
@@ -126,7 +128,7 @@ void APlayerUnit::SetInitalPosition(FVector2D position)
 		return;
 	}
 
-	AActor* TargetTile = GridManager->GetTileAt(position.X, position.Y);
+	AActor* TargetTile = GridManager->GetClosestAvailableTile(position);
 	if (!TargetTile) {
 		UE_LOG(LogTemp, Warning, TEXT("Invalid target tile at (%f, %f)"), position.X, position.Y);
 		return;
@@ -260,6 +262,38 @@ void APlayerUnit::DestoryUnit()
 	}
 
 	
+}
+
+void APlayerUnit::CheckForItems()
+{
+	if (!GridManager) {
+		UE_LOG(LogTemp, Error, TEXT("NO MANAGER"));
+		return;
+	}
+
+	AActor* TargetTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
+
+	if (!TargetTile)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No item at tile (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);
+		return;
+	}
+	AGridTile* tile = Cast<AGridTile>(TargetTile);
+	if (tile) {
+		if (tile->itemSlot) {
+
+			AItem* item = tile->itemSlot;
+			WeaponSlot = item;
+			item->EquipItem();
+			tile->itemSlot = nullptr;
+
+			
+			UE_LOG(LogTemp, Error, TEXT("Player picked up item at tile (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);	
+
+		}
+
+	}
+
 }
 
 void APlayerUnit::BeginFocus()

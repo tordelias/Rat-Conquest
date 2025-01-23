@@ -8,6 +8,7 @@
 #include "GridTile.generated.h"
 
 class APlayerUnit;
+class AItem;
 
 UCLASS()
 class RAT_CONQUEST_API AGridTile : public AActor, public IInteractionInterface
@@ -24,7 +25,6 @@ public:
     bool bIsOccupied;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-    bool testTile = false;
 
     FVector2D GridPosition;
 
@@ -45,6 +45,8 @@ public:
 
     UPROPERTY(VisibleAnywhere, Category = "Occupants")
     TArray<AActor*> tileObjects;
+
+	AItem* itemSlot;
 
     void AddOccupant(AActor* tileObj);
     void RemoveOccupant(AActor* tileObj);
