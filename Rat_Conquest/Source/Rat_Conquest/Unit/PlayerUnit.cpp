@@ -56,6 +56,21 @@ void APlayerUnit::Tick(float DeltaTime)
 		{
 			FVector NewPosition = FMath::Lerp(StartPosition, TargetPosition, MovementProgress);
 			SetActorLocation(FVector(NewPosition.X, NewPosition.Y, GetActorLocation().Z));
+
+			FVector Direction = (FVector(TargetPosition.X, TargetPosition.Y, 0) - FVector(GetActorLocation().X, GetActorLocation().Y, 0)).GetSafeNormal(); // Get normalized direction vector
+			FRotator TargetRotation = Direction.Rotation(); // Convert direction to rotation
+			FRotator CurrentRotation = GetActorRotation();
+
+			// Ensure the mesh aligns properly with the forward X-axis
+			TargetRotation.Yaw += 90.0f * -1; // Add a 90-degree offset to align X as forward, if necessary
+
+			// Constrain rotation to yaw only
+			TargetRotation.Pitch = CurrentRotation.Pitch;
+			TargetRotation.Roll = CurrentRotation.Roll;
+
+			// Smoothly interpolate to the target yaw rotation
+			FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, 5.0f);
+			SetActorRotation(NewRotation);
 		}
 	}
 	if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::E))
@@ -293,6 +308,11 @@ void APlayerUnit::CheckForItems()
 		}
 
 	}
+
+}
+
+void APlayerUnit::CalculateStats()
+{
 
 }
 

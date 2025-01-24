@@ -54,13 +54,16 @@ public:
 
 	//the amount of tiles the unit can move pr turn
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	int movementSpeed = 3;
+	int MovementSpeed = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	int health = 3;
+	int Health = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	int damage = 1;
+	int Damage = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	int Defence = 0;
 
 	bool bFirstMove = true;
 
@@ -74,7 +77,8 @@ public:
 private:
 	bool bIsMoving = false;                 
 	FVector StartPosition;                  
-	FVector TargetPosition;                 
+	FVector TargetPosition;  
+	
 	float MovementProgress = 0.0f;          
 	float MovementDuration = 0.5f;
 

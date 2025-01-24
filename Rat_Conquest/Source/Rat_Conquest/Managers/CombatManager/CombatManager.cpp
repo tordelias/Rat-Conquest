@@ -24,7 +24,7 @@ void ACombatManager::DealDamageToUnit(APlayerUnit* Attackerunit, APlayerUnit* De
 	//UE_LOG(LogTemp, Display, TEXT("%f damage"),
 	//	Attackerunit->damage);
 
-	TakeDamage(Defenderunit, Attackerunit->damage);
+	TakeDamage(Defenderunit, Attackerunit->Damage);
 }
 
 void ACombatManager::TakeDamage(APlayerUnit* unit, int amount)
@@ -34,12 +34,12 @@ void ACombatManager::TakeDamage(APlayerUnit* unit, int amount)
 		UE_LOG(LogTemp, Error, TEXT("TakeDamage failed: Unit is null!"));
 		return;
 	}
-
-	unit->health -= amount;
+	int TotalDamage = FMath::Max(amount - unit->Defence, 1);
+	unit->Health -= TotalDamage;
 
 	UE_LOG(LogTemp, Warning, TEXT("took %d damage"),amount);
 
-	if (unit->health <= 0)
+	if (unit->Health <= 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("has been killed!"));
 		KillUnit(unit);
