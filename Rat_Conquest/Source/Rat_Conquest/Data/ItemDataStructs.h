@@ -48,7 +48,7 @@ struct FItemStatistics
 	float MovementSpeed;
 
 	UPROPERTY(EditAnywhere)
-	float Maxhealth;
+	float MaxHealth;
 
 	UPROPERTY(EditAnywhere)
 	float Luck;

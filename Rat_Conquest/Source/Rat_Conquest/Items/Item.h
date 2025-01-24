@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Rat_Conquest/Items/ItemBase.h"
 #include "GameFramework/Actor.h"
 #include "Item.generated.h"
 
@@ -20,11 +21,18 @@ public:
 	void ConsumeItem();
 
 
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	void InitializeItem();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	UStaticMeshComponent* ItemMesh;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
+	UDataTable* ItemDataTable;
 	 //stats
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
+	FName RowName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	int Damage = 0;
@@ -40,6 +48,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	int Defence = 0;
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
+	UItemBase* ItemDataB;
 
 protected:
 	// Called when the game starts or when spawned
