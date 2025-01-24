@@ -12,7 +12,7 @@ class ACombatManager;
 class AGridTile;
 class AItem;
 UCLASS()
-class RAT_CONQUEST_API APlayerUnit : public AActor, public IInteractionInterface
+class RAT_CONQUEST_API APlayerUnit : public APawn, public IInteractionInterface
 {
 	GENERATED_BODY()
 	
