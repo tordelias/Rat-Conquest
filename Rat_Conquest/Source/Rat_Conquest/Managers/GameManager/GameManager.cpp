@@ -55,14 +55,15 @@ void AGameManager::StartTurnOrder()
     }
     else
     {
-        if (EnemyUnits.Num() > 0)
-        {
-            TurnQueue.Append(EnemyUnits);
-        }
         if (PlayerUnits.Num() > 0)
         {
             TurnQueue.Append(PlayerUnits);
         }
+        if (EnemyUnits.Num() > 0)
+        {
+            TurnQueue.Append(EnemyUnits);
+        }
+       
     }
 
     if (TurnQueue.Num() > 0)
@@ -96,8 +97,18 @@ void AGameManager::ExecuteTurn()
     }
     else
     {
-        CurrentUnit->ExecuteAITurn();
+		float RandomDelay = FMath::RandRange(1.0f, 2.0f);
+		FTimerHandle AIUnitTurnTimerHandle;
+        GetWorld()->GetTimerManager().SetTimer(
+            AIUnitTurnTimerHandle,  // Timer handle to keep track of this timer
+            this,                   // Object that owns the timer (this GameManager)
+            &AGameManager::HandleAITurnAfterDelay, // Callback function
+            RandomDelay,                   // Delay in seconds
+            false                   // Do not loop the timer
+        );
     }
+        
+    
 }
 
 void AGameManager::EndUnitTurn()
@@ -154,6 +165,18 @@ void AGameManager::RemoveUnitFromQueue(APlayerUnit* unit)
 
     // Log for debugging
     UE_LOG(LogTemp, Display, TEXT("Unit removed from queue and lists."));
+}
+
+void AGameManager::HandleAITurnAfterDelay()
+{
+    if (CurrentUnit)
+    {
+        CurrentUnit->ExecuteAITurn();  // Perform the AI unit's actions
+        UE_LOG(LogTemp, Warning, TEXT("AI unit turn executed"));
+
+        // Proceed to the next turn after the AI completes its turn
+        
+    }
 }
 
 void AGameManager::HighlightUnitAndTiles(APlayerUnit* NewUnit)

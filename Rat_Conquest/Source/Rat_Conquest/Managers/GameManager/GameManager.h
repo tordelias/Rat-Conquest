@@ -30,6 +30,8 @@ public:
 
 	void RemoveUnitFromQueue(APlayerUnit* unit);
 
+	void HandleAITurnAfterDelay();
+
 	UPROPERTY()
 	TArray<APlayerUnit*> PlayerUnits;
 
