@@ -114,7 +114,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	}
 	
 
-	if (GridManager->GetDistanceBetweenTiles(TargetTile, OldTile) > movementSpeed)
+	if (GridManager->GetDistanceBetweenTiles(TargetTile, OldTile) > MovementSpeed)
 		return;
 	OldGridTile->RemoveUnitRefrence();
 	
@@ -184,7 +184,7 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
 
 		// Define attack range, which is based on movement range
-		float AttackRange = movementSpeed; // Player's movement range
+		float AttackRange = MovementSpeed; // Player's movement range
 		float DistanceToEnemy = FVector2D::Distance(PlayerPosition, EnemyPosition);
 
 		// Check if the enemy is within movement range of the player
@@ -209,7 +209,7 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 				float TileDistanceToPlayer = FVector2D::Distance(Tile->GridPosition, PlayerPosition);
 
 				// Prioritize the closest tile within the movement range
-				if (TileDistanceToPlayer < ClosestDistanceToEnemy && TileDistanceToPlayer <= movementSpeed)
+				if (TileDistanceToPlayer < ClosestDistanceToEnemy && TileDistanceToPlayer <= MovementSpeed)
 				{
 					ClosestDistanceToEnemy = TileDistanceToPlayer;
 					BestTile = Tile;
@@ -322,7 +322,7 @@ void APlayerUnit::BeginFocus()
 	{
 		mesh->SetRenderCustomDepth(true);
 	}
-	auto movableTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, movementSpeed);
+	auto movableTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed);
 	for (auto tile : movableTiles)
 	{
 		tile->BeginFocus();
@@ -347,7 +347,7 @@ void APlayerUnit::BeginMouseHoverFocus()
 	// Get tiles within movement range
 	if (GridManager)
 	{
-		TArray<AGridTile*> HoverableTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, movementSpeed);
+		TArray<AGridTile*> HoverableTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed);
 		for (AGridTile* Tile : HoverableTiles)
 		{
 			if (Tile)
@@ -402,9 +402,9 @@ void APlayerUnit::UpdateInteractableData()
 		InstanceInteractableData.UnitName = FText::FromString("Rat");
 	}
 
-	InstanceInteractableData.UnitHealth = health;
-	InstanceInteractableData.UnitDamage = damage;
-	InstanceInteractableData.UnitMovementSpeed = movementSpeed;
+	InstanceInteractableData.UnitHealth = Health;
+	InstanceInteractableData.UnitDamage = Damage;
+	InstanceInteractableData.UnitMovementSpeed = MovementSpeed;
 
 }
 
@@ -418,7 +418,7 @@ void APlayerUnit::MoveToGridPosition()
 		{
 			float Distance = FVector2D::Distance(CurrentGridPosition, closestEnemy->CurrentGridPosition);
 
-			if (Distance < movementSpeed)
+			if (Distance < MovementSpeed)
 			{
 				this->Attack(closestEnemy);
 			}
@@ -513,7 +513,7 @@ void APlayerUnit::MoveToClosestPossibleTile(APlayerUnit* Enemy)
 		{
 			float DistanceToTile = FVector2D::Distance(CurrentPosition, Tile->GridPosition);
 
-			if (DistanceToTile <= this->movementSpeed)
+			if (DistanceToTile <= this->MovementSpeed)
 			{
 				float DistanceToEnemyFromTile = FVector2D::Distance(Tile->GridPosition, EnemyPosition);
 				float TotalScore = DistanceToTile + DistanceToEnemyFromTile;

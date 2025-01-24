@@ -184,7 +184,7 @@ void AGameManager::HighlightUnitAndTiles(APlayerUnit* NewUnit)
         if (GridManager)
         {
             TArray<AGridTile*> MovableTiles = GridManager->GetMovableTiles(
-                NewUnit->CurrentGridPosition.X, NewUnit->CurrentGridPosition.Y, NewUnit->movementSpeed);
+                NewUnit->CurrentGridPosition.X, NewUnit->CurrentGridPosition.Y, NewUnit->MovementSpeed);
 
             for (AGridTile* Tile : MovableTiles)
             {
