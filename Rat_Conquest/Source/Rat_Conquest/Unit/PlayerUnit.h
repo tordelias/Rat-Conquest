@@ -20,6 +20,8 @@ public:
 	// Sets default values for this actor's properties
 	APlayerUnit();
 	void MoveToTile(FVector2D NewGridPosition);
+	bool CalculatePathToTile(FVector2D InTargetGridPosition);
+	TArray<FVector2D> GetPathToTile(FVector2D InTargetGridPosition, FVector2D StartTile);
 	void SetInitalPosition(FVector2D position);
 	void DelayedInitalPosition();
 	void PlayerAttack(class APlayerCamera* PlayerCharacter);
@@ -78,15 +80,19 @@ public:
 	virtual void EndMouseHoverFocus() override;
 	virtual void Interact(APlayerCamera* PlayerCharacter) override;
 
+	FVector TargetPosition;
+	FVector2D TargetGridPosition;
+
 private:
 	bool bIsMoving = false;                 
 	FVector StartPosition;                  
-	FVector TargetPosition;  
 	
 	float MovementProgress = 0.0f;          
 	float MovementDuration = 0.5f;
 
 	TArray<AGridTile*> MovedTiles;
+
+	TArray<FVector2D> PathToTake;
 	
 
 protected:

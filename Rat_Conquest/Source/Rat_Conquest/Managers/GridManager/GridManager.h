@@ -46,6 +46,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	//A* pathfinding
+	void ResetAllTilesPathfindingData();
 private:
 	UPROPERTY(EditAnywhere, Category = "Grid")
 	FVector2D GridSize;

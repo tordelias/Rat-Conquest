@@ -68,4 +68,11 @@ public:
     bool bIsHighlightedByUnit = false;
     bool bIsHighlightedByGameManager = false;
     bool bIsHovered;
+
+
+	//for A* pathfinding
+    float G;
+    float H; 
+	float F;
+	void ResetPathfindingData();
 };

@@ -153,3 +153,10 @@ void AGridTile::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 }
+
+void AGridTile::ResetPathfindingData()
+{
+    G = 0.f;
+    H = 0.f;
+    F = 0.f;
+}

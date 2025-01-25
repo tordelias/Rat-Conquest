@@ -330,3 +330,15 @@ void AGridManager::Tick(float DeltaTime)
 
     }
 }
+
+void AGridManager::ResetAllTilesPathfindingData()
+{
+    for (auto& Tilemap : GridTiles) 
+    {
+		AGridTile* Tile = Cast<AGridTile>(Tilemap.Value);
+        if (Tile)
+        {
+            Tile->ResetPathfindingData();
+        }
+    }
+}

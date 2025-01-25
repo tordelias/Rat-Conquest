@@ -48,20 +48,63 @@ void APlayerUnit::Tick(float DeltaTime)
 		{
 			MovementProgress = 1.0f;
 			bIsMoving = false;
-			SetActorLocation(FVector(TargetPosition.X,TargetPosition.Y,GetActorLocation().Z));
-			UE_LOG(LogTemp, Display, TEXT("Finished moving to new tile: %s"), *TargetPosition.ToString());
+
+			// Update the unit's position to the target tile
+			SetActorLocation(FVector(TargetPosition.X, TargetPosition.Y, GetActorLocation().Z));
+			UE_LOG(LogTemp, Display, TEXT("Finished moving to tile: %s"), *TargetPosition.ToString());
+
+			// Update the current grid position
+			CurrentGridPosition = TargetGridPosition;
+
+			// Check if there are more tiles in the path
+			if (PathToTake.Num() > 0)
+			{
+				// Pop the next tile from the path
+				FVector2D NextTilePosition = PathToTake[0];
+				PathToTake.RemoveAt(0);
+
+				// Log the updated path for debugging
+				UE_LOG(LogTemp, Display, TEXT("Updated PathToTake:"));
+				for (FVector2D TilePosition : PathToTake)
+				{
+					UE_LOG(LogTemp, Display, TEXT("- %s"), *TilePosition.ToString());
+				}
+
+				// Set up movement to the next tile
+				AActor* NextTile = GridManager->GetTileAt(NextTilePosition.X, NextTilePosition.Y);
+				if (NextTile)
+				{
+					StartPosition = GetActorLocation();
+					TargetPosition = NextTile->GetActorLocation();
+					TargetGridPosition = NextTilePosition;
+					MovementProgress = 0.0f; // Reset progress
+					bIsMoving = true;        // Start movement
+				}
+			}
+			else
+			{
+				// Path is complete
+				UE_LOG(LogTemp, Display, TEXT("Finished moving along the path."));
+				CheckForItems();
+				if (bIsPlayerUnit)
+				{
+					FinishTurn();
+				}
+			}
 		}
 		else
 		{
+			// Interpolate position between StartPosition and TargetPosition
 			FVector NewPosition = FMath::Lerp(StartPosition, TargetPosition, MovementProgress);
 			SetActorLocation(FVector(NewPosition.X, NewPosition.Y, GetActorLocation().Z));
 
-			FVector Direction = (FVector(TargetPosition.X, TargetPosition.Y, 0) - FVector(GetActorLocation().X, GetActorLocation().Y, 0)).GetSafeNormal(); // Get normalized direction vector
-			FRotator TargetRotation = Direction.Rotation(); // Convert direction to rotation
+			// Rotate the unit to face the direction of movement
+			FVector Direction = (TargetPosition - StartPosition).GetSafeNormal();
+			FRotator TargetRotation = Direction.Rotation();
 			FRotator CurrentRotation = GetActorRotation();
 
-			// Ensure the mesh aligns properly with the forward X-axis
-			TargetRotation.Yaw += 90.0f * -1; // Add a 90-degree offset to align X as forward, if necessary
+			// Adjust rotation to align with the unit's forward direction
+			TargetRotation.Yaw += 90.0f * -1;
 
 			// Constrain rotation to yaw only
 			TargetRotation.Pitch = CurrentRotation.Pitch;
@@ -72,17 +115,11 @@ void APlayerUnit::Tick(float DeltaTime)
 			SetActorRotation(NewRotation);
 		}
 	}
-	if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::E))
-	{
-		TArray<AGridTile*> listofTiles = GridManager->GetNeighbourTiles(CurrentGridPosition.X,CurrentGridPosition.Y);
-
-
-	}
 }
-
 void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 {
-	if (!GridManager) {
+	if (!GridManager)
+	{
 		UE_LOG(LogTemp, Error, TEXT("NO MANAGER"));
 		return;
 	}
@@ -95,37 +132,159 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	if (!GridTile || GridTile->bIsOccupied)
 		return;
 
+	// Free the current tile
 	AActor* OldTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
 	AGridTile* OldGridTile = Cast<AGridTile>(OldTile);
-	if (OldTile) {
-		if (OldGridTile) {
-			OldGridTile->bIsOccupied = false;
-			
-		} 
-			
+	if (OldGridTile)
+	{
+		OldGridTile->bIsOccupied = false;
+		OldGridTile->RemoveUnitRefrence();
 	}
-	
 
+	// Check if the target tile is within movement range
 	if (GridManager->GetDistanceBetweenTiles(TargetTile, OldTile) > MovementSpeed)
 		return;
-	OldGridTile->RemoveUnitRefrence();
-	
-	// Mark new tile as occupied
+
+	// Calculate the path
+	if (!CalculatePathToTile(NewGridPosition))
+	{
+		return; // No valid path found
+	}
+
+	// Log the path for debugging
+	UE_LOG(LogTemp, Display, TEXT("PathToTake:"));
+	for (FVector2D TilePosition : PathToTake)
+	{
+		UE_LOG(LogTemp, Display, TEXT("- %s"), *TilePosition.ToString());
+	}
+
+	// Mark the new tile as occupied
 	GridTile->bIsOccupied = true;
 	GridTile->SetUnitRefrence(this);
-	// Set up lerp variables
-	StartPosition = GetActorLocation();
-	TargetPosition = TargetTile->GetActorLocation();
-	MovementProgress = 0.0f;  // Reset progress
-	bIsMoving = true;         // Start movement
 
-	CurrentGridPosition = NewGridPosition;
-	UE_LOG(LogTemp, Display, TEXT("Started moving to new tile."));
-	CheckForItems();
-	if (bIsPlayerUnit)
+	// Set up movement to the first tile in the path
+	if (PathToTake.Num() > 0)
 	{
-		FinishTurn();
+		FVector2D NextTilePosition = PathToTake[0];
+		PathToTake.RemoveAt(0);
+
+		AActor* NextTile = GridManager->GetTileAt(NextTilePosition.X, NextTilePosition.Y);
+		if (NextTile)
+		{
+			StartPosition = GetActorLocation();
+			TargetPosition = NextTile->GetActorLocation();
+			TargetGridPosition = NextTilePosition;
+			MovementProgress = 0.0f; // Reset progress
+			bIsMoving = true;        // Start movement
+		}
 	}
+}
+
+bool APlayerUnit::CalculatePathToTile(FVector2D InTargetGridPosition)
+{
+	if (!GridManager)
+	{
+		UE_LOG(LogTemp, Error, TEXT("NO MANAGER"));
+		return false;
+	}
+
+	PathToTake = GetPathToTile(InTargetGridPosition, CurrentGridPosition);
+	return PathToTake.Num() > 0;
+}
+
+TArray<FVector2D> APlayerUnit::GetPathToTile(FVector2D InTargetGridPosition, FVector2D StartTile)
+{
+	GridManager->ResetAllTilesPathfindingData();
+	TArray<FVector2D> Path;
+	TArray<AGridTile*> OpenList;
+	TArray<AGridTile*> ClosedList;
+	TMap<AGridTile*, AGridTile*> CameFrom;
+
+	AGridTile* StartTilePtr = Cast<AGridTile>(GridManager->GetTileAt(StartTile.X, StartTile.Y));
+	AGridTile* TargetTilePtr = Cast<AGridTile>(GridManager->GetTileAt(InTargetGridPosition.X, InTargetGridPosition.Y));
+
+	if (!StartTilePtr || !TargetTilePtr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Invalid start or target tile"));
+		return TArray<FVector2D>();
+	}
+
+	// Initialize the open list with the start tile
+	OpenList.Add(StartTilePtr);
+	StartTilePtr->G = 0;
+	StartTilePtr->H = FVector2D::Distance(StartTilePtr->GridPosition, InTargetGridPosition);
+	StartTilePtr->F = StartTilePtr->G + StartTilePtr->H;
+
+	while (OpenList.Num() > 0)
+	{
+		// Find the tile with the lowest F cost in the open list
+		AGridTile* CurrentTile = OpenList[0];
+		for (AGridTile* Tile : OpenList)
+		{
+			if (Tile->F < CurrentTile->F)
+			{
+				CurrentTile = Tile;
+			}
+		}
+
+		// If we've reached the target tile, reconstruct the path
+		if (CurrentTile->GridPosition == InTargetGridPosition)
+		{
+			AGridTile* PathTile = CurrentTile;
+			while (PathTile != StartTilePtr)
+			{
+				Path.Add(PathTile->GridPosition);
+				PathTile = CameFrom[PathTile];
+			}
+			Path.Add(StartTilePtr->GridPosition);
+			Algo::Reverse(Path); // Reverse the path to get it from start to target
+
+			// Log the path for debugging
+			UE_LOG(LogTemp, Display, TEXT("Calculated Path:"));
+			for (FVector2D TilePosition : Path)
+			{
+				UE_LOG(LogTemp, Display, TEXT("- %s"), *TilePosition.ToString());
+			}
+
+			return Path;
+		}
+
+		// Move the current tile from the open list to the closed list
+		OpenList.Remove(CurrentTile);
+		ClosedList.Add(CurrentTile);
+
+		// Get the neighboring tiles
+		TArray<AGridTile*> NeighbourTiles = GridManager->GetNeighbourTiles(CurrentTile->GridPosition.X, CurrentTile->GridPosition.Y);
+
+		for (AGridTile* Neighbour : NeighbourTiles)
+		{
+			if (!Neighbour || Neighbour->bIsOccupied || ClosedList.Contains(Neighbour))
+			{
+				continue; // Skip occupied or already evaluated tiles
+			}
+
+			// Calculate the tentative G cost
+			float TentativeG = CurrentTile->G + FVector2D::Distance(CurrentTile->GridPosition, Neighbour->GridPosition);
+
+			if (!OpenList.Contains(Neighbour) || TentativeG < Neighbour->G)
+			{
+				// This path to the neighbor is better than any previous one
+				CameFrom.Add(Neighbour, CurrentTile);
+				Neighbour->G = TentativeG;
+				Neighbour->H = FVector2D::Distance(Neighbour->GridPosition, InTargetGridPosition);
+				Neighbour->F = Neighbour->G + Neighbour->H;
+
+				if (!OpenList.Contains(Neighbour))
+				{
+					OpenList.Add(Neighbour);
+				}
+			}
+		}
+	}
+
+	// If the loop ends without finding the target, return an empty path
+	UE_LOG(LogTemp, Warning, TEXT("No path found to target tile"));
+	return TArray<FVector2D>();
 }
 
 void APlayerUnit::SetInitalPosition(FVector2D position)
@@ -216,10 +375,10 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 			this->MoveToTile(BestTile->GridPosition);
 
 			// Only attack if the player has reached the correct tile
-			if (this->CurrentGridPosition == BestTile->GridPosition)
-			{
+			//if (this->CurrentGridPosition == BestTile->GridPosition)
+			//{
 				combatManager->DealDamageToUnit(Enemy, this);
-			}
+			//}
 		}
 		else
 		{
