@@ -22,7 +22,7 @@ void AItem::EquipItem()
 void AItem::DropItem()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Item Dropped"));
-	ItemMesh->SetVisibility(false);
+	ItemMesh->SetVisibility(true);
 }
 
 void AItem::ConsumeItem()
@@ -35,7 +35,7 @@ void AItem::InitializeItem()
     if (!ItemDataTable) return;
 
    
-    FItemData* ItemData = ItemDataTable->FindRow<FItemData>(RowName, TEXT("Item Data Lookup"));
+    FItemData* ItemData = ItemDataTable->FindRow<FItemData>(RowName, TEXT(""));
     for (const auto& RowNames : ItemDataTable->GetRowNames())
     {
         UE_LOG(LogTemp, Warning, TEXT("Row Name: %s"), *RowNames.ToString());

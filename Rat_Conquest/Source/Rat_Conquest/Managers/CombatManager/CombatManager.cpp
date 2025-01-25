@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
 #include "Rat_Conquest/Managers/GameManager/GameManager.h"
+#include "Rat_Conquest/Items/Item.h"
 
 // Sets default values
 ACombatManager::ACombatManager()
@@ -20,11 +21,21 @@ void ACombatManager::DealDamageToUnit(APlayerUnit* Attackerunit, APlayerUnit* De
 		UE_LOG(LogTemp, Error, TEXT("DealDamageToUnit failed: Attacker or Defender is null!"));
 		return;
 	}
-
+	int weaponDamage = 0;
 	//UE_LOG(LogTemp, Display, TEXT("%f damage"),
 	//	Attackerunit->damage);
+	if (Attackerunit->ItemSlots[0])
+	{
+		AItem* item = Cast<AItem>(Attackerunit->ItemSlots[0]);
+		if (item) {
+			weaponDamage = item->Damage;
+		}
+		
+	}
+	int TotalDamage = Attackerunit->Damage + weaponDamage;
 
-	TakeDamage(Defenderunit, Attackerunit->Damage);
+
+	TakeDamage(Defenderunit, TotalDamage);
 }
 
 void ACombatManager::TakeDamage(APlayerUnit* unit, int amount)

@@ -32,6 +32,10 @@ public:
 
 	void HandleAITurnAfterDelay();
 
+	void EndEncounter();
+
+	void StartEncounter();
+
 	UPROPERTY()
 	TArray<APlayerUnit*> PlayerUnits;
 
@@ -41,6 +45,10 @@ public:
 
 	UPROPERTY()
 	TArray<APlayerUnit*> TurnQueue;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemies")
+	TArray<APlayerUnit*> EnemyList;
 
 	UPROPERTY()
 	APlayerUnit* CurrentUnit;

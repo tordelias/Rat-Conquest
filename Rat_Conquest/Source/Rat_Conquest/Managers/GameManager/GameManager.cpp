@@ -97,14 +97,15 @@ void AGameManager::ExecuteTurn()
     }
     else
     {
+		//Adds a random delay to the AI unit's turn 
 		float RandomDelay = FMath::RandRange(1.0f, 2.0f);
 		FTimerHandle AIUnitTurnTimerHandle;
         GetWorld()->GetTimerManager().SetTimer(
-            AIUnitTurnTimerHandle,  // Timer handle to keep track of this timer
-            this,                   // Object that owns the timer (this GameManager)
-            &AGameManager::HandleAITurnAfterDelay, // Callback function
-            RandomDelay,                   // Delay in seconds
-            false                   // Do not loop the timer
+            AIUnitTurnTimerHandle,  
+            this,                  
+            &AGameManager::HandleAITurnAfterDelay, 
+            RandomDelay,                
+            false                
         );
     }
         
@@ -177,6 +178,68 @@ void AGameManager::HandleAITurnAfterDelay()
         // Proceed to the next turn after the AI completes its turn
         
     }
+}
+
+void AGameManager::EndEncounter()
+{
+	// Clear the turn queue
+	TurnQueue.Empty();
+
+	// Clear the player and enemy units
+	PlayerUnits.Empty();
+	EnemyUnits.Empty();
+
+	// Clear the currently focused unit and tiles
+	CurrentlyFocusedUnit = nullptr;
+	CurrentlyFocusedTiles.Empty();
+
+
+	
+	
+}
+
+void AGameManager::StartEncounter()
+{
+    //Spawn new enemies
+	for (int i = 0; i < rand() % 2 + 1; ++i)
+	{
+		if (EnemyList.Num() > 0)
+		{
+			int RandomIndex = rand() % EnemyList.Num();
+			APlayerUnit* NewEnemy = GetWorld()->SpawnActor<APlayerUnit>(EnemyList[RandomIndex]->GetClass());
+			if (NewEnemy)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("New enemy spawned: %s"), *NewEnemy->GetName());
+				
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("No enemies in the EnemyList!"));
+		}
+	}
+
+
+	// Initialize the player and enemy units
+	InitalizeUnits();
+
+	for (APlayerUnit* P_unit : PlayerUnits)
+	{
+		P_unit->GridStartPosition = FVector2D(0,0);
+        P_unit->ResetPosition();
+	}
+	for (APlayerUnit* E_unit : EnemyUnits)
+	{
+		E_unit->GridStartPosition = FVector2D(5, 5);
+		E_unit->ResetPosition();
+	}
+   
+
+	// Start the turn order
+	StartTurnOrder();
+
+
+
 }
 
 void AGameManager::HighlightUnitAndTiles(APlayerUnit* NewUnit)

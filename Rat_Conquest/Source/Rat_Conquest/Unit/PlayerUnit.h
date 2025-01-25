@@ -29,9 +29,12 @@ public:
 	void FinishTurn();
 	void DestoryUnit();
 
+	void ResetPosition();
+
 	//item stuff
 	void CheckForItems();
 	void CalculateStats();
+	void DropItem(AItem* OldItem, FVector2D CurrentPosition);
 	//should be skeleton mesh
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* mesh;
@@ -67,6 +70,7 @@ public:
 
 	bool bFirstMove = true;
 
+	TArray<AItem*> ItemSlots; //0 = weapon, 1 = armor, 2 = accessory
 
 	void BeginFocus();
 	void EndFocus();
@@ -83,7 +87,7 @@ private:
 	float MovementDuration = 0.5f;
 
 	TArray<AGridTile*> MovedTiles;
-	AItem* WeaponSlot;
+	
 
 protected:
 	// Called when the game starts or when spawned

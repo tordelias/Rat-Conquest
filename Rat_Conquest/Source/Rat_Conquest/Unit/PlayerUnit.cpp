@@ -22,7 +22,7 @@ APlayerUnit::APlayerUnit()
 
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	UpdateInteractableData();
-
+	ItemSlots.SetNum(3);
 	GridStartPosition = FVector2D(0, 0);
 }
 
@@ -279,40 +279,128 @@ void APlayerUnit::DestoryUnit()
 	
 }
 
+void APlayerUnit::ResetPosition()
+{
+	if (GridManager)
+	{
+		AActor* Tile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
+		AGridTile* GridTile = Cast<AGridTile>(Tile);
+		if (GridTile)
+		{
+			GridTile->RemoveUnitRefrence();
+			GridTile->bIsOccupied = false;
+		}
+	}
+	SetInitalPosition(GridStartPosition);
+}
+
 void APlayerUnit::CheckForItems()
 {
+	// Ensure the GridManager is valid
 	if (!GridManager) {
 		UE_LOG(LogTemp, Error, TEXT("NO MANAGER"));
 		return;
 	}
 
+	// Retrieve the target tile based on the current grid position
 	AActor* TargetTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
 
-	if (!TargetTile)
-	{
+	if (!TargetTile) {
 		UE_LOG(LogTemp, Warning, TEXT("No item at tile (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);
 		return;
 	}
-	AGridTile* tile = Cast<AGridTile>(TargetTile);
-	if (tile) {
-		if (tile->itemSlot) {
 
-			AItem* item = tile->itemSlot;
-			WeaponSlot = item;
-			item->EquipItem();
-			tile->itemSlot = nullptr;
-
-			
-			UE_LOG(LogTemp, Error, TEXT("Player picked up item at tile (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);	
-
+	// Cast the target tile to AGridTile
+	AGridTile* Tile = Cast<AGridTile>(TargetTile);
+	if (Tile && Tile->ItemSlot) {
+		AItem* NewItem = Tile->ItemSlot;
+		if (!NewItem) {
+			UE_LOG(LogTemp, Error, TEXT("Item is null"));
+			return;
 		}
 
+		// Determine the appropriate slot index for the new item
+		int32 SlotIndex = 0; // Default to weapon slot
+		
+
+		// Check if the slot is already occupied
+		if (ItemSlots[SlotIndex]) {
+			AItem* OldItem = ItemSlots[SlotIndex];
+
+			// Unequip the old item
+			OldItem->DropItem();
+
+			// Drop the old item back into the game world
+			DropItem(OldItem, CurrentGridPosition);
+		}
+
+		// Equip the new item
+		ItemSlots[SlotIndex] = NewItem;
+		NewItem->EquipItem();
+		Tile->ItemSlot = nullptr;
+
+		UE_LOG(LogTemp, Log, TEXT("Player picked up item at tile (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);
 	}
+
 
 }
 
 void APlayerUnit::CalculateStats()
 {
+
+}
+
+void APlayerUnit::DropItem(AItem* OldItem, FVector2D CurrentPosition)
+{
+	if (!OldItem)
+	{
+		UE_LOG(LogTemp, Error, TEXT("OldItem is null"));
+		return;
+	}
+
+	// Remove the item from the player's inventory
+	ItemSlots[0] = nullptr;
+	if (OldItem->IsValidLowLevel())
+	{
+		OldItem->Destroy();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("OldItem is not valid"));
+	}
+	// Determine the world location to drop the item
+	FVector DropLocation = GetActorLocation(); // Adjust the offset as needed
+
+	// Spawn parameters
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = GetInstigator();
+
+	// Spawn the item actor in the world
+	AItem* DroppedItem = GetWorld()->SpawnActor<AItem>(OldItem->GetClass(), DropLocation, FRotator::ZeroRotator, SpawnParams);
+	if (!DroppedItem)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to spawn dropped item"));
+		return;
+	}
+
+	// If using a grid system, update the corresponding tile
+	if (GridManager)
+	{
+		AActor* TargetTile = GridManager->GetTileAt(CurrentPosition.X, CurrentPosition.Y);
+		AGridTile* Tile = Cast<AGridTile>(TargetTile);
+		if (Tile)
+		{
+			Tile->ItemSlot = DroppedItem;
+			UE_LOG(LogTemp, Log, TEXT("Updated tile with dropped item"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to update tile with dropped item"));
+		}
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("Player dropped item at location (%s)"), *DropLocation.ToString());
 
 }
 

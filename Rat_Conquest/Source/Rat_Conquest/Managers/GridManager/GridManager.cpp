@@ -98,6 +98,7 @@ void AGridManager::SetGridSize(int32 Rows, int32 Colums)
 
 void AGridManager::ScanWorldForObjects()
 {
+    int num = 0;
     for (auto& TilePair : GridTiles)
     {
         AGridTile* Tile = Cast<AGridTile>(TilePair.Value);
@@ -121,17 +122,20 @@ void AGridManager::ScanWorldForObjects()
             {
                 // The overlapping actor has a StaticMeshComponent
                 Tile->AddOccupant(Actor);
-                UE_LOG(LogTemp, Display, TEXT("Found actor with StaticMesh at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
+                UE_LOG(LogTemp, Display, TEXT("Found actor with StaticMesh at Row: %f, Column: %f, Name: %s"), Tile->GridPosition.X, Tile->GridPosition.Y, *Actor->GetName());
+                num++;
             }
 			if (StaticMeshComp && Item)
 			{
 				
-				Tile->itemSlot = Item;
+				Tile->ItemSlot = Item;
 				UE_LOG(LogTemp, Error, TEXT("Found item at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
 			}
 
         }
     }
+	UE_LOG(LogTemp, Display, TEXT("Found %d objects in the grid"), num);
+
 }
 
 AActor* AGridManager::GetClosestAvailableTile(FVector2D Location)

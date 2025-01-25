@@ -46,7 +46,7 @@ public:
     UPROPERTY(VisibleAnywhere, Category = "Occupants")
     TArray<AActor*> tileObjects;
 
-	AItem* itemSlot;
+	AItem* ItemSlot;
 
     void AddOccupant(AActor* tileObj);
     void RemoveOccupant(AActor* tileObj);
