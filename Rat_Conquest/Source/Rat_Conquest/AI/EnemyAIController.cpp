@@ -2,6 +2,9 @@
 
 
 #include "EnemyAIController.h"
+
+#include "Kismet/GameplayStatics.h"
+
 #include "Rat_Conquest/Unit/PlayerUnit.h"
 #include "Rat_Conquest/Managers/GridManager/GridManager.h"
 #include "Rat_Conquest/GridTile/GridTile.h"
@@ -189,6 +192,13 @@ void AEnemyAIController::Attack(APlayerUnit* Enemy)
 			UE_LOG(LogTemp, Log, TEXT("AI moving to tile (%f, %f) to attack the enemy"), BestTile->GridPosition.X, BestTile->GridPosition.Y);
 			AI->MoveToTile(BestTile->GridPosition);
 			AI->combatManager->DealDamageToUnit(AI, Enemy);
+			//ACombatManager* CombatManager = Cast<ACombatManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ACombatManager::StaticClass()));
+
+			//if (CombatManager)
+			//{
+			//	CombatManager->DealDamageToUnit(AI, Enemy);
+			//	UE_LOG(LogTemp, Log, TEXT("Dealt damage to enemy using CombatManager found via GetActorOfClass."));
+			//}
 		}
 		else
 		{

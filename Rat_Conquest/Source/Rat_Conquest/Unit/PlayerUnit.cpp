@@ -20,7 +20,6 @@ APlayerUnit::APlayerUnit()
 	PrimaryActorTick.bCanEverTick = true;
 
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	UpdateInteractableData();
 	ItemSlots.SetNum(3);
 	GridStartPosition = FVector2D(0, 0);
 }
@@ -34,6 +33,7 @@ void APlayerUnit::BeginPlay()
 	//	DelayedInitalPosition();
 	//}
 	DelayedInitalPosition();
+	this->UpdateInteractableData();
 }
 // Called every frame
 void APlayerUnit::Tick(float DeltaTime)
@@ -416,6 +416,7 @@ void APlayerUnit::DropItem(AItem* OldItem, FVector2D CurrentPosition)
 
 void APlayerUnit::BeginFocus()
 {
+	this->UpdateInteractableData();
 	if (mesh)
 	{
 		mesh->SetRenderCustomDepth(true);
@@ -475,7 +476,7 @@ void APlayerUnit::Interact(APlayerCamera* PlayerCharacter)
 	if (PlayerCharacter)
 	{
 	
-		UpdateInteractableData();
+		this->UpdateInteractableData();
 
 		if(!this->bIsPlayerUnit)
 		{

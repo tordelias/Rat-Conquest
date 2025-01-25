@@ -24,7 +24,7 @@ struct FInteractableData
 	GENERATED_USTRUCT_BODY()
 
 
-	FInteractableData() : InteractableType(EInteractionType::IT_Pickup), InteractionDuration(0.0f), UnitName(FText::FromString("")), UnitHealth(0), UnitDamage(0), UnitMovementSpeed(0)
+	FInteractableData() : InteractableType(EInteractionType::IT_Pickup), UnitName(FText::FromString("")), UnitHealth(0), UnitDamage(0), UnitMovementSpeed(0), InteractionDuration(0.0f)
 	{
 	};
 	UPROPERTY(EditInstanceOnly)

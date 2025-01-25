@@ -34,6 +34,7 @@ void ACombatManager::DealDamageToUnit(APlayerUnit* Attackerunit, APlayerUnit* De
 	}
 	int TotalDamage = Attackerunit->Damage + weaponDamage;
 
+	UE_LOG(LogTemp, Warning, TEXT("Dealing %d damage to %s"), TotalDamage, *Defenderunit->GetName());
 
 	TakeDamage(Defenderunit, TotalDamage);
 }
