@@ -102,13 +102,6 @@ public:
 	UPROPERTY(VisibleInstanceOnly, Category = "Interact")
 	FInteractableData InstanceInteractableData;
 
-	//AI stuff (Should be moved to a AI controller)
-	void MoveToGridPosition();
-	APlayerUnit* FindEnemyunit();
-	void MoveToClosestPossibleTile(APlayerUnit* Enemy);
-
-	void Attack(APlayerUnit* Enemy);
-
 private: 
 
 

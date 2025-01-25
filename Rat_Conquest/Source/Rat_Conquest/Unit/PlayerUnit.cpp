@@ -4,7 +4,7 @@
 #include "PlayerUnit.h"
 
 //Engine
-
+#include "Kismet/GameplayStatics.h" // Include for UGameplayStatics
 //includes
 #include "Rat_Conquest/Managers/GridManager/GridManager.h"
 #include "Rat_Conquest/Player/PlayerCamera.h"
@@ -12,8 +12,7 @@
 #include "Rat_Conquest/GridTile/GridTile.h"
 #include "Rat_Conquest/Managers/CombatManager/CombatManager.h"
 #include "Rat_Conquest/Items/Item.h"
-#include "Kismet/GameplayStatics.h" // Include for UGameplayStatics
-
+#include "Rat_Conquest/AI/EnemyAIController.h"
 // Sets default values
 APlayerUnit::APlayerUnit()
 {
@@ -246,9 +245,27 @@ void APlayerUnit::ExecutePlayerTurn()
 
 void APlayerUnit::ExecuteAITurn()
 {
-	//Some AI logic here
+	// Get the AI Controller for this pawn
+	AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
+
+	if (AIController)
+	{
+		// Call the MoveToGridPosition() function on the AI Controller
+		AIController->MoveToGridPosition();
+
+		// Log success
+		UE_LOG(LogTemp, Log, TEXT("Called MoveToGridPosition from AI Controller."));
+	}
+	else
+	{
+		// Log failure if no AI Controller found
+		UE_LOG(LogTemp, Warning, TEXT("Failed to find AI Controller."));
+	}
+
+	// Continue with the rest of the AI logic
 	UE_LOG(LogTemp, Error, TEXT("AI did something"));
-	MoveToGridPosition();
+
+	// End the turn
 	FinishTurn();
 }
 
@@ -495,188 +512,3 @@ void APlayerUnit::UpdateInteractableData()
 	InstanceInteractableData.UnitMovementSpeed = MovementSpeed;
 
 }
-
-
-//AI stuff (Should be moved to a AI controller)
-void APlayerUnit::MoveToGridPosition()
-{
-		auto closestEnemy = this->FindEnemyunit();
-
-		if (IsValid(closestEnemy))
-		{
-			float Distance = FVector2D::Distance(CurrentGridPosition, closestEnemy->CurrentGridPosition);
-
-			if (Distance < MovementSpeed)
-			{
-				this->Attack(closestEnemy);
-			}
-			else
-			{
-				this->MoveToClosestPossibleTile(closestEnemy);
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("No valid enemy found"));
-		
-		}
-}
-
-APlayerUnit* APlayerUnit::FindEnemyunit()
-{
-	FVector2D closestUnitPos = FVector2D::ZeroVector;
-	APlayerUnit* closestUnit = nullptr;
-
-	if (!GridManager)
-	{
-		UE_LOG(LogTemp, Error, TEXT("GridManager is not valid or has not been possessed"));
-		return nullptr;
-	}
-
-	int numTilesChecked = 0;
-
-	for (const auto& TilePair : GridManager->GridTiles)
-	{
-		// Cast the AActor* value to AGridTile*
-		AGridTile* Tile = Cast<AGridTile>(TilePair.Value);
-		if (!Tile)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Invalid tile found in GridTiles"));
-			continue;
-		}
-		APlayerUnit* Unit = Tile->unitRefrence;
-
-		if (!Unit)
-		{
-			UE_LOG(LogTemp, Verbose, TEXT("Tile at position %s has no unit reference"), *TilePair.Key.ToString());
-			continue;
-		}
-
-		if (Unit == this)
-		{
-			UE_LOG(LogTemp, Verbose, TEXT("Skipping self"));
-			continue;
-		}
-
-		if (!Unit->bIsPlayerUnit)
-		{
-			UE_LOG(LogTemp, Verbose, TEXT("Skipping enemy unit: %s"), *Unit->GetName());
-			continue;
-			
-		}
-
-		if (!closestUnit || FVector2D::Distance(this->CurrentGridPosition, Unit->CurrentGridPosition) < FVector2D::Distance(this->CurrentGridPosition, closestUnitPos))
-		{
-			closestUnitPos = Unit->CurrentGridPosition;
-			closestUnit = Unit;
-			UE_LOG(LogTemp, Log, TEXT("Found a closer FriendlyUnit: %s at location: %s"), *Unit->GetName(), *closestUnitPos.ToString());
-		}
-
-		numTilesChecked++;
-	}
-
-	if (!closestUnit)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No FriendlyUnit found in the grid after checking %d tiles"), numTilesChecked);
-	}
-
-	return closestUnit;
-}
-
-
-void APlayerUnit::MoveToClosestPossibleTile(APlayerUnit* Enemy)
-{
-	if (GridManager && Enemy)
-	{
-		FVector2D CurrentPosition = this->CurrentGridPosition;
-		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
-
-		TArray<AGridTile*> PossibleTiles;
-		PossibleTiles = GridManager->GetNeighbourTiles(this->CurrentGridPosition.X, this->CurrentGridPosition.Y);
-
-		AGridTile* BestTile = nullptr;
-		float BestScore = FLT_MAX; 
-
-		for (AGridTile* Tile : PossibleTiles)
-		{
-			float DistanceToTile = FVector2D::Distance(CurrentPosition, Tile->GridPosition);
-
-			if (DistanceToTile <= this->MovementSpeed)
-			{
-				float DistanceToEnemyFromTile = FVector2D::Distance(Tile->GridPosition, EnemyPosition);
-				float TotalScore = DistanceToTile + DistanceToEnemyFromTile;
-
-				if (TotalScore < BestScore)
-				{
-					BestScore = TotalScore;
-					BestTile = Tile;
-				}
-			}
-		}
-
-		if (BestTile && !this->bIsPlayerUnit)
-		{
-			this->MoveToTile(BestTile->GridPosition);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("No valid tile found within range"));
-			
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("GridManager or Enemy is not valid"));
-		
-	}
-}
-
-
-void APlayerUnit::Attack(APlayerUnit* Enemy)
-{
-	if (GridManager && !this->bIsPlayerUnit && Enemy)
-	{
-		FVector2D AIPosition = this->CurrentGridPosition;
-		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
-
-		TArray<AGridTile*> NeighbourTiles = GridManager->GetNeighbourTiles(EnemyPosition.X, EnemyPosition.Y);
-
-		AGridTile* BestTile = nullptr;
-		float ClosestDistanceToEnemy = FLT_MAX;
-
-		for (AGridTile* Tile : NeighbourTiles)
-		{
-			if (Tile && !Tile->bIsOccupied)
-			{
-				float DistanceToEnemy = FVector2D::Distance(Tile->GridPosition, EnemyPosition);
-
-				if (DistanceToEnemy < ClosestDistanceToEnemy)
-				{
-					ClosestDistanceToEnemy = DistanceToEnemy;
-					BestTile = Tile;
-				}
-			}
-		}
-
-		if (BestTile && Enemy->bIsPlayerUnit)
-		{
-			UE_LOG(LogTemp, Log, TEXT("AI moving to tile (%f, %f) to attack the enemy"), BestTile->GridPosition.X, BestTile->GridPosition.Y);
-			this->MoveToTile(BestTile->GridPosition);
-			combatManager->DealDamageToUnit(this, Enemy);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("No valid tiles directly adjacent to the enemy. Moving closer instead."));
-			MoveToClosestPossibleTile(Enemy);
-		}
-	}
-	else
-	{
-		if (!GridManager) UE_LOG(LogTemp, Error, TEXT("GridManager is invalid"));
-		if (!Enemy) UE_LOG(LogTemp, Error, TEXT("Enemy is null"));
-		if (bIsPlayerUnit) UE_LOG(LogTemp, Warning, TEXT("Player-controlled units cannot use this AI logic"));
-	}
-	
-
-}
-
