@@ -233,6 +233,7 @@ void APlayerUnit::ExecutePlayerTurn()
 {
 	//some logic here
 	UE_LOG(LogTemp, Error, TEXT("Player did something"));
+	CheckForItems();
 	//FinishTurn();
 }
 
@@ -312,6 +313,7 @@ void APlayerUnit::CheckForItems()
 		return;
 	}
 
+	GridManager->ScanWorldForObjects();
 	// Retrieve the target tile based on the current grid position
 	AActor* TargetTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
 
@@ -346,7 +348,7 @@ void APlayerUnit::CheckForItems()
 
 		// Equip the new item
 		ItemSlots[SlotIndex] = NewItem;
-		NewItem->EquipItem();
+		NewItem->EquipItem(this);
 		Tile->ItemSlot = nullptr;
 
 		UE_LOG(LogTemp, Log, TEXT("Player picked up item at tile (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);

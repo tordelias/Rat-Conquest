@@ -12,16 +12,31 @@ AItem::AItem()
 	RootComponent = ItemMesh;
 }
 
-void AItem::EquipItem()
+void AItem::EquipItem(AActor* UnitOwner)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Item Equipped"));
-	ItemMesh->SetVisibility(false);
+    if (!UnitOwner)
+    {
+        UE_LOG(LogTemp, Error, TEXT("UnitOwner is null. Cannot equip item."));
+        return;
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("Item Equipped"));
+
+    // Make the item a child of the unit that picked it up
+    AttachToActor(UnitOwner, FAttachmentTransformRules::KeepRelativeTransform);
+
+    // Position the item relative to the unit
+    FVector Offset(0.f, 0.f, 80.f); // Adjust the offset as needed
+    SetActorRelativeLocation(Offset);
+	ItemMesh->SetVisibility(true);
 
 }
 
 void AItem::DropItem()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Item Dropped"));
+	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	ItemMesh->SetVisibility(true);
 }
 

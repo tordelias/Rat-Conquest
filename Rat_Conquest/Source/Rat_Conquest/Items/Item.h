@@ -16,7 +16,7 @@ public:
 	// Sets default values for this actor's properties
 	AItem();
 
-	void EquipItem();
+	void EquipItem(AActor* UnitOwner);
 	void DropItem();
 	void ConsumeItem();
 
