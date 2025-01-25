@@ -78,13 +78,6 @@ void APlayerUnit::Tick(float DeltaTime)
 
 
 	}
-	if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Q))
-	{
-		if(!bIsPlayerUnit)
-		{
-			this->MoveToGridPosition();
-		}
-	}
 }
 
 void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
