@@ -30,7 +30,7 @@ void AItem::EquipItem(AActor* UnitOwner)
     FVector Offset(0.f, 0.f, 80.f); // Adjust the offset as needed
     SetActorRelativeLocation(Offset);
 	ItemMesh->SetVisibility(true);
-
+    bIsEquipped = true;    
 }
 
 void AItem::DropItem()
@@ -38,6 +38,7 @@ void AItem::DropItem()
 	UE_LOG(LogTemp, Warning, TEXT("Item Dropped"));
 	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	ItemMesh->SetVisibility(true);
+    bIsEquipped = false;
 }
 
 void AItem::ConsumeItem()
@@ -93,6 +94,26 @@ void AItem::BeginPlay()
 void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+    //rotate the item
+
+    if (!bIsEquipped) {
+        FRotator Rotation = FRotator(0.f, 1.f * YawRotationSpeed, 0.f);
+        AddActorLocalRotation(Rotation);
+
+        // Add a bobbing effect to the item
+        float RunningTime = GetGameTimeSinceCreation();
+        float DeltaHeight = (FMath::Sin((RunningTime + DeltaTime) * BobbingSpeed) - FMath::Sin(RunningTime * BobbingSpeed));
+        FVector NewLocation = GetActorLocation();
+        NewLocation.Z += DeltaHeight * 8.0f;
+        RunningTime += DeltaTime;
+        SetActorLocation(NewLocation);
+
+
+    }
+	
+
+
 
 }
 

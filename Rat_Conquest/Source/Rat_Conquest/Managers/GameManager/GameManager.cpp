@@ -98,7 +98,7 @@ void AGameManager::ExecuteTurn()
     else
     {
 		//Adds a random delay to the AI unit's turn 
-		float RandomDelay = FMath::RandRange(1.0f, 2.0f);
+		float RandomDelay = FMath::RandRange(0.90f, 1.9f);
 		FTimerHandle AIUnitTurnTimerHandle;
         GetWorld()->GetTimerManager().SetTimer(
             AIUnitTurnTimerHandle,  

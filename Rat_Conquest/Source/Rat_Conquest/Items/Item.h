@@ -48,6 +48,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	int Defence = 0;
+
+	//rotation variables
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
+	float YawRotationSpeed = 1.0f;
+	//bobbing variables
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
+	float BobbingSpeed = 1.0f;
+
+	bool bIsEquipped = false;
+
+
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	UItemBase* ItemDataB;
