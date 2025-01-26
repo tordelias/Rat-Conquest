@@ -35,6 +35,7 @@ void APlayerUnit::BeginPlay()
 	DelayedInitalPosition();
 	this->UpdateInteractableData();
 }
+
 // Called every frame
 void APlayerUnit::Tick(float DeltaTime)
 {
@@ -85,6 +86,15 @@ void APlayerUnit::Tick(float DeltaTime)
 			{
 				// Path is complete
 				UE_LOG(LogTemp, Display, TEXT("Finished moving along the path."));
+
+				// Trigger the OnMovementComplete delegate if it's bound
+				if (OnMovementComplete.IsBound())
+				{
+					OnMovementComplete.Execute(EnemyToAttack); // Pass the enemy to attack
+					OnMovementComplete.Unbind(); // Unbind the delegate after execution
+				}
+
+				// Other logic (e.g., checking for items, finishing the turn)
 				CheckForItems();
 				if (bIsPlayerUnit)
 				{
@@ -116,6 +126,8 @@ void APlayerUnit::Tick(float DeltaTime)
 		}
 	}
 }
+
+
 void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 {
 	if (!GridManager)
@@ -324,45 +336,42 @@ void APlayerUnit::DelayedInitalPosition()
 		GetWorldTimerManager().SetTimerForNextTick(this, &APlayerUnit::DelayedInitalPosition);
 	}
 }
+float ChebyshevDistance(FVector2D A, FVector2D B)
+{
+	return FMath::Max(FMath::Abs(A.X - B.X), FMath::Abs(A.Y - B.Y));
+}
 
 void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 {
 	auto Enemy = PlayerCharacter->GetCurrentUnit();
 	if (GridManager && Enemy)
 	{
-		// Get the current position of the player and the enemy
 		FVector2D PlayerPosition = this->CurrentGridPosition;
 		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
 
-		// Define attack range, which is based on movement range
-		float AttackRange = MovementSpeed; // Player's movement range
-		float DistanceToEnemy = FVector2D::Distance(PlayerPosition, EnemyPosition);
+		float AttackRange = MovementSpeed;
+		float DistanceToEnemy = ChebyshevDistance(PlayerPosition, EnemyPosition);
 
-		// Check if the enemy is within movement range of the player
 		if (DistanceToEnemy > AttackRange)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Player is out of range to move to the enemy's neighboring tiles."));
-			return; // Player can't attack if they can't move to a neighboring tile
+			return;
 		}
 
-		// Retrieve all neighboring tiles around the enemy
 		TArray<AGridTile*> NeighbourTiles = GridManager->GetNeighbourTiles(EnemyPosition.X, EnemyPosition.Y);
 
 		AGridTile* BestTile = nullptr;
-		float ClosestDistanceToEnemy = FLT_MAX;
+		float ClosestDistanceToPlayer = FLT_MAX;
 
-		// Find the closest valid, unoccupied neighboring tile around the enemy
 		for (AGridTile* Tile : NeighbourTiles)
 		{
-			if (Tile && !Tile->bIsOccupied)
+			if (Tile && !Tile->bIsOccupied) // Only consider unoccupied tiles
 			{
-				// Calculate distance to the player from this tile
 				float TileDistanceToPlayer = FVector2D::Distance(Tile->GridPosition, PlayerPosition);
 
-				// Prioritize the closest tile within the movement range
-				if (TileDistanceToPlayer < ClosestDistanceToEnemy && TileDistanceToPlayer <= MovementSpeed)
+				if (TileDistanceToPlayer < ClosestDistanceToPlayer && TileDistanceToPlayer <= MovementSpeed)
 				{
-					ClosestDistanceToEnemy = TileDistanceToPlayer;
+					ClosestDistanceToPlayer = TileDistanceToPlayer;
 					BestTile = Tile;
 				}
 			}
@@ -370,21 +379,31 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 
 		if (BestTile)
 		{
-			// Move the player to the closest neighboring tile around the enemy
 			UE_LOG(LogTemp, Log, TEXT("Player moving to tile (%f, %f) to attack the enemy"), BestTile->GridPosition.X, BestTile->GridPosition.Y);
-			this->MoveToTile(BestTile->GridPosition);
 
-			// Only attack if the player has reached the correct tile
-			//if (this->CurrentGridPosition == BestTile->GridPosition)
-			//{
-				combatManager->DealDamageToUnit(Enemy, this);
-			//}
+			// Store the enemy to attack
+			EnemyToAttack = Enemy;
+
+			// needs to work for animations 
+			//OnMovementComplete.BindUObject(Enemy, &APlayerUnit::AttackAfterMovement, this);
+			AttackAfterMovement(Enemy);
+			// Start moving to the best tile
+			Enemy->MoveToTile(BestTile->GridPosition);
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("No valid neighboring tile found within movement range."));
 		}
 	}
+}
+
+void APlayerUnit::AttackAfterMovement(APlayerUnit* Enemy)
+{
+	if (combatManager && Enemy)
+	{
+		combatManager->DealDamageToUnit(Enemy, this);
+	}
+	this->OnMovementComplete.Unbind();
 }
 
 

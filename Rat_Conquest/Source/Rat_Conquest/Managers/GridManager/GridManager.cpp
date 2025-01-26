@@ -216,11 +216,11 @@ AActor* AGridManager::GetTileAt(int32 Row, int32 Column)
 
 TArray<AGridTile*> AGridManager::GetNeighbourTiles(int32 Row, int32 Column)
 {
-    TArray<AGridTile*> OccupiedTiles;
+    TArray<AGridTile*> NeighbourTiles;
     if (Row < 0 || Column < 0 || GridSize == FVector2D::ZeroVector)
     {
         UE_LOG(LogTemp, Warning, TEXT("Invalid grid dimensions! Row: %d, Column: %d"), Row, Column);
-        return OccupiedTiles;
+        return NeighbourTiles;
     }
 
     int32 StartRow = FMath::Max(0, Row - 1);
@@ -237,19 +237,14 @@ TArray<AGridTile*> AGridManager::GetNeighbourTiles(int32 Row, int32 Column)
                 continue; // Skip the center tile
             }
 
-            AGridTile* Tile = Cast<AGridTile>(GetTileAt(i, j)); // Assuming GetTileAt returns an AActor
-            if (Tile != nullptr /*&& Tile->bIsOccupied*/) // Check if the tile is occupied
+            AGridTile* Tile = Cast<AGridTile>(GetTileAt(i, j));
+            if (Tile != nullptr)
             {
-                //UE_LOG(LogTemp, Display, TEXT("Found occupied tile at Row: %d, Column: %d"), i, j);
-                OccupiedTiles.Add(Tile);
-            }
-            else
-            {
-                UE_LOG(LogTemp, Warning, TEXT("No occupied tile found at Row: %d, Column: %d"), i, j);
+                NeighbourTiles.Add(Tile);
             }
         }
     }
-    return OccupiedTiles;
+    return NeighbourTiles;
 }
 
 TArray<AGridTile*> AGridManager::GetMovableTiles(int32 Row, int32 Column, int32 MovementRange)

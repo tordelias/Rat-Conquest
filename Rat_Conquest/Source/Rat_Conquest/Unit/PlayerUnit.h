@@ -11,6 +11,9 @@ class AGridManager;
 class ACombatManager;
 class AGridTile;
 class AItem;
+
+DECLARE_DELEGATE_OneParam(FOnMovementCompleteSignature, APlayerUnit*);
+
 UCLASS()
 class RAT_CONQUEST_API APlayerUnit : public APawn, public IInteractionInterface
 {
@@ -25,6 +28,10 @@ public:
 	void SetInitalPosition(FVector2D position);
 	void DelayedInitalPosition();
 	void PlayerAttack(class APlayerCamera* PlayerCharacter);
+	void AttackAfterMovement(APlayerUnit* Enemy);
+
+	FOnMovementCompleteSignature OnMovementComplete;
+	APlayerUnit* EnemyToAttack;
 
 	void ExecutePlayerTurn();
 	void ExecuteAITurn();
