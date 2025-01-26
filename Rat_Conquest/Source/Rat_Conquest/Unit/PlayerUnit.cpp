@@ -220,7 +220,11 @@ TArray<FVector2D> APlayerUnit::GetPathToTile(FVector2D InTargetGridPosition, FVe
 		UE_LOG(LogTemp, Error, TEXT("Invalid start or target tile"));
 		return TArray<FVector2D>();
 	}
-
+	if (TargetTilePtr->bIsOccupied)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Target tile is occupied"));
+		return TArray<FVector2D>();
+	}
 	// Initialize the open list with the start tile
 	OpenList.Add(StartTilePtr);
 	StartTilePtr->G = 0;
