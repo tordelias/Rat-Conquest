@@ -41,6 +41,11 @@ void AItem::DropItem()
     bIsEquipped = false;
 }
 
+void AItem::UseItem()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Item Used"));
+}
+
 void AItem::ConsumeItem()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Item Consumed"));

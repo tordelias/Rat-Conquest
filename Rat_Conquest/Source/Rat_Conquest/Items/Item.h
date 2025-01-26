@@ -18,7 +18,9 @@ public:
 
 	void EquipItem(AActor* UnitOwner);
 	void DropItem();
+	void UseItem();
 	void ConsumeItem();
+
 
 
 	UFUNCTION(BlueprintCallable, Category = "Item")
