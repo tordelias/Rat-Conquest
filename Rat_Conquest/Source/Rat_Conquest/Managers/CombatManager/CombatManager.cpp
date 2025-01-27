@@ -16,27 +16,76 @@ ACombatManager::ACombatManager()
 
 void ACombatManager::DealDamageToUnit(APlayerUnit* Attackerunit, APlayerUnit* Defenderunit)
 {
-	if (!Attackerunit || !Defenderunit)
-	{
-		UE_LOG(LogTemp, Error, TEXT("DealDamageToUnit failed: Attacker or Defender is null!"));
-		return;
-	}
-	int weaponDamage = 0;
-	//UE_LOG(LogTemp, Display, TEXT("%f damage"),
-	//	Attackerunit->damage);
-	if (Attackerunit->ItemSlots[0])
-	{
-		AItem* item = Cast<AItem>(Attackerunit->ItemSlots[0]);
-		if (item) {
-			weaponDamage = item->Damage;
-		}
-		
-	}
-	int TotalDamage = Attackerunit->Damage + weaponDamage;
+    if (!Attackerunit || !Defenderunit)
+    {
+        UE_LOG(LogTemp, Error, TEXT("DealDamageToUnit failed: Attacker or Defender is null!"));
+        return;
+    }
 
-	UE_LOG(LogTemp, Warning, TEXT("Dealing %d damage to %s"), TotalDamage, *Defenderunit->GetName());
+    int weaponDamage = 0;
+    if (Attackerunit->ItemSlots[0])
+    {
+        AItem* item = Cast<AItem>(Attackerunit->ItemSlots[0]);
+        if (item)
+        {
+            weaponDamage = item->Damage;
+        }
+    }
+    int TotalDamage = Attackerunit->Damage + weaponDamage;
 
-	TakeDamage(Defenderunit, TotalDamage);
+    UE_LOG(LogTemp, Warning, TEXT("Dealing %d damage to %s"), TotalDamage, *Defenderunit->GetName());
+
+    // Add a small knockback effect
+    ApplyKnockback(Attackerunit, Defenderunit);
+
+    // Apply damage to the defender
+    TakeDamage(Defenderunit, TotalDamage);
+}
+
+void ACombatManager::ApplyKnockback(APlayerUnit* Attackerunit, APlayerUnit* Defenderunit)
+{
+    if (!Attackerunit || !Defenderunit)
+    {
+        UE_LOG(LogTemp, Error, TEXT("ApplyKnockback failed: Attacker or Defender is null!"));
+        return;
+    }
+
+    // Calculate knockback direction (from attacker to defender)
+    FVector KnockbackDirection = (Defenderunit->GetActorLocation() - Attackerunit->GetActorLocation()).GetSafeNormal();
+    KnockbackDirection.Z = 0; // Ensure knockback is only horizontal
+
+    // Define knockback strength and duration
+    float KnockbackDistance = 100.0f; // Adjust this value to control the knockback distance
+    float KnockbackDuration = 0.2f;   // Adjust this value to control the knockback duration
+
+    // Calculate the target knockback position
+    FVector StartPosition = Defenderunit->GetActorLocation();
+    FVector TargetPosition = StartPosition + (KnockbackDirection * KnockbackDistance);
+
+    // Start the knockback interpolation
+    Defenderunit->KnockbackStartPosition = StartPosition;
+    Defenderunit->KnockbackTargetPosition = TargetPosition;
+    Defenderunit->KnockbackProgress = 0.0f;
+    Defenderunit->bIsKnockbackActive = true;
+
+    // Set a timer to reset the position after the knockback effect
+    FTimerHandle KnockbackResetTimer;
+    FTimerDelegate ResetPositionDelegate;
+    ResetPositionDelegate.BindUObject(this, &ACombatManager::ResetKnockbackPosition, Defenderunit);
+    GetWorld()->GetTimerManager().SetTimer(KnockbackResetTimer, ResetPositionDelegate, KnockbackDuration, false);
+}
+
+void ACombatManager::ResetKnockbackPosition(APlayerUnit* Defenderunit)
+{
+    if (!Defenderunit)
+    {
+        UE_LOG(LogTemp, Error, TEXT("ResetKnockbackPosition failed: Defender is null!"));
+        return;
+    }
+
+    // Reset the defender's position to its original tile
+    Defenderunit->SetActorLocation(Defenderunit->KnockbackStartPosition);
+    Defenderunit->bIsKnockbackActive = false;
 }
 
 void ACombatManager::TakeDamage(APlayerUnit* unit, int amount)

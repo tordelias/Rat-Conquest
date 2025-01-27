@@ -17,6 +17,8 @@ public:
 	// Sets default values for this actor's properties
 	ACombatManager();
 	void DealDamageToUnit(APlayerUnit* Attackerunit, APlayerUnit* Defenderunit);
+	void ApplyKnockback(APlayerUnit* Attackerunit, APlayerUnit* Defenderunit);
+	void ResetKnockbackPosition(APlayerUnit* Defenderunit);
 	void TakeDamage(APlayerUnit* unit, int amount);
 	void KillUnit(APlayerUnit* unit);
 

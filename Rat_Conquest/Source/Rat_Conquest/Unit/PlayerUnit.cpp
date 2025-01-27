@@ -125,6 +125,26 @@ void APlayerUnit::Tick(float DeltaTime)
 			SetActorRotation(NewRotation);
 		}
 	}
+
+	//temp
+	if (bIsKnockbackActive)
+	{
+		// Update knockback progress
+		KnockbackProgress += DeltaTime / KnockbackDuration;
+
+		if (KnockbackProgress >= 1.0f)
+		{
+			// Snap to the target position when the knockback is complete
+			SetActorLocation(KnockbackTargetPosition);
+			bIsKnockbackActive = false;
+		}
+		else
+		{
+			// Interpolate between the start and target positions
+			FVector NewPosition = FMath::Lerp(KnockbackStartPosition, KnockbackTargetPosition, KnockbackProgress);
+			SetActorLocation(NewPosition);
+		}
+	}
 }
 
 

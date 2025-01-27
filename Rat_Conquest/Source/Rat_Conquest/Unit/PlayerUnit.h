@@ -116,6 +116,15 @@ public:
 	UPROPERTY(VisibleInstanceOnly, Category = "Interact")
 	FInteractableData InstanceInteractableData;
 
+	UStaticMeshComponent* GetMesh() { return mesh; }
+
+	//temp
+	FVector KnockbackStartPosition; 
+	bool bIsKnockbackActive; 
+	float KnockbackProgress;
+	float KnockbackDuration = 1.f;
+	FVector KnockbackTargetPosition;
+
 private: 
 
 
