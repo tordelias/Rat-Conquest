@@ -114,9 +114,14 @@ void AGameManager::ExecuteTurn()
 
 void AGameManager::EndUnitTurn()
 {
-    if (PlayerUnits.Num() == 0 || EnemyUnits.Num() == 0)
+    if (EnemyUnits.Num() == 0)
     {
-		UE_LOG(LogTemp, Warning, TEXT("No more units to take turn!"));
+        StartEncounter();
+        
+    }
+    else if (PlayerUnits.Num() == 0) {
+
+        UE_LOG(LogTemp, Warning, TEXT("No more units to take turn!"));
         return;
     }
 
@@ -205,13 +210,30 @@ void AGameManager::StartEncounter()
 	{
 		if (EnemyList.Num() > 0)
 		{
-			int RandomIndex = rand() % EnemyList.Num();
-			APlayerUnit* NewEnemy = GetWorld()->SpawnActor<APlayerUnit>(EnemyList[RandomIndex]->GetClass());
+            int RandomIndex = FMath::RandRange(0, EnemyList.Num() - 1);
+
+            FVector SpawnLocation = FVector(0.f, 0.f, 300.f); // Adjust as needed
+            FRotator SpawnRotation = FRotator::ZeroRotator;
+
+            FActorSpawnParameters SpawnParams;
+            SpawnParams.Owner = this;
+            SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+            APlayerUnit* NewEnemy = GetWorld()->SpawnActor<APlayerUnit>(
+                EnemyList[RandomIndex],
+                SpawnLocation,
+                SpawnRotation,
+                SpawnParams
+            );
 			if (NewEnemy)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("New enemy spawned: %s"), *NewEnemy->GetName());
 				
 			}
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("Failed to spawn enemy at index %d"), RandomIndex);
+            }
 		}
 		else
 		{
@@ -223,16 +245,47 @@ void AGameManager::StartEncounter()
 	// Initialize the player and enemy units
 	InitalizeUnits();
 
-	for (APlayerUnit* P_unit : PlayerUnits)
-	{
-		P_unit->GridStartPosition = FVector2D(0,0);
-        P_unit->ResetPosition();
-	}
-	for (APlayerUnit* E_unit : EnemyUnits)
-	{
-		E_unit->GridStartPosition = FVector2D(5, 5);
-		E_unit->ResetPosition();
-	}
+    float InitialDelay = 0.0f; // Starting delay in seconds
+    float DelayIncrement = 1.0f; // Delay between each unit
+
+    for (APlayerUnit* P_unit : PlayerUnits)
+    {
+        //P_unit->GridStartPosition = FVector2D(0, 0);
+
+        // Incremental delay for each unit
+        FTimerHandle AIUnitTurnTimerHandle;
+        GetWorld()->GetTimerManager().SetTimer(
+            AIUnitTurnTimerHandle,
+            FTimerDelegate::CreateLambda([P_unit]()
+                {
+                    P_unit->ResetPosition();
+                }),
+            InitialDelay,
+            false
+        );
+
+        // Increase the delay for the next unit
+        InitialDelay += DelayIncrement;
+    }
+    for (APlayerUnit* E_unit : EnemyUnits)
+    {
+        // E_unit->GridStartPosition = FVector2D(5, 0);
+
+         // Incremental delay for each unit
+        FTimerHandle AIUnitTurnTimerHandle;
+        GetWorld()->GetTimerManager().SetTimer(
+            AIUnitTurnTimerHandle,
+            FTimerDelegate::CreateLambda([E_unit]()
+                {
+                    E_unit->ResetPosition();
+                }),
+            InitialDelay,
+            false
+        );
+
+        // Increase the delay for the next unit
+        InitialDelay += DelayIncrement;
+    }
    
 
 	// Start the turn order
@@ -295,6 +348,8 @@ void AGameManager::BeginPlay()
     InitalizeUnits();
     TogglePlayerTurn();
     StartTurnOrder();
+
+    //StartEncounter();
 }
 
 // Called every frame
@@ -314,5 +369,8 @@ void AGameManager::Tick(float DeltaTime)
 			UE_LOG(LogTemp, Warning, TEXT("Player Unit: %s"), *unit->GetName());
 		}
         UE_LOG(LogTemp, Warning, TEXT("Size of TurnQueue: %d"), TurnQueue.Num());
+
+
+       
     }
 }

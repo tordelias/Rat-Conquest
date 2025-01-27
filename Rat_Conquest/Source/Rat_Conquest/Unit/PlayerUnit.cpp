@@ -187,6 +187,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 			TargetGridPosition = NextTilePosition;
 			MovementProgress = 0.0f; // Reset progress
 			bIsMoving = true;        // Start movement
+
 		}
 	}
 }
@@ -219,11 +220,11 @@ TArray<FVector2D> APlayerUnit::GetPathToTile(FVector2D InTargetGridPosition, FVe
 		UE_LOG(LogTemp, Error, TEXT("Invalid start or target tile"));
 		return TArray<FVector2D>();
 	}
-	//if (TargetTilePtr->bIsOccupied)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("Target tile is occupied"));
-	//	return TArray<FVector2D>();
-	//}
+	/*if (TargetTilePtr->bIsOccupied)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Target tile is occupied"));
+		return TArray<FVector2D>();
+	}*/
 	// Initialize the open list with the start tile
 	OpenList.Add(StartTilePtr);
 	StartTilePtr->G = 0;
@@ -355,7 +356,7 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		float AttackRange = PlayerUnit->MovementSpeed;
 		float DistanceToEnemy = ChebyshevDistance(EnemyPosition, PlayerPosition);
 
-		if (DistanceToEnemy > AttackRange)
+		if (DistanceToEnemy > AttackRange + 1)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Player is out of range to move to the enemy's neighboring tiles."));
 			UE_LOG(LogTemp, Warning, TEXT("Distance to enemy: %f, Attack range: %f"), DistanceToEnemy, AttackRange);

@@ -104,14 +104,15 @@ void AGridManager::ScanWorldForObjects()
         AGridTile* Tile = Cast<AGridTile>(TilePair.Value);
         if (!Tile)
             continue;
-
+        if (Tile->bIsOccupied)
+            num++;
         // Clear existing occupants
         Tile->tileObjects.Empty();
-        Tile->bIsOccupied = false;
+        
         // Check for overlapping actors
         TArray<AActor*> OverlappingActors;
         Tile->TileMesh->GetOverlappingActors(OverlappingActors); // Assumes TileMesh is set to query overlaps
-
+        
         for (AActor* Actor : OverlappingActors)
         {
             // Check if Actor is a GridTile and matches testTile
@@ -123,7 +124,7 @@ void AGridManager::ScanWorldForObjects()
                 // The overlapping actor has a StaticMeshComponent
                 Tile->AddOccupant(Actor);
                 UE_LOG(LogTemp, Display, TEXT("Found actor with StaticMesh at Row: %f, Column: %f, Name: %s"), Tile->GridPosition.X, Tile->GridPosition.Y, *Actor->GetName());
-                num++;
+                
             }
 			if (StaticMeshComp && Item)
 			{
@@ -134,7 +135,7 @@ void AGridManager::ScanWorldForObjects()
 
         }
     }
-	UE_LOG(LogTemp, Display, TEXT("Found %d objects in the grid"), num);
+	UE_LOG(LogTemp, Error, TEXT("Found %d occupied tiles in the grid"), num);
 
 }
 

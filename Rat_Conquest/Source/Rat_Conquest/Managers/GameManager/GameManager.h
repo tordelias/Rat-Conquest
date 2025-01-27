@@ -47,8 +47,9 @@ public:
 	TArray<APlayerUnit*> TurnQueue;
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemies")
-	TArray<APlayerUnit*> EnemyList;
+	
+	UPROPERTY(EditAnywhere, Category = "Enemies")
+	TArray<TSubclassOf<APlayerUnit>> EnemyList;
 
 	UPROPERTY()
 	APlayerUnit* CurrentUnit;
