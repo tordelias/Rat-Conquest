@@ -65,6 +65,9 @@ public:
 	bool bIsPlayerUnit = true;
 
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	bool bIsRangedUnit = true;
+
 	//the amount of tiles the unit can move pr turn
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	int MovementSpeed = 3;
@@ -78,6 +81,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	int Defence = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	int AttackRange = 6;
 	bool bFirstMove = true;
 
 	TArray<AItem*> ItemSlots; //0 = weapon, 1 = armor, 2 = accessory

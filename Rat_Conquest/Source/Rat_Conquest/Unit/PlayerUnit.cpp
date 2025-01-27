@@ -22,6 +22,7 @@ APlayerUnit::APlayerUnit()
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	ItemSlots.SetNum(3);
 	GridStartPosition = FVector2D(0, 0);
+	
 }
 
 // Called when the game starts or when spawned
@@ -367,19 +368,43 @@ float ChebyshevDistance(FVector2D A, FVector2D B)
 
 void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 {
-	auto PlayerUnit = PlayerCharacter->GetCurrentUnit();
-	if (GridManager && PlayerUnit)
+	if (!PlayerCharacter || !GridManager)
 	{
-		FVector2D PlayerPosition = PlayerUnit->CurrentGridPosition;
-		FVector2D EnemyPosition = this->CurrentGridPosition;
+		UE_LOG(LogTemp, Error, TEXT("PlayerCharacter or GridManager is null"));
+		return;
+	}
 
-		float AttackRange = PlayerUnit->MovementSpeed;
-		float DistanceToEnemy = ChebyshevDistance(EnemyPosition, PlayerPosition);
+	auto PlayerUnit = PlayerCharacter->GetCurrentUnit();
+	if (!PlayerUnit)
+	{
+		UE_LOG(LogTemp, Error, TEXT("PlayerUnit is null"));
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("ATTACKING!"));
+	FVector2D PlayerPosition = PlayerUnit->CurrentGridPosition;
+	FVector2D EnemyPosition = this->CurrentGridPosition;
 
-		if (DistanceToEnemy > AttackRange + 1)
+	float DistanceToEnemy = ChebyshevDistance(EnemyPosition, PlayerPosition);
+	
+	if (bIsRangedUnit)
+	{
+		// Ranged unit logic: Attack from a distance
+		if (DistanceToEnemy <= AttackRange) // AttackRange is a new variable for ranged units
+		{
+			UE_LOG(LogTemp, Log, TEXT("Ranged unit attacking from a distance"));
+			combatManager->DealDamageToUnit(PlayerUnit, this);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Enemy is out of range for ranged attack"));
+		}
+	}
+	else if(!bIsRangedUnit)
+	{
+		// Melee unit logic: Move to the enemy and attack
+		if (DistanceToEnemy > MovementSpeed + 1) // +1 to account for adjacency
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Player is out of range to move to the enemy's neighboring tiles."));
-			UE_LOG(LogTemp, Warning, TEXT("Distance to enemy: %f, Attack range: %f"), DistanceToEnemy, AttackRange);
 			return;
 		}
 
@@ -394,28 +419,19 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 			{
 				float TileDistanceToPlayer = ChebyshevDistance(Tile->GridPosition, PlayerUnit->TargetGridPosition);
 
-				if (TileDistanceToPlayer < ClosestDistanceToPlayer && TileDistanceToPlayer <= AttackRange)
+				if (TileDistanceToPlayer < ClosestDistanceToPlayer && TileDistanceToPlayer <= MovementSpeed)
 				{
 					ClosestDistanceToPlayer = TileDistanceToPlayer;
 					BestTile = Tile;
 				}
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Tile at (%f, %f) is occupied."), Tile->GridPosition.X, Tile->GridPosition.Y);
 			}
 		}
 
 		if (BestTile)
 		{
 			UE_LOG(LogTemp, Log, TEXT("Player moving to tile (%f, %f) to attack the enemy"), BestTile->GridPosition.X, BestTile->GridPosition.Y);
-			// needs to work for animations 
 			PlayerUnit->EnemyToAttack = this;
-
-			// Bind the delegate to AttackAfterMovement
 			PlayerUnit->OnMovementComplete.BindUObject(PlayerUnit, &APlayerUnit::AttackAfterMovement);
-
-			// Start moving to the best tile
 			PlayerUnit->MoveToTile(BestTile->GridPosition);
 		}
 		else
@@ -449,7 +465,7 @@ void APlayerUnit::ExecutePlayerTurn()
 {
 	//some logic here
 	UE_LOG(LogTemp, Error, TEXT("Player did something"));
-	CheckForItems();
+	//CheckForItems();
 	//FinishTurn();
 }
 
@@ -713,6 +729,9 @@ void APlayerUnit::UpdateInteractableData()
 	if (bIsPlayerUnit)
 	{
 		InstanceInteractableData.UnitName = FText::FromString("SwordsMan");
+	}
+	else if (bIsPlayerUnit && bIsRangedUnit) {
+		InstanceInteractableData.UnitName = FText::FromString("BowMan");
 	}
 	else
 	{
