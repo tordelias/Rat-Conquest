@@ -31,12 +31,14 @@ void AEnemyAIController::MoveToGridPosition()
 	{
 		float Distance = FVector2D::Distance(AI->CurrentGridPosition, closestEnemy->CurrentGridPosition);
 
-		if (Distance < AI->MovementSpeed)
+		if (Distance < AI->MovementSpeed + 1)
 		{
+			UE_LOG(LogTemp, Error, TEXT("AI trying to Attack"));
 			this->Attack(closestEnemy);
 		}
 		else
 		{
+			UE_LOG(LogTemp, Error, TEXT("AI moving to closest possible tile"));
 			this->MoveToClosestPossibleTile(closestEnemy);
 		}
 	}
@@ -118,7 +120,7 @@ void AEnemyAIController::MoveToClosestPossibleTile(APlayerUnit* Enemy)
 	{
 		FVector2D CurrentPosition = AI->CurrentGridPosition;
 		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
-
+		 
 		TArray<AGridTile*> PossibleTiles;
 		PossibleTiles = AI->GridManager->GetNeighbourTiles(AI->CurrentGridPosition.X, AI->CurrentGridPosition.Y);
 
@@ -129,7 +131,7 @@ void AEnemyAIController::MoveToClosestPossibleTile(APlayerUnit* Enemy)
 		{
 			float DistanceToTile = FVector2D::Distance(CurrentPosition, Tile->GridPosition);
 
-			if (DistanceToTile <= AI->MovementSpeed)
+			if (DistanceToTile <= AI->MovementSpeed && !Tile->bIsOccupied)
 			{
 				float DistanceToEnemyFromTile = FVector2D::Distance(Tile->GridPosition, EnemyPosition);
 				float TotalScore = DistanceToTile + DistanceToEnemyFromTile;
@@ -179,7 +181,7 @@ void AEnemyAIController::Attack(APlayerUnit* Enemy)
 			{
 				float DistanceToEnemy = FVector2D::Distance(Tile->GridPosition, EnemyPosition);
 
-				if (DistanceToEnemy < ClosestDistanceToEnemy)
+				if (DistanceToEnemy < ClosestDistanceToEnemy && Tile->GridPosition != EnemyPosition)
 				{
 					ClosestDistanceToEnemy = DistanceToEnemy;
 					BestTile = Tile;
@@ -189,20 +191,14 @@ void AEnemyAIController::Attack(APlayerUnit* Enemy)
 
 		if (BestTile && Enemy->bIsPlayerUnit)
 		{
-			UE_LOG(LogTemp, Log, TEXT("AI moving to tile (%f, %f) to attack the enemy"), BestTile->GridPosition.X, BestTile->GridPosition.Y);
-			AI->MoveToTile(BestTile->GridPosition);
-			AI->combatManager->DealDamageToUnit(AI, Enemy);
-			//ACombatManager* CombatManager = Cast<ACombatManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ACombatManager::StaticClass()));
-
-			//if (CombatManager)
-			//{
-			//	CombatManager->DealDamageToUnit(AI, Enemy);
-			//	UE_LOG(LogTemp, Log, TEXT("Dealt damage to enemy using CombatManager found via GetActorOfClass."));
-			//}
+			UE_LOG(LogTemp, Error, TEXT("AI moving to tile (%f, %f) to attack the enemy"), BestTile->GridPosition.X, BestTile->GridPosition.Y);
+			AI->MoveToTile(BestTile->GridPosition); 
+			AI->EnemyToAttack = Enemy;
+			AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("No valid tiles directly adjacent to the enemy. Moving closer instead."));
+			UE_LOG(LogTemp, Error, TEXT("No valid tiles directly adjacent to the enemy. Moving closer instead."));
 			MoveToClosestPossibleTile(Enemy);
 		}
 	}

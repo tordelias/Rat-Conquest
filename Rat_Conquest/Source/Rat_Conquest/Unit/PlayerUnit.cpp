@@ -90,7 +90,7 @@ void APlayerUnit::Tick(float DeltaTime)
 				// Trigger the OnMovementComplete delegate if it's bound
 				if (OnMovementComplete.IsBound())
 				{
-					OnMovementComplete.Execute(EnemyToAttack); // Pass the enemy to attack
+					OnMovementComplete.Execute();
 					OnMovementComplete.Unbind(); // Unbind the delegate after execution
 				}
 
@@ -143,7 +143,11 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	AGridTile* GridTile = Cast<AGridTile>(TargetTile);
 	if (!GridTile || GridTile->bIsOccupied)
 		return;
-
+	// Calculate the path
+	if (!CalculatePathToTile(NewGridPosition))
+	{
+		return; // No valid path found
+	}
 	// Free the current tile
 	AActor* OldTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
 	AGridTile* OldGridTile = Cast<AGridTile>(OldTile);
@@ -154,14 +158,9 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	}
 
 	// Check if the target tile is within movement range
-	if (GridManager->GetDistanceBetweenTiles(TargetTile, OldTile) > MovementSpeed)
-		return;
+	//if (GridManager->GetDistanceBetweenTiles(TargetTile, OldTile) > MovementSpeed)
+	//	return;
 
-	// Calculate the path
-	if (!CalculatePathToTile(NewGridPosition))
-	{
-		return; // No valid path found
-	}
 
 	// Log the path for debugging
 	UE_LOG(LogTemp, Display, TEXT("PathToTake:"));
@@ -220,11 +219,11 @@ TArray<FVector2D> APlayerUnit::GetPathToTile(FVector2D InTargetGridPosition, FVe
 		UE_LOG(LogTemp, Error, TEXT("Invalid start or target tile"));
 		return TArray<FVector2D>();
 	}
-	if (TargetTilePtr->bIsOccupied)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Target tile is occupied"));
-		return TArray<FVector2D>();
-	}
+	//if (TargetTilePtr->bIsOccupied)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Target tile is occupied"));
+	//	return TArray<FVector2D>();
+	//}
 	// Initialize the open list with the start tile
 	OpenList.Add(StartTilePtr);
 	StartTilePtr->G = 0;
@@ -347,18 +346,19 @@ float ChebyshevDistance(FVector2D A, FVector2D B)
 
 void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 {
-	auto Enemy = PlayerCharacter->GetCurrentUnit();
-	if (GridManager && Enemy)
+	auto PlayerUnit = PlayerCharacter->GetCurrentUnit();
+	if (GridManager && PlayerUnit)
 	{
-		FVector2D PlayerPosition = this->CurrentGridPosition;
-		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
+		FVector2D PlayerPosition = PlayerUnit->CurrentGridPosition;
+		FVector2D EnemyPosition = this->CurrentGridPosition;
 
-		float AttackRange = MovementSpeed;
-		float DistanceToEnemy = ChebyshevDistance(PlayerPosition, EnemyPosition);
+		float AttackRange = PlayerUnit->MovementSpeed;
+		float DistanceToEnemy = ChebyshevDistance(EnemyPosition, PlayerPosition);
 
 		if (DistanceToEnemy > AttackRange)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Player is out of range to move to the enemy's neighboring tiles."));
+			UE_LOG(LogTemp, Warning, TEXT("Distance to enemy: %f, Attack range: %f"), DistanceToEnemy, AttackRange);
 			return;
 		}
 
@@ -371,28 +371,31 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		{
 			if (Tile && !Tile->bIsOccupied) // Only consider unoccupied tiles
 			{
-				float TileDistanceToPlayer = FVector2D::Distance(Tile->GridPosition, PlayerPosition);
+				float TileDistanceToPlayer = ChebyshevDistance(Tile->GridPosition, PlayerUnit->TargetGridPosition);
 
-				if (TileDistanceToPlayer < ClosestDistanceToPlayer && TileDistanceToPlayer <= MovementSpeed)
+				if (TileDistanceToPlayer < ClosestDistanceToPlayer && TileDistanceToPlayer <= AttackRange)
 				{
 					ClosestDistanceToPlayer = TileDistanceToPlayer;
 					BestTile = Tile;
 				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Tile at (%f, %f) is occupied."), Tile->GridPosition.X, Tile->GridPosition.Y);
 			}
 		}
 
 		if (BestTile)
 		{
 			UE_LOG(LogTemp, Log, TEXT("Player moving to tile (%f, %f) to attack the enemy"), BestTile->GridPosition.X, BestTile->GridPosition.Y);
-
-			// Store the enemy to attack
-			EnemyToAttack = Enemy;
-
 			// needs to work for animations 
-			//OnMovementComplete.BindUObject(Enemy, &APlayerUnit::AttackAfterMovement, this);
-			AttackAfterMovement(Enemy);
+			PlayerUnit->EnemyToAttack = this;
+
+			// Bind the delegate to AttackAfterMovement
+			PlayerUnit->OnMovementComplete.BindUObject(PlayerUnit, &APlayerUnit::AttackAfterMovement);
+
 			// Start moving to the best tile
-			Enemy->MoveToTile(BestTile->GridPosition);
+			PlayerUnit->MoveToTile(BestTile->GridPosition);
 		}
 		else
 		{
@@ -401,11 +404,21 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 	}
 }
 
-void APlayerUnit::AttackAfterMovement(APlayerUnit* Enemy)
+void APlayerUnit::AttackAfterMovement()
 {
-	if (combatManager && Enemy)
+	if (!combatManager)
 	{
-		combatManager->DealDamageToUnit(Enemy, this);
+		UE_LOG(LogTemp, Warning, TEXT("Combat Manager is null"));
+		this->OnMovementComplete.Unbind();
+		return;
+	}
+	if (EnemyToAttack)
+	{
+		combatManager->DealDamageToUnit(this, EnemyToAttack);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("nemyToAttack is null"));
 	}
 	this->OnMovementComplete.Unbind();
 }
