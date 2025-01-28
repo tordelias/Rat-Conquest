@@ -11,6 +11,7 @@ class AGridManager;
 class ACombatManager;
 class AGridTile;
 class AItem;
+class AGenericProjectile;
 
 DECLARE_DELEGATE(FOnMovementCompleteSignature);
 
@@ -30,6 +31,8 @@ public:
 	void DelayedInitalPosition();
 	void PlayerAttack(class APlayerCamera* PlayerCharacter);
 	void AttackAfterMovement();
+	void ShootProjectile(FVector _EnemyLocation);
+
 
 	FOnMovementCompleteSignature OnMovementComplete;
 	APlayerUnit* EnemyToAttack;
@@ -40,6 +43,8 @@ public:
 	void DestoryUnit();
 
 	void ResetPosition();
+	float ChebyshevDistance(FVector2D A, FVector2D B);
+
 
 	//item stuff
 	void CheckForItems();
@@ -65,6 +70,8 @@ public:
 	bool bIsPlayerUnit = true;
 
 
+	bool bIsCurrentUnit = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	bool bIsRangedUnit = true;
 
@@ -85,6 +92,8 @@ public:
 	int AttackRange = 6;
 	bool bFirstMove = true;
 
+	
+
 	TArray<AItem*> ItemSlots; //0 = weapon, 1 = armor, 2 = accessory
 
 	void BeginFocus();
@@ -95,6 +104,8 @@ public:
 
 	FVector TargetPosition;
 	FVector2D TargetGridPosition;
+	UPROPERTY(EditAnywhere, Category = "Projectile")
+	TSubclassOf<AGenericProjectile> ProjectileClass;
 
 private:
 	bool bIsMoving = false;                 

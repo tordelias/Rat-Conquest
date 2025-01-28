@@ -97,6 +97,7 @@ void AGridTile::Interact(APlayerCamera* PlayerCharacter)
         if (PlayerCharacter->GetCurrentUnit())
         {
             PlayerCharacter->GetCurrentUnit()->MoveToTile(GridPosition);
+            
         }
     }
 }

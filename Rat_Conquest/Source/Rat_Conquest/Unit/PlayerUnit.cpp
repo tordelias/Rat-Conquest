@@ -13,6 +13,7 @@
 #include "Rat_Conquest/Managers/CombatManager/CombatManager.h"
 #include "Rat_Conquest/Items/Item.h"
 #include "Rat_Conquest/AI/EnemyAIController.h"
+#include "Rat_Conquest/Projectiles/GenericProjectile.h"
 // Sets default values
 APlayerUnit::APlayerUnit()
 {
@@ -45,12 +46,12 @@ void APlayerUnit::Tick(float DeltaTime)
 	if (bIsMoving)
 	{
 		MovementProgress += DeltaTime / MovementDuration;
-
+		bIsCurrentUnit = false;
 		if (MovementProgress >= 1.0f)
 		{
 			MovementProgress = 1.0f;
 			bIsMoving = false;
-
+			
 			// Update the unit's position to the target tile
 			SetActorLocation(FVector(TargetPosition.X, TargetPosition.Y, GetActorLocation().Z));
 			UE_LOG(LogTemp, Display, TEXT("Finished moving to tile: %s"), *TargetPosition.ToString());
@@ -96,7 +97,7 @@ void APlayerUnit::Tick(float DeltaTime)
 				}
 
 				// Other logic (e.g., checking for items, finishing the turn)
-				CheckForItems();
+				
 				if (bIsPlayerUnit)
 				{
 					FinishTurn();
@@ -151,6 +152,8 @@ void APlayerUnit::Tick(float DeltaTime)
 
 void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 {
+	if (!bIsCurrentUnit && bIsPlayerUnit)
+		return;
 	if (!GridManager)
 	{
 		UE_LOG(LogTemp, Error, TEXT("NO MANAGER"));
@@ -179,8 +182,9 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	}
 
 	// Check if the target tile is within movement range
-	//if (GridManager->GetDistanceBetweenTiles(TargetTile, OldTile) > MovementSpeed)
-	//	return;
+	float distance = ChebyshevDistance(GridTile->GridPosition, OldGridTile->GridPosition);
+	if (distance > MovementSpeed)
+		return;
 
 
 	// Log the path for debugging
@@ -361,7 +365,7 @@ void APlayerUnit::DelayedInitalPosition()
 		GetWorldTimerManager().SetTimerForNextTick(this, &APlayerUnit::DelayedInitalPosition);
 	}
 }
-float ChebyshevDistance(FVector2D A, FVector2D B)
+float APlayerUnit::ChebyshevDistance(FVector2D A, FVector2D B)
 {
 	return FMath::Max(FMath::Abs(A.X - B.X), FMath::Abs(A.Y - B.Y));
 }
@@ -380,19 +384,23 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		UE_LOG(LogTemp, Error, TEXT("PlayerUnit is null"));
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("ATTACKING!"));
+	
 	FVector2D PlayerPosition = PlayerUnit->CurrentGridPosition;
 	FVector2D EnemyPosition = this->CurrentGridPosition;
 
 	float DistanceToEnemy = ChebyshevDistance(EnemyPosition, PlayerPosition);
+
 	
-	if (bIsRangedUnit)
+	if (PlayerUnit->bIsRangedUnit)
 	{
 		// Ranged unit logic: Attack from a distance
 		if (DistanceToEnemy <= AttackRange) // AttackRange is a new variable for ranged units
 		{
+			//spawn a projectile here or something
 			UE_LOG(LogTemp, Log, TEXT("Ranged unit attacking from a distance"));
+			PlayerUnit->ShootProjectile(this->GetActorLocation());
 			combatManager->DealDamageToUnit(PlayerUnit, this);
+			FinishTurn();
 		}
 		else
 		{
@@ -460,6 +468,27 @@ void APlayerUnit::AttackAfterMovement()
 	this->OnMovementComplete.Unbind();
 }
 
+void APlayerUnit::ShootProjectile(FVector _EnemyLocation)
+{
+	if (ProjectileClass)
+	{
+		// Spawn the projectile
+		FVector SpawnLocation = GetActorLocation(); // Start at the unit's location
+		FVector EnemyLocation = _EnemyLocation; // Target location (e.g., enemy position)
+
+		FRotator SpawnRotation = (EnemyLocation - SpawnLocation).Rotation();
+
+		AGenericProjectile* Projectile = GetWorld()->SpawnActor<AGenericProjectile>(
+			ProjectileClass, SpawnLocation, SpawnRotation);
+
+		if (Projectile)
+		{
+			// Initialize the projectile with a curve
+			Projectile->InitializeProjectileWithCurve(SpawnLocation, EnemyLocation);
+		}
+	}
+}
+
 
 void APlayerUnit::ExecutePlayerTurn()
 {
@@ -500,6 +529,7 @@ void APlayerUnit::FinishTurn()
 	AGameManager* GameManager = Cast<AGameManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass()));
 	if (GameManager)
 	{
+		CheckForItems();
 		GameManager->EndUnitTurn();
 	}
 }

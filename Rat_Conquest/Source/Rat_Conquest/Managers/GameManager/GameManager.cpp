@@ -91,6 +91,7 @@ void AGameManager::ExecuteTurn()
         if (PlayerCharacter)
         {
             PlayerCharacter->SetCurrentUnit(CurrentUnit);
+            CurrentUnit->bIsCurrentUnit = true;
         }
         CurrentUnit->ExecutePlayerTurn();
 		UE_LOG(LogTemp, Warning, TEXT("Player unit turn executed"));
