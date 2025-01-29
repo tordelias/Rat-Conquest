@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Item.h"
+#include "Rat_Conquest/Projectiles/GenericProjectile.h"
 #include "Weapon.generated.h"
 
 /**
@@ -31,9 +32,11 @@ public:
 
 	void UseArrowShot();
 
+	void SetEnemyLocation(FVector CurrentLocation);
+	FVector _EnemyLocation;
 
-
-	
+	UPROPERTY(EditAnywhere, Category = "Projectile")
+	TSubclassOf<AGenericProjectile> ProjectileClass;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Properties")

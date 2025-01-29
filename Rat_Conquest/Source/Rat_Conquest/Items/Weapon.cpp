@@ -34,4 +34,27 @@ void AWeapon::UseSlash()
 void AWeapon::UseArrowShot()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Arrow Shot Used"));
+	if (ProjectileClass)
+	{
+		// Spawn the arrows
+		FVector SpawnLocation = GetActorLocation(); // Start at the unit's location
+		FVector EnemyLocation = _EnemyLocation; // Target location (e.g., enemy position)
+
+		FRotator SpawnRotation = (EnemyLocation - SpawnLocation).Rotation();
+
+		AGenericProjectile* Projectile = GetWorld()->SpawnActor<AGenericProjectile>(
+			ProjectileClass, SpawnLocation, SpawnRotation);
+
+		if (Projectile)
+		{
+			// Initialize the projectile with a curve
+			Projectile->InitializeProjectileWithCurve(SpawnLocation, EnemyLocation);
+		}
+	}
+}
+
+void AWeapon::SetEnemyLocation(FVector CurrentLocation)
+{
+	_EnemyLocation = CurrentLocation;
+	
 }

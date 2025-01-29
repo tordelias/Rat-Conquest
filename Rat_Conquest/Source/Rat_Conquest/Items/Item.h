@@ -60,6 +60,8 @@ public:
 
 	bool bIsEquipped = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
+	bool bIsMelee = true;
 
 
 public:

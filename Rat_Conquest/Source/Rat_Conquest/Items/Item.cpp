@@ -72,6 +72,7 @@ void AItem::InitializeItem()
         ItemBase->ItemAssetData = ItemData->ItemAssetData;
 
         Damage = ItemBase->ItemStatistics.Damage;
+        bIsMelee = ItemBase->ItemStatistics.bIsMelee;
         if (ItemBase->ItemAssetData.Mesh)
         {
             ItemMesh->SetStaticMesh(ItemBase->ItemAssetData.Mesh);

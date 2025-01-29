@@ -612,6 +612,8 @@ void APlayerUnit::CheckForItems()
 		ItemSlots[SlotIndex] = NewItem;
 		NewItem->EquipItem(this);
 		Tile->ItemSlot = nullptr;
+		//set the unit according to the item
+		bIsRangedUnit = !NewItem->bIsMelee;
 
 		UE_LOG(LogTemp, Log, TEXT("Player picked up item at tile (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);
 	}
