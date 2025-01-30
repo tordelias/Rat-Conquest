@@ -8,22 +8,32 @@
 
 void UTurnIndicatorWidget::AddTurnImage(APlayerUnit* unit)
 {
-	if (unit && UnitImageWidgetClass)
-	{
-		UUnitImageWidget* NewWidget = CreateWidget<UUnitImageWidget>(GetWorld(), UnitImageWidgetClass);
-		if (NewWidget)
-		{
-			NewWidget->SetData(unit);
-			UnitImageWidgets.Add(NewWidget);
+    if (unit && UnitImageWidgetClass)
+    {
+        UUnitImageWidget* NewWidget = CreateWidget<UUnitImageWidget>(GetWorld(), UnitImageWidgetClass);
+        if (NewWidget)
+        {
+            NewWidget->SetData(unit);
+            UnitImageWidgets.Add(NewWidget);
 
-			if (UPanelWidget* Container = Cast<UPanelWidget>(GetWidgetFromName("UnitImageContainer")))
-			{
-				Container->AddChild(NewWidget);
-				Container->InvalidateLayoutAndVolatility();
-			}
-		}
-	}
-	UE_LOG(LogTemp, Error, TEXT("Unit added to turn indicator"));
+            // Resize the first element
+            if (UnitImageWidgets.Num() == 1)
+            {
+                NewWidget->SetSize(true); 
+            }
+            else
+            {
+                NewWidget->SetSize(false); 
+            }
+
+            if (UPanelWidget* Container = Cast<UPanelWidget>(GetWidgetFromName("UnitImageContainer")))
+            {
+                Container->AddChild(NewWidget);
+                Container->InvalidateLayoutAndVolatility();
+            }
+        }
+    }
+    UE_LOG(LogTemp, Error, TEXT("Unit added to turn indicator"));
 }
 
 void UTurnIndicatorWidget::RemoveTurnImage()
@@ -44,6 +54,16 @@ void UTurnIndicatorWidget::RemoveTurnImage()
             else
             {
                 UE_LOG(LogTemp, Error, TEXT("UnitImageContainer is null!"));
+            }
+
+            // Resize the new first element (if any)
+            if (UnitImageWidgets.Num() > 0)
+            {
+                UUnitImageWidget* NewFirstWidget = Cast<UUnitImageWidget>(UnitImageWidgets[0]);
+                if (NewFirstWidget)
+                {
+                    NewFirstWidget->SetSize(true); // Make the new first element bigger
+                }
             }
         }
         else

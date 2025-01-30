@@ -24,6 +24,9 @@ public:
     UFUNCTION(BlueprintCallable)
     void SetData(APlayerUnit* Unit);
 
+    UFUNCTION(BlueprintCallable)
+    void SetSize(bool bIsFirstElement);
+
     //// Reference to the unit this widget represents
     //UPROPERTY()
     //APlayerUnit* Unit;

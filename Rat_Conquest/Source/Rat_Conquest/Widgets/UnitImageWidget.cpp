@@ -3,6 +3,7 @@
 #include "Rat_Conquest/Unit/PlayerUnit.h" // Include the header for APlayerUnit
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Components/SizeBox.h"
 
 void UUnitImageWidget::SetData(APlayerUnit* Unit)
 {
@@ -20,6 +21,28 @@ void UUnitImageWidget::SetData(APlayerUnit* Unit)
         if (UnitName)
         {
             UnitName->SetText(Unit->InstanceInteractableData.UnitName);
+        }
+    }
+}
+
+void UUnitImageWidget::SetSize(bool bIsFirstElement)
+{
+    if (bIsFirstElement)
+    {
+        // Make the first element bigger
+        if (USizeBox* SizeBox = Cast<USizeBox>(GetWidgetFromName("SizeBox")))
+        {
+            SizeBox->SetWidthOverride(150.f); 
+            SizeBox->SetHeightOverride(150.f);
+        }
+    }
+    else
+    {
+        // Reset the size for other elements
+        if (USizeBox* SizeBox = Cast<USizeBox>(GetWidgetFromName("SizeBox")))
+        {
+            SizeBox->ClearWidthOverride();
+            SizeBox->ClearHeightOverride();
         }
     }
 }
