@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Rat_Conquest/Items/ItemBase.h"
 #include "GameFramework/Actor.h"
+#include "Rat_Conquest/Abilites/AbilityComponent.h" 
 #include "Item.generated.h"
 
 UCLASS()
@@ -62,8 +63,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	bool bIsMelee = true;
+	UFUNCTION(BlueprintCallable, Category = "Abilities")
+	TArray<UAbilityComponent*> GetAbilities() const { return Abilities; }
 
-
+	void InitializeAbilities();
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	UItemBase* ItemDataB;
@@ -71,7 +74,11 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Abilities")
+	TArray<TSubclassOf<UAbilityComponent>> AbilityClasses;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Abilities")
+	TArray<UAbilityComponent*> Abilities;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

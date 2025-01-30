@@ -281,12 +281,12 @@ TArray<AGridTile*> AGridManager::GetMovableTiles(int32 Row, int32 Column, int32 
         for (AGridTile* Neighbor : Neighbors)
         {
             if (!Neighbor || Neighbor->bIsOccupied) continue;
-
             int32 NeighborRow = Neighbor->GridPosition.X;
             int32 NeighborColumn = Neighbor->GridPosition.Y;
 
-            // Calculate Manhattan distance
-            int32 Distance = FMath::Abs(NeighborRow - Row) + FMath::Abs(NeighborColumn - Column);
+            int32 RowDiff = FMath::Abs(NeighborRow - Row);
+            int32 ColDiff = FMath::Abs(NeighborColumn - Column);
+            int32 Distance = FMath::Max(RowDiff, ColDiff);
 
             if (Distance <= MovementRange && !VisitedTiles.Contains(Neighbor))
             {

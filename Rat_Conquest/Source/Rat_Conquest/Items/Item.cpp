@@ -88,6 +88,11 @@ void AItem::InitializeItem()
     }
 }
 
+void AItem::InitializeAbilities()
+{
+
+}
+
 // Called when the game starts or when spawned
 void AItem::BeginPlay()
 {

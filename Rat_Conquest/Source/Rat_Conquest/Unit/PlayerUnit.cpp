@@ -180,6 +180,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 		OldGridTile->bIsOccupied = false;
 		OldGridTile->RemoveUnitRefrence();
 	}
+	
 
 	// Check if the target tile is within movement range
 	float distance = ChebyshevDistance(GridTile->GridPosition, OldGridTile->GridPosition);
@@ -253,7 +254,7 @@ TArray<FVector2D> APlayerUnit::GetPathToTile(FVector2D InTargetGridPosition, FVe
 	// Initialize the open list with the start tile
 	OpenList.Add(StartTilePtr);
 	StartTilePtr->G = 0;
-	StartTilePtr->H = FVector2D::Distance(StartTilePtr->GridPosition, InTargetGridPosition);
+	StartTilePtr->H = ChebyshevDistance(StartTilePtr->GridPosition, InTargetGridPosition);
 	StartTilePtr->F = StartTilePtr->G + StartTilePtr->H;
 
 	while (OpenList.Num() > 0)
@@ -305,14 +306,14 @@ TArray<FVector2D> APlayerUnit::GetPathToTile(FVector2D InTargetGridPosition, FVe
 			}
 
 			// Calculate the tentative G cost
-			float TentativeG = CurrentTile->G + FVector2D::Distance(CurrentTile->GridPosition, Neighbour->GridPosition);
+			float TentativeG = CurrentTile->G + ChebyshevDistance(CurrentTile->GridPosition, Neighbour->GridPosition);
 
 			if (!OpenList.Contains(Neighbour) || TentativeG < Neighbour->G)
 			{
 				// This path to the neighbor is better than any previous one
 				CameFrom.Add(Neighbour, CurrentTile);
 				Neighbour->G = TentativeG;
-				Neighbour->H = FVector2D::Distance(Neighbour->GridPosition, InTargetGridPosition);
+				Neighbour->H = ChebyshevDistance(Neighbour->GridPosition, InTargetGridPosition);
 				Neighbour->F = Neighbour->G + Neighbour->H;
 
 				if (!OpenList.Contains(Neighbour))
