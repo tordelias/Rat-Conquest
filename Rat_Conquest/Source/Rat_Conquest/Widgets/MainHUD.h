@@ -8,6 +8,7 @@
 
 struct FInteractableData; 
 class UUnitStatWidget; 
+class UMainWidget;
 /**
  * 
  */
@@ -22,13 +23,23 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UUnitStatWidget> UnitWidgetclass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget", meta = (AllowPrivate = "true"))
+	TSubclassOf<UMainWidget> MainWidgetClass;
+
 	UPROPERTY()
 	UUnitStatWidget* StatWidget;
 
+	UPROPERTY()
+	UMainWidget* MainWidget;
+
+
 public: 
+
 
 	void ShowStatWidget();
 	void CloseStatWidget();
 	void UpdateStatWidget(FInteractableData* data);
+	void AddTurnImage(class APlayerUnit* unit);
+	void RemoveTurnImage();
 	
 };

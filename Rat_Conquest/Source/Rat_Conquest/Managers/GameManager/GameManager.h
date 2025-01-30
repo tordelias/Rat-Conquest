@@ -8,6 +8,7 @@
 
 
 class APlayerUnit;
+class AMainHUD;
 UCLASS()
 class RAT_CONQUEST_API AGameManager : public AActor
 {
@@ -70,4 +71,8 @@ private:
 	TArray<class AGridTile*> CurrentlyFocusedTiles;
 	APlayerUnit* CurrentlyFocusedUnit = nullptr;
 	void HighlightUnitAndTiles(APlayerUnit* NewUnit); 
+
+	AMainHUD* MainHUD;
+
+
 };

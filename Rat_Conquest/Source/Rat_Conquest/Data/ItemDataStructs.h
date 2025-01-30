@@ -91,6 +91,9 @@ struct FItemAssetData
 
 	UPROPERTY(EditAnywhere)
 	UStaticMesh* Mesh;
+
+	UPROPERTY(EditAnywhere)
+	UTexture2D* UnitIcon;
 };
 
 USTRUCT()

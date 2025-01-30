@@ -54,6 +54,11 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* mesh;
 
+	//UnitIcon
+	UPROPERTY(EditAnywhere, Category = "Icon")
+	UTexture2D* UnitIcon;
+	bool bHasWeapon = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	FVector2D CurrentGridPosition;
 

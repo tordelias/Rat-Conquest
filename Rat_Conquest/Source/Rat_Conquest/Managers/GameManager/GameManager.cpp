@@ -7,17 +7,31 @@
 #include "Rat_Conquest/Managers/GridManager/GridManager.h"
 #include "Rat_Conquest/GridTile/GridTile.h"
 #include "EngineUtils.h"
-
+#include "Rat_Conquest/Widgets/MainHUD.h"
+#include "Rat_Conquest/Widgets/MainWidget.h"
+#include "Rat_Conquest/Widgets/TurnIndicatorWidget.h"
 // Sets default values
 AGameManager::AGameManager()
 {
     // Set this actor to call Tick() every frame. You can turn this off to improve performance if you don't need it.
     PrimaryActorTick.bCanEverTick = true;
+
+}
+// Called when the game starts or when spawned
+void AGameManager::BeginPlay()
+{
+    Super::BeginPlay();
+	GetWorldTimerManager().SetTimerForNextTick(this, &AGameManager::InitalizeUnits);
+    //InitalizeUnits();
+    //StartEncounter();
+
+    //AMainHUD* MainHUD = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 }
 
 void AGameManager::TogglePlayerTurn()
 {
     bisPlayersturn = true;
+
 }
 
 void AGameManager::InitalizeUnits()
@@ -35,11 +49,16 @@ void AGameManager::InitalizeUnits()
             EnemyUnits.Add(Unit);
             UE_LOG(LogTemp, Warning, TEXT("Enemy unit added"));
         }
+
     }
+    TogglePlayerTurn();
+    StartTurnOrder();
+
 }
 
 void AGameManager::StartTurnOrder()
 {
+    MainHUD = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
     TurnQueue.Empty();
    
     if (bisPlayersturn)
@@ -47,6 +66,7 @@ void AGameManager::StartTurnOrder()
         if (PlayerUnits.Num() > 0)
         {
             TurnQueue.Append(PlayerUnits);
+
         }
         if (EnemyUnits.Num() > 0)
         {
@@ -65,6 +85,18 @@ void AGameManager::StartTurnOrder()
         }
        
     }
+	for (APlayerUnit* unit : TurnQueue)
+	{
+        if (MainHUD)
+        {
+            MainHUD->AddTurnImage(unit);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("MainHUD is null!"));
+        }
+	}
+
 
     if (TurnQueue.Num() > 0)
     {
@@ -134,6 +166,10 @@ void AGameManager::EndUnitTurn()
     }
 
     TurnQueue.RemoveAt(0);
+    if (MainHUD)
+    {
+		MainHUD->RemoveTurnImage();
+    }
 
     if (TurnQueue.Num() > 0)
     {
@@ -342,16 +378,6 @@ void AGameManager::HighlightUnitAndTiles(APlayerUnit* NewUnit)
     }
 }
 
-// Called when the game starts or when spawned
-void AGameManager::BeginPlay()
-{
-    Super::BeginPlay();
-    InitalizeUnits();
-    TogglePlayerTurn();
-    StartTurnOrder();
-
-    //StartEncounter();
-}
 
 // Called every frame
 void AGameManager::Tick(float DeltaTime)
