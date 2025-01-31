@@ -18,10 +18,10 @@ void UUnitImageWidget::SetData(APlayerUnit* Unit)
         }
 
         // Set the unit's name (assuming APlayerUnit has a GetUnitName() function)
-        if (UnitName)
-        {
-            UnitName->SetText(Unit->InstanceInteractableData.UnitName);
-        }
+        //if (UnitName)
+        //{
+        //    UnitName->SetText(Unit->InstanceInteractableData.UnitName);
+        //}
     }
 }
 
@@ -41,8 +41,8 @@ void UUnitImageWidget::SetSize(bool bIsFirstElement)
         // Reset the size for other elements
         if (USizeBox* SizeBox = Cast<USizeBox>(GetWidgetFromName("SizeBox")))
         {
-            SizeBox->ClearWidthOverride();
-            SizeBox->ClearHeightOverride();
+            SizeBox->SetWidthOverride(100.f);
+            SizeBox->SetHeightOverride(100.f);
         }
     }
 }

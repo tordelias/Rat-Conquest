@@ -17,8 +17,8 @@ public:
     UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
     class UImage* UnitImage;
 
-    UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-    class UTextBlock* UnitName;
+    //UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+    //class UTextBlock* UnitName;
 
     // Function to initialize the widget with unit data
     UFUNCTION(BlueprintCallable)
