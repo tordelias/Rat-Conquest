@@ -401,14 +401,14 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 			UE_LOG(LogTemp, Log, TEXT("Ranged unit attacking from a distance"));
 			PlayerUnit->ShootProjectile(this->GetActorLocation());
 			combatManager->DealDamageToUnit(PlayerUnit, this);
-			FinishTurn();
+			PlayerUnit->FinishTurn();
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Enemy is out of range for ranged attack"));
 		}
 	}
-	else if(!bIsRangedUnit)
+	else if(!PlayerUnit->bIsRangedUnit)
 	{
 		// Melee unit logic: Move to the enemy and attack
 		if (DistanceToEnemy > MovementSpeed + 1) // +1 to account for adjacency
@@ -614,7 +614,18 @@ void APlayerUnit::CheckForItems()
 		NewItem->EquipItem(this);
 		Tile->ItemSlot = nullptr;
 		//set the unit according to the item
-		bIsRangedUnit = !NewItem->bIsMelee;
+		if (NewItem->bIsMelee) {
+			bIsRangedUnit = false;
+
+		}
+		else {
+			bIsRangedUnit = true;
+		}
+		
+		if (bIsRangedUnit) {
+			UE_LOG(LogTemp, Error, TEXT("Player is a Ranged unit"));
+
+		}
 
 		UE_LOG(LogTemp, Log, TEXT("Player picked up item at tile (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);
 	}
