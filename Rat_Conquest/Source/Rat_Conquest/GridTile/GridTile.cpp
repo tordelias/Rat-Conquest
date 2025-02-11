@@ -23,7 +23,10 @@ AGridTile::AGridTile()
     // Initialize visibility and render settings
     TileMesh->SetVisibility(false);
     TileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+    //This is for Highlighting
     TileMesh->SetRenderCustomDepth(false);
+    TileMesh->SetCustomDepthStencilValue(0);
 
     // Initialize variables
     bIsHighlightedByUnit = false;
@@ -39,6 +42,7 @@ void AGridTile::BeginFocus()
     {
         TileMesh->SetRenderCustomDepth(true);
         TileMesh->SetVisibility(true);
+        TileMesh->SetCustomDepthStencilValue(1);
         bIsHighlightedByUnit = true;
     }
 }
@@ -49,6 +53,7 @@ void AGridTile::EndFocus()
     {
         TileMesh->SetRenderCustomDepth(false);
         TileMesh->SetVisibility(false);
+        TileMesh->SetCustomDepthStencilValue(0);
         bIsHighlightedByUnit = false;
     }
 }
@@ -59,6 +64,7 @@ void AGridTile::BeginMouseHoverFocus()
     {
         TileMesh->SetVisibility(true);
         TileMesh->SetRenderCustomDepth(true);
+        TileMesh->SetCustomDepthStencilValue(2);
     }
 }
 
@@ -68,6 +74,7 @@ void AGridTile::EndMouseHoverFocus()
     {
         TileMesh->SetRenderCustomDepth(false);
         TileMesh->SetVisibility(false);
+        TileMesh->SetCustomDepthStencilValue(0);
     }
 }
 
@@ -76,6 +83,8 @@ void AGridTile::SetGameManagerHighlight()
     if (!bIsHighlightedByGameManager)
     {
         TileMesh->SetRenderCustomDepth(true);
+        TileMesh->SetVisibility(true);
+        TileMesh->SetCustomDepthStencilValue(3);
         bIsHighlightedByGameManager = true;
     }
 }
@@ -84,7 +93,9 @@ void AGridTile::ClearGameManagerHighlight()
 {
     if (bIsHighlightedByGameManager)
     {
+        TileMesh->SetCustomDepthStencilValue(0);
         TileMesh->SetRenderCustomDepth(false);
+        TileMesh->SetVisibility(false);
         bIsHighlightedByGameManager = false;
     }
 }
