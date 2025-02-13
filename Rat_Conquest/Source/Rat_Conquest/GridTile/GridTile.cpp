@@ -114,6 +114,10 @@ void AGridTile::BeginMouseHoverFocus()
         TileMesh->SetRenderCustomDepth(true);
         TileMesh->SetCustomDepthStencilValue(2);
     }
+    else
+    {
+		this->YellowHighlight();
+    }
 }
 
 void AGridTile::EndMouseHoverFocus()
