@@ -338,14 +338,7 @@ void AGameManager::HighlightUnitAndTiles(APlayerUnit* NewUnit)
     if (CurrentlyFocusedUnit)
     {
         CurrentlyFocusedUnit->EndFocus();
-
-        for (AGridTile* Tile : CurrentlyFocusedTiles)
-        {
-            if (Tile)
-            {
-                Tile->EndFocus();
-            }
-        }
+		UE_LOG(LogTemp, Warning, TEXT("EndFocus called")); 
         CurrentlyFocusedTiles.Empty();
     }
 
@@ -355,22 +348,6 @@ void AGameManager::HighlightUnitAndTiles(APlayerUnit* NewUnit)
         CurrentlyFocusedUnit = NewUnit;
         CurrentlyFocusedUnit->BeginFocus();
 
-        // Highlight movable tiles
-        AGridManager* GridManager = Cast<AGridManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AGridManager::StaticClass()));
-        if (GridManager)
-        {
-            TArray<AGridTile*> MovableTiles = GridManager->GetMovableTiles(
-                NewUnit->CurrentGridPosition.X, NewUnit->CurrentGridPosition.Y, NewUnit->MovementSpeed);
-
-            for (AGridTile* Tile : MovableTiles)
-            {
-                if (Tile)
-                {
-                    Tile->BeginFocus();
-                    CurrentlyFocusedTiles.Add(Tile);
-                }
-            }
-        }
     }
     else
     {

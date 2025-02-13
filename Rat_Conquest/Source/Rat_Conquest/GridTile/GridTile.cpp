@@ -41,11 +41,7 @@ void AGridTile::BeginFocus()
     //Highlight Collors Green == 1, Red == 2, Yellow == 3
     if (!bIsHighlightedByGameManager) // Do not override GameManager highlights
     {
-        TileMesh->SetRenderCustomDepth(true);
-        TileMesh->SetVisibility(true);
-        TileMesh->SetCustomDepthStencilValue(1);
         bIsHighlightedByUnit = true;
-        bIsGreenHighlighted = true;
     }
 }
 
@@ -53,18 +49,17 @@ void AGridTile::EndFocus()
 {
     if (bIsHighlightedByUnit)
     {
-        TileMesh->SetRenderCustomDepth(false);
-        TileMesh->SetVisibility(false);
-        TileMesh->SetCustomDepthStencilValue(0);
         bIsHighlightedByUnit = false;
-        bIsGreenHighlighted = false;
+		bIsGreenHighlighted = false;
+		bIsRedHighlighted = false;
+		this->EndHighlight();
     }
 }
 
 void AGridTile::GreenHighlight()
 {
     	//Highlight Collors Green == 1, Red == 2, Yellow == 3
-	if (!bIsHighlightedByGameManager && !bIsHighlightedByUnit)
+	if (!bIsHighlightedByUnit)
 	{
 		TileMesh->SetRenderCustomDepth(true);
 		TileMesh->SetVisibility(true);
@@ -76,7 +71,7 @@ void AGridTile::GreenHighlight()
 void AGridTile::RedHighlight()
 {
     //Highlight Collors Green == 1, Red == 2, Yellow == 3
-    if(!bIsHighlightedByGameManager && !bIsHighlightedByUnit)
+    if(!bIsHighlightedByUnit)
 	{
 		TileMesh->SetRenderCustomDepth(true);
 		TileMesh->SetVisibility(true);
@@ -96,7 +91,7 @@ void AGridTile::YellowHighlight()
 
 void AGridTile::EndHighlight()
 {
-    if (bIsHighlightedByUnit || bIsHighlightedByGameManager)
+    if (!bIsHighlightedByUnit)
 	{
         if(!bIsGreenHighlighted && !bIsRedHighlighted)
         {
@@ -113,7 +108,7 @@ void AGridTile::EndHighlight()
 void AGridTile::BeginMouseHoverFocus()
 {
     //Highlight Collors Green == 1, Red == 2, Yellow == 3
-    if (!bIsHighlightedByGameManager && !bIsHighlightedByUnit) 
+    if (!bIsHighlightedByUnit) 
     {
         TileMesh->SetVisibility(true);
         TileMesh->SetRenderCustomDepth(true);
@@ -123,7 +118,7 @@ void AGridTile::BeginMouseHoverFocus()
 
 void AGridTile::EndMouseHoverFocus()
 {
-    if (!bIsHighlightedByUnit && !bIsHighlightedByGameManager)
+    if (!bIsHighlightedByUnit)
     {
         TileMesh->SetRenderCustomDepth(false);
         TileMesh->SetVisibility(false);
@@ -142,30 +137,6 @@ void AGridTile::EndMouseHoverFocus()
     }
 }
 
-void AGridTile::SetGameManagerHighlight()
-{
-    //Highlight Collors Green == 1, Red == 2, Yellow == 3
-    if (!bIsHighlightedByGameManager)
-    {
-        TileMesh->SetRenderCustomDepth(true);
-        TileMesh->SetVisibility(true);
-        TileMesh->SetCustomDepthStencilValue(1);
-        bIsHighlightedByGameManager = true;
-        bIsGreenHighlighted = true;
-    }
-}
-
-void AGridTile::ClearGameManagerHighlight()
-{
-    if (bIsHighlightedByGameManager)
-    {
-        TileMesh->SetCustomDepthStencilValue(0);
-        TileMesh->SetRenderCustomDepth(false);
-        TileMesh->SetVisibility(false);
-        bIsHighlightedByGameManager = false;
-        bIsGreenHighlighted = false;
-    }
-}
 
 void AGridTile::Interact(APlayerCamera* PlayerCharacter)
 {

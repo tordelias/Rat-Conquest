@@ -120,6 +120,7 @@ private:
 	float MovementDuration = 0.5f;
 
 	TArray<AGridTile*> MovedTiles;
+	TArray<AGridTile*> HoverTiles;
 
 	TArray<FVector2D> PathToTake;
 	

@@ -36,6 +36,15 @@ void APlayerUnit::BeginPlay()
 	//}
 	DelayedInitalPosition();
 	this->UpdateInteractableData();
+
+	if (bIsPlayerUnit)
+	{
+		mesh->SetCustomDepthStencilValue(1);
+	}
+	else
+	{
+		mesh->SetCustomDepthStencilValue(2);
+	}
 }
 
 // Called every frame
@@ -698,21 +707,21 @@ void APlayerUnit::BeginFocus()
 	if (mesh)
 	{
 		mesh->SetRenderCustomDepth(true);
-		if(bIsPlayerUnit)
+	}
+	// Store movement tiles in MovementTiles
+	MovedTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed);
+	for (auto tile : MovedTiles)
+	{
+		if (bIsPlayerUnit)
 		{
-			mesh->SetCustomDepthStencilValue(1);
+			tile->GreenHighlight();
 		}
 		else
 		{
-			mesh->SetCustomDepthStencilValue(2);
+			tile->RedHighlight();
 		}
-	}
-	auto movableTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed);
-	for (auto tile : movableTiles)
-	{
 		tile->BeginFocus();
 	}
-	MovedTiles = movableTiles;
 }
 
 void APlayerUnit::EndFocus()
@@ -721,25 +730,28 @@ void APlayerUnit::EndFocus()
 	{
 		mesh->SetRenderCustomDepth(false);
 	}
+	// Process MovementTiles instead of MovedTiles
 	for (auto tile : MovedTiles)
 	{
 		tile->EndFocus();
 	}
+	MovedTiles.Empty();
 }
 
 void APlayerUnit::BeginMouseHoverFocus()
 {
-	// Get tiles within movement range
-	if (GridManager && !bIsCurrentUnit)
+	if(!this->bIsCurrentUnit)
 	{
-		TArray<AGridTile*> HoverableTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed);
-		for (AGridTile* Tile : HoverableTiles)
+		mesh->SetRenderCustomDepth(true);
+		if (GridManager && !bIsCurrentUnit)
 		{
-			if (Tile)
+			// Use HoverTiles instead of MovedTiles
+			HoverTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed);
+			for (AGridTile* Tile : HoverTiles)
 			{
-				if(bIsPlayerUnit)
-					{
-					if(Tile->bIsGreenHighlighted || Tile->bIsRedHighlighted)
+				if (bIsPlayerUnit)
+				{
+					if (Tile->bIsGreenHighlighted || Tile->bIsRedHighlighted)
 					{
 						Tile->YellowHighlight();
 					}
@@ -759,23 +771,25 @@ void APlayerUnit::BeginMouseHoverFocus()
 						Tile->RedHighlight();
 					}
 				}
-				Tile->BeginMouseHoverFocus();
 			}
 		}
-		MovedTiles = HoverableTiles; 
 	}
 }
 
 void APlayerUnit::EndMouseHoverFocus()
 {
-	for (AGridTile* Tile : MovedTiles)
+	if(!this->bIsCurrentUnit)
 	{
-		if (Tile)
+		mesh->SetRenderCustomDepth(false);
+		for (AGridTile* Tile : HoverTiles)
 		{
-			Tile->EndMouseHoverFocus(); 
+			if (Tile)
+			{
+				Tile->EndMouseHoverFocus();
+			}
 		}
+		HoverTiles.Empty();
 	}
-	MovedTiles.Empty();
 }
 
 
