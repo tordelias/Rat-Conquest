@@ -30,6 +30,7 @@ public:
 	float GetDistanceBetweenTiles(AActor* Tile1, AActor* Tile2);
 
 	AActor* GetTileAt(int32 Row, int32 Column);
+	AGridTile* GetTileAtPosition(int32 Row, int32 Column);
 
 	TArray<AGridTile*> GetNeighbourTiles(int32 Row, int32 Column);
 
@@ -49,6 +50,12 @@ public:
 
 	//A* pathfinding
 	void ResetAllTilesPathfindingData();
+
+	float GridHeight;
+
+	FVector2D WorldToGridPosition(FVector WorldPosition) const;
+	FVector GridToWorldPosition(FVector2D GridPosition) const;
+	float Tilesize = 100.f; 
 private:
 	UPROPERTY(EditAnywhere, Category = "Grid")
 	FVector2D GridSize;

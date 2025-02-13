@@ -8,6 +8,8 @@ AGridManager::AGridManager()
 	// Set this actor to call Tick() every frame. Turn this off for better performance if not needed.
 	PrimaryActorTick.bCanEverTick = true;
     SetGridSize(10, 12);
+
+	GridHeight = GetActorLocation().Z;
 }
 
 // Generate the grid of tiles
@@ -15,6 +17,7 @@ void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float TileSize)
 {
     GridTiles.Empty(); // Clear any existing tiles
 
+	this->Tilesize = TileSize;
     // Check if the GridTileClass is set
     if (GridTileClass == nullptr)
     {
@@ -214,6 +217,24 @@ AActor* AGridManager::GetTileAt(int32 Row, int32 Column)
     }
 
 }
+AGridTile* AGridManager::GetTileAtPosition(int32 Row, int32 Column)
+{
+    FVector2D GridPosition(Row, Column);
+
+    if (GridTiles.Contains(GridPosition))
+    {
+        AActor* Tile = GridTiles[GridPosition];
+		//cast to GridTile
+		AGridTile* GridTile = Cast<AGridTile>(Tile);
+        return GridTile;
+    }
+    else
+    {
+        // UE_LOG(LogTemp, Warning, TEXT("No tile found at Row: %d, Column: %d"), Row, Column);
+        return nullptr;
+    }
+
+}
 
 TArray<AGridTile*> AGridManager::GetNeighbourTiles(int32 Row, int32 Column)
 {
@@ -337,4 +358,20 @@ void AGridManager::ResetAllTilesPathfindingData()
             Tile->ResetPathfindingData();
         }
     }
+}
+
+FVector2D AGridManager::WorldToGridPosition(FVector WorldPosition) const
+{
+    return FVector2D(
+        (WorldPosition.X - this->GetActorLocation().X) / Tilesize,
+        (WorldPosition.Y - this->GetActorLocation().Y) / Tilesize
+    );
+}
+FVector AGridManager::GridToWorldPosition(FVector2D GridPosition) const
+{
+    return FVector(
+        GridPosition.X * Tilesize + this->GetActorLocation().X,
+        GridPosition.Y * Tilesize + this->GetActorLocation().Y,
+        GridHeight
+    );
 }

@@ -152,6 +152,15 @@ void AGridTile::Interact(APlayerCamera* PlayerCharacter)
             PlayerCharacter->GetCurrentUnit()->MoveToTile(GridPosition);
             
         }
+        if (bIsOccupied && unitRefrence != nullptr)
+        {
+            if (!unitRefrence->bIsPlayerUnit)
+            {
+				unitRefrence->PlayerAttack(PlayerCharacter);
+
+            }
+
+        }
     }
 }
 

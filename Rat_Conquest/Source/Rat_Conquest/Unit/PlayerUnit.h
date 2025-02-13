@@ -30,6 +30,7 @@ public:
 	void SetInitalPosition(FVector2D position);
 	void DelayedInitalPosition();
 	void PlayerAttack(class APlayerCamera* PlayerCharacter);
+	FVector2D GetCardinalDirection(FVector2D FromGridPos, FVector2D ToGridPos);
 	void AttackAfterMovement();
 	void ShootProjectile(FVector _EnemyLocation);
 
@@ -139,6 +140,7 @@ public:
 	FInteractableData InstanceInteractableData;
 
 	UStaticMeshComponent* GetMesh() { return mesh; }
+	FVector2D GetMousePosition();
 
 	//temp
 	FVector KnockbackStartPosition; 
