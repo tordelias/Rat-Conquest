@@ -698,6 +698,14 @@ void APlayerUnit::BeginFocus()
 	if (mesh)
 	{
 		mesh->SetRenderCustomDepth(true);
+		if(bIsPlayerUnit)
+		{
+			mesh->SetCustomDepthStencilValue(1);
+		}
+		else
+		{
+			mesh->SetCustomDepthStencilValue(2);
+		}
 	}
 	auto movableTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed);
 	for (auto tile : movableTiles)
@@ -722,13 +730,35 @@ void APlayerUnit::EndFocus()
 void APlayerUnit::BeginMouseHoverFocus()
 {
 	// Get tiles within movement range
-	if (GridManager)
+	if (GridManager && !bIsCurrentUnit)
 	{
 		TArray<AGridTile*> HoverableTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed);
 		for (AGridTile* Tile : HoverableTiles)
 		{
 			if (Tile)
 			{
+				if(bIsPlayerUnit)
+					{
+					if(Tile->bIsGreenHighlighted || Tile->bIsRedHighlighted)
+					{
+						Tile->YellowHighlight();
+					}
+					else
+					{
+						Tile->GreenHighlight();
+					}
+				}
+				else
+				{
+					if (Tile->bIsGreenHighlighted || Tile->bIsRedHighlighted)
+					{
+						Tile->YellowHighlight();
+					}
+					else
+					{
+						Tile->RedHighlight();
+					}
+				}
 				Tile->BeginMouseHoverFocus();
 			}
 		}

@@ -30,6 +30,10 @@ public:
 
     void BeginFocus();
     void EndFocus();
+    void GreenHighlight();
+    void RedHighlight();
+    void YellowHighlight();
+    void EndHighlight();
     virtual void BeginMouseHoverFocus() override;
     virtual void EndMouseHoverFocus() override;
     virtual void Interact(APlayerCamera* PlayerCharacter) override;
@@ -68,6 +72,9 @@ public:
     bool bIsHighlightedByUnit = false;
     bool bIsHighlightedByGameManager = false;
     bool bIsHovered;
+
+    bool bIsGreenHighlighted = false;
+    bool bIsRedHighlighted = false;
 
 
 	//for A* pathfinding

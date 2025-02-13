@@ -35,32 +35,85 @@ AGridTile::AGridTile()
     UpdateInteractableData();
 }
 
-
+//make focus color dependent
 void AGridTile::BeginFocus()
 {
+    //Highlight Collors Green == 1, Red == 2, Yellow == 3
     if (!bIsHighlightedByGameManager) // Do not override GameManager highlights
     {
         TileMesh->SetRenderCustomDepth(true);
         TileMesh->SetVisibility(true);
         TileMesh->SetCustomDepthStencilValue(1);
         bIsHighlightedByUnit = true;
+        bIsGreenHighlighted = true;
     }
 }
 
 void AGridTile::EndFocus()
 {
-    if (bIsHighlightedByUnit) // Only affect unit-specific highlighting
+    if (bIsHighlightedByUnit)
     {
         TileMesh->SetRenderCustomDepth(false);
         TileMesh->SetVisibility(false);
         TileMesh->SetCustomDepthStencilValue(0);
         bIsHighlightedByUnit = false;
+        bIsGreenHighlighted = false;
     }
+}
+
+void AGridTile::GreenHighlight()
+{
+    	//Highlight Collors Green == 1, Red == 2, Yellow == 3
+	if (!bIsHighlightedByGameManager && !bIsHighlightedByUnit)
+	{
+		TileMesh->SetRenderCustomDepth(true);
+		TileMesh->SetVisibility(true);
+		TileMesh->SetCustomDepthStencilValue(1);
+        bIsGreenHighlighted = true;
+	}
+}
+
+void AGridTile::RedHighlight()
+{
+    //Highlight Collors Green == 1, Red == 2, Yellow == 3
+    if(!bIsHighlightedByGameManager && !bIsHighlightedByUnit)
+	{
+		TileMesh->SetRenderCustomDepth(true);
+		TileMesh->SetVisibility(true);
+		TileMesh->SetCustomDepthStencilValue(2);
+		bIsRedHighlighted = true;
+	}
+}
+
+void AGridTile::YellowHighlight()
+{
+    	//Highlight Collors Green == 1, Red == 2, Yellow == 3
+	if (bIsRedHighlighted || bIsGreenHighlighted)
+	{
+		TileMesh->SetCustomDepthStencilValue(3);
+	}
+}
+
+void AGridTile::EndHighlight()
+{
+    if (bIsHighlightedByUnit || bIsHighlightedByGameManager)
+	{
+        if(!bIsGreenHighlighted && !bIsRedHighlighted)
+        {
+            TileMesh->SetRenderCustomDepth(false);
+            TileMesh->SetVisibility(false);
+            TileMesh->SetCustomDepthStencilValue(0);
+            bIsHighlightedByUnit = false;
+            bIsGreenHighlighted = false;
+            bIsRedHighlighted = false;
+        }
+	}
 }
 
 void AGridTile::BeginMouseHoverFocus()
 {
-    if (!bIsHighlightedByGameManager && !bIsHighlightedByUnit) // Avoid double-highlighting
+    //Highlight Collors Green == 1, Red == 2, Yellow == 3
+    if (!bIsHighlightedByGameManager && !bIsHighlightedByUnit) 
     {
         TileMesh->SetVisibility(true);
         TileMesh->SetRenderCustomDepth(true);
@@ -70,22 +123,35 @@ void AGridTile::BeginMouseHoverFocus()
 
 void AGridTile::EndMouseHoverFocus()
 {
-    if (!bIsHighlightedByUnit && !bIsHighlightedByGameManager) // Preserve GameManager highlights
+    if (!bIsHighlightedByUnit && !bIsHighlightedByGameManager)
     {
         TileMesh->SetRenderCustomDepth(false);
         TileMesh->SetVisibility(false);
         TileMesh->SetCustomDepthStencilValue(0);
+        bIsRedHighlighted = false;
+        bIsGreenHighlighted = false; 
+
+    }
+    if (bIsGreenHighlighted)
+    {
+        TileMesh->SetCustomDepthStencilValue(1);
+    }
+    else if (bIsRedHighlighted)
+    {
+        TileMesh->SetCustomDepthStencilValue(2);
     }
 }
 
 void AGridTile::SetGameManagerHighlight()
 {
+    //Highlight Collors Green == 1, Red == 2, Yellow == 3
     if (!bIsHighlightedByGameManager)
     {
         TileMesh->SetRenderCustomDepth(true);
         TileMesh->SetVisibility(true);
-        TileMesh->SetCustomDepthStencilValue(3);
+        TileMesh->SetCustomDepthStencilValue(1);
         bIsHighlightedByGameManager = true;
+        bIsGreenHighlighted = true;
     }
 }
 
@@ -97,6 +163,7 @@ void AGridTile::ClearGameManagerHighlight()
         TileMesh->SetRenderCustomDepth(false);
         TileMesh->SetVisibility(false);
         bIsHighlightedByGameManager = false;
+        bIsGreenHighlighted = false;
     }
 }
 
