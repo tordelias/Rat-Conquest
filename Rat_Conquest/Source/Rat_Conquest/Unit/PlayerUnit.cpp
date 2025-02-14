@@ -25,6 +25,7 @@ APlayerUnit::APlayerUnit()
 	GridStartPosition = FVector2D(0, 0);
 	GridManager = nullptr;
 	combatManager = nullptr;
+	bIsRangedUnit = false;
 	// Search all instances
 	
 }
@@ -79,7 +80,6 @@ void APlayerUnit::BeginPlay()
 	{
 		mesh->SetCustomDepthStencilValue(2);
 	}
-	bIsRangedUnit = false;
 }
 
 // Called every frame
@@ -461,7 +461,8 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 			UE_LOG(LogTemp, Log, TEXT("Ranged unit attacking from a distance"));
 			PlayerUnit->ShootProjectile(this->GetActorLocation());
 			combatManager->DealDamageToUnit(PlayerUnit, this);
-			PlayerUnit->FinishTurn();
+			PlayerCharacter->GetCurrentUnit()->FinishTurn();
+			return;
 		}
 		else
 		{
