@@ -243,13 +243,13 @@ void AGameManager::EndEncounter()
 void AGameManager::StartEncounter()
 {
     //Spawn new enemies
-	for (int i = 0; i < rand() % 2 + 1; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		if (EnemyList.Num() > 0)
 		{
             int RandomIndex = FMath::RandRange(0, EnemyList.Num() - 1);
 
-            FVector SpawnLocation = FVector(0.f, 0.f, 300.f); // Adjust as needed
+            FVector SpawnLocation = FVector(0.f, 0.f, 0.f); // Adjust as needed
             FRotator SpawnRotation = FRotator::ZeroRotator;
 
             FActorSpawnParameters SpawnParams;
@@ -271,6 +271,7 @@ void AGameManager::StartEncounter()
             {
                 UE_LOG(LogTemp, Error, TEXT("Failed to spawn enemy at index %d"), RandomIndex);
             }
+            
 		}
 		else
 		{

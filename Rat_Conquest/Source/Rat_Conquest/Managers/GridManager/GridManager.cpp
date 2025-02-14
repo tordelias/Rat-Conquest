@@ -50,6 +50,23 @@ void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float TileSize)
             AActor* Tile = GetWorld()->SpawnActor<AActor>(GridTileClass, Location, FRotator::ZeroRotator, SpawnParams);
             if (Tile != nullptr)
             {
+
+                FVector TileCenter = Tile->GetActorLocation();
+                FVector BoxExtent(TileSize / 2, TileSize / 2, 10.0f); // Adjust Z height as needed
+                FColor DebugColor = FColor::Yellow;
+
+                // Draw debug box around the tile
+                DrawDebugBox(
+                    GetWorld(),
+                    TileCenter,
+                    BoxExtent,
+                    FQuat::Identity,
+                    DebugColor,
+                    true,       
+                    -1.0f,       
+                    0,           
+                    2.0f         // Thickness
+                );
                 // Logical position with (0,0) as bottom-left corner
                 FVector2D LogicalGridPosition(i, j);
 
@@ -135,6 +152,10 @@ void AGridManager::ScanWorldForObjects()
 				Tile->ItemSlot = Item;
 				UE_LOG(LogTemp, Error, TEXT("Found item at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
 			}
+            if (StaticMeshComp && Actor->ActorHasTag(TEXT("PlayerPos"))) {
+                UE_LOG(LogTemp, Error, TEXT("FOUND PLAYER POS at Row:"));
+
+            }
 
         }
     }

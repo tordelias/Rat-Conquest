@@ -23,6 +23,9 @@ APlayerUnit::APlayerUnit()
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	ItemSlots.SetNum(3);
 	GridStartPosition = FVector2D(0, 0);
+	GridManager = nullptr;
+	combatManager = nullptr;
+	// Search all instances
 	
 }
 
@@ -34,6 +37,37 @@ void APlayerUnit::BeginPlay()
 	//if (bIsPlayerUnit) {
 	//	DelayedInitalPosition();
 	//}
+	TArray<AActor*> FoundGridManagers;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGridManager::StaticClass(), FoundGridManagers);
+
+	if (FoundGridManagers.Num() > 0)
+	{
+		GridManager = Cast<AGridManager>(FoundGridManagers[0]);
+		if (FoundGridManagers.Num() > 1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Multiple GridManagers found! Using first instance."));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("No GridManager found in the level!"));
+	}
+
+	TArray<AActor*> FoundCombatManagers;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACombatManager::StaticClass(), FoundCombatManagers);
+
+	if (FoundCombatManagers.Num() > 0)
+	{
+		combatManager = Cast<ACombatManager>(FoundCombatManagers[0]);
+		if (FoundCombatManagers.Num() > 1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Multiple Combatmanagers found! Using first instance."));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("No CombatManager found in the level!"));
+	}
 	DelayedInitalPosition();
 	this->UpdateInteractableData();
 

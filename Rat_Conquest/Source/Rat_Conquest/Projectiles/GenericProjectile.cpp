@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
+#include "GenericProjectile.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "GenericProjectile.h"
+
 
 // Sets default values
 AGenericProjectile::AGenericProjectile()

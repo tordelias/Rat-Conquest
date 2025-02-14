@@ -271,6 +271,8 @@ void ALevelGenerator::CheckOpenDoors()
 {
     for (ARoom* Room : RoomInstances)
     {
+        if (!Room)
+            continue;
         TArray<bool> Directions;
         Directions = Room->GetDoorDirections(Directions);
 
