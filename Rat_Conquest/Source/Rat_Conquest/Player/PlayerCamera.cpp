@@ -40,6 +40,7 @@ APlayerCamera::APlayerCamera()
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Overlap);
 
+
     MinZoom = 100.0f;
     MaxZoom = 1200.0f;
     ZoomSpeed = 30.0f;
@@ -54,6 +55,8 @@ void APlayerCamera::BeginPlay()
 
     InteractionCheckDistance = 1750.f; 
     InteractionCheckFrequency = 0.05f;
+
+   
 }
 
 // Called every frame
@@ -65,11 +68,12 @@ void APlayerCamera::Tick(float DeltaTime)
     {
         PerformInteractionCheck();
     }
+    
 }
 
 void APlayerCamera::PerformInteractionCheck()
 {
-    FVector MouseWorldLocation, MouseWorldDirection;
+   
 
     if (APlayerController* PC = Cast<APlayerController>(GetController()))
     {

@@ -47,6 +47,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	USpringArmComponent* SpringArm;
 
+
 	// Zoom range for the camera
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float MinZoom;
@@ -105,6 +106,10 @@ protected:
 
 	AMainHUD* mainHUD; 
 
+	FVector MouseWorldLocation, MouseWorldDirection;
+
+
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -117,5 +122,8 @@ public:
 	APlayerUnit* GetCurrentUnit() const { return CurrentUnit; }
 
 	FORCEINLINE bool bIsInteracting() const { return GetWorldTimerManager().IsTimerActive(TimerHandleInteraction); }
+
+	FVector GetMouseWorldLocation() const { return MouseWorldLocation; }
+	FVector GetMouseWorldDirection() const { return MouseWorldDirection; }
 
 };

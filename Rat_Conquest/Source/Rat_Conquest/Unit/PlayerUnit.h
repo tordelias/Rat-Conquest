@@ -136,11 +136,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	FVector2D GetMousePosition(FVector WorldLocation, FVector WorldDirection);
+
 	UPROPERTY(VisibleInstanceOnly, Category = "Interact")
 	FInteractableData InstanceInteractableData;
 
 	UStaticMeshComponent* GetMesh() { return mesh; }
-	FVector2D GetMousePosition();
 
 	//temp
 	FVector KnockbackStartPosition; 
@@ -148,6 +149,9 @@ public:
 	float KnockbackProgress;
 	float KnockbackDuration = 1.f;
 	FVector KnockbackTargetPosition;
+
+	FVector2D TargetEnemyLocation = FVector2D(0,0);
+	FVector2D MouseGridPos = FVector2D(0, 0);
 
 private: 
 
