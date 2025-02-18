@@ -54,6 +54,9 @@ public:
 	//should be skeleton mesh
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMeshComponent* mesh;
+	//Skeleton mesh
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	USkeletalMeshComponent* SkeletalMesh;
 
 	//UnitIcon
 	UPROPERTY(EditAnywhere, Category = "Icon")

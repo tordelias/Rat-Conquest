@@ -20,7 +20,11 @@ APlayerUnit::APlayerUnit()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+	SkeletalMesh->SetupAttachment(RootComponent);
+
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+
 	ItemSlots.SetNum(3);
 	GridStartPosition = FVector2D(0, 0);
 	GridManager = nullptr;
