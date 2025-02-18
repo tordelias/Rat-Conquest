@@ -212,8 +212,8 @@ FVector2D APlayerUnit::GetMousePosition(FVector WorldLocation, FVector WorldDire
 		));
 
 	UE_LOG(LogTemp, Display, TEXT("MouseWorldPos: %s"), *MouseWorldPos.ToString());
-
-	return GridManager->WorldToGridPosition(MouseWorldPos);
+	MouseWorldPos.Z = GridManager->GridHeight;
+	return FVector2D(MouseWorldPos.X, MouseWorldPos.Y);
 }
 
 
@@ -235,26 +235,36 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	}
 
 	AGridTile* GridTile = Cast<AGridTile>(TargetTile);
-	if (!GridTile || GridTile->bIsOccupied)
+	if (!GridTile)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to cast TargetTile to AGridTile |MoveToTile_PlayerUnit.cpp|"));
+		return;
+	}
+
+	if (GridTile->bIsOccupied)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Target tile is occupied |MoveToTile_PlayerUnit.cpp|"));
-		//return;
+		return;
 	}
+
 	// Calculate the path
 	if (!CalculatePathToTile(NewGridPosition))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No valid path found to target tile |MoveToTile_PlayerUnit.cpp|"));
-		return; // No valid path found
+		return;
 	}
+
 	// Free the current tile
 	AActor* OldTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
 	AGridTile* OldGridTile = Cast<AGridTile>(OldTile);
-	if (OldGridTile)
+	if (!OldGridTile)
 	{
-		OldGridTile->bIsOccupied = false;
-		OldGridTile->RemoveUnitRefrence();
+		UE_LOG(LogTemp, Error, TEXT("OldGridTile is null |MoveToTile_PlayerUnit.cpp|"));
+		return;
 	}
-	
+
+	OldGridTile->bIsOccupied = false;
+	OldGridTile->RemoveUnitRefrence();
 
 	// Check if the target tile is within movement range
 	float distance = ChebyshevDistance(GridTile->GridPosition, OldGridTile->GridPosition);
@@ -263,7 +273,6 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 		UE_LOG(LogTemp, Warning, TEXT("Target tile is out of movement range |MoveToTile_PlayerUnit.cpp|"));
 		return;
 	}
-
 
 	// Log the path for debugging
 	UE_LOG(LogTemp, Display, TEXT("PathToTake:"));
@@ -290,7 +299,6 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 			TargetGridPosition = NextTilePosition;
 			MovementProgress = 0.0f; // Reset progress
 			bIsMoving = true;        // Start movement
-
 		}
 	}
 }
@@ -409,13 +417,13 @@ TArray<FVector2D> APlayerUnit::GetPathToTile(FVector2D InTargetGridPosition, FVe
 void APlayerUnit::SetInitalPosition(FVector2D position)
 {
 	if (!GridManager) {
-		UE_LOG(LogTemp, Error, TEXT("NO MANAGER"));
+		UE_LOG(LogTemp, Error, TEXT("NO MANAGER |SetInitalPosition_PlayerUnit.cpp|"));
 		return;
 	}
 
 	AActor* TargetTile = GridManager->GetClosestAvailableTile(position);
 	if (!TargetTile) {
-		UE_LOG(LogTemp, Warning, TEXT("Invalid target tile at (%f, %f)"), position.X, position.Y);
+		UE_LOG(LogTemp, Warning, TEXT("Invalid target tile at (%f, %f) |SetInitalPosition_PlayerUnit.cpp|"), position.X, position.Y);
 		return;
 	}
 
@@ -429,6 +437,10 @@ void APlayerUnit::SetInitalPosition(FVector2D position)
 		GridTile->bIsOccupied = true;
 	}
 	UE_LOG(LogTemp, Display, TEXT("Player unit set to grid position (%f, %f)"), position.X, position.Y);
+	if (!this->bIsPlayerUnit)
+	{
+		UE_LOG(LogTemp, Display, TEXT("AI start pos was set"));
+	}
 }
 
 void APlayerUnit::DelayedInitalPosition()
@@ -462,26 +474,22 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		UE_LOG(LogTemp, Error, TEXT("PlayerUnit is null"));
 		return;
 	}
-	
+
 	FVector2D PlayerPosition = PlayerUnit->CurrentGridPosition;
 	FVector2D EnemyPosition = this->CurrentGridPosition;
-
 	TargetEnemyLocation = EnemyPosition;
-
 
 	float DistanceToEnemy = ChebyshevDistance(EnemyPosition, PlayerPosition);
 
-	
 	if (PlayerUnit->bIsRangedUnit)
 	{
-		// Ranged unit logic: Attack from a distance
-		if (DistanceToEnemy <= AttackRange) // AttackRange is a new variable for ranged units
+		if (DistanceToEnemy <= AttackRange)
 		{
-			//spawn a projectile here or something
 			UE_LOG(LogTemp, Log, TEXT("Ranged unit attacking from a distance"));
 			PlayerUnit->ShootProjectile(this->GetActorLocation());
 			combatManager->DealDamageToUnit(PlayerUnit, this);
 			PlayerCharacter->GetCurrentUnit()->FinishTurn();
+
 			return;
 		}
 		else
@@ -491,58 +499,81 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 	}
 	else if (!PlayerUnit->bIsRangedUnit)
 	{
-		// Melee unit logic: Move to the enemy and attack
 		if (ChebyshevDistance(PlayerPosition, EnemyPosition) > PlayerUnit->MovementSpeed + 1)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Enemy out of movement range |PlayerAttack_PlayerUnit.cpp|"));
 			return;
 		}
 
-		// Get mouse position in grid coordinates (floating-point)
-		 MouseGridPos = GetMousePosition(PlayerCharacter->GetMouseWorldLocation(), PlayerCharacter->GetMouseWorldDirection());
+		MouseGridPos = GetMousePosition(PlayerCharacter->GetMouseWorldLocation(), PlayerCharacter->GetMouseWorldDirection());
+		UE_LOG(LogTemp, Display, TEXT("Mouse pos X=%f, Y=%f, Enemy pos X=%f, Y=%f"), MouseGridPos.X, MouseGridPos.Y, TargetEnemyLocation.X, TargetEnemyLocation.Y);
 
-		 UE_LOG(LogTemp, Display, TEXT("Mouse pos X=%f, Y= %f, Enemy pos X=%f, Y=%f)"), MouseGridPos.X, MouseGridPos.Y, TargetEnemyLocation.X, TargetEnemyLocation.Y);
-
-		// Calculate direction from enemy to mouse
-		FVector2D AttackDirection = GetCardinalDirection(EnemyPosition, MouseGridPos);
+		FVector2D AttackDirection = GetCardinalDirection(FVector2D(this->GetTargetLocation().X,this->GetTargetLocation().Y), MouseGridPos);
 		FVector2D AttackTileGridPos = EnemyPosition + AttackDirection;
-		UE_LOG(LogTemp, Display, TEXT("Attack tile pos X=%f, Y=%f)"), AttackTileGridPos.X, AttackTileGridPos.Y);
+		UE_LOG(LogTemp, Display, TEXT("Attack tile pos X=%f, Y=%f"), AttackTileGridPos.X, AttackTileGridPos.Y);
 
-		// Validate tile
-		AGridTile* AttackTile = GridManager->GetTileAtPosition(AttackTileGridPos.X, AttackTileGridPos.Y);
-		if (AttackTile->GridPosition != PlayerPosition)
+		// Ensure GridManager is valid before accessing it
+		if (!GridManager)
 		{
-			if (!AttackTile || AttackTile->bIsOccupied)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Invalid attack tile |PlayerAttack_PlayerUnit.cpp|"));
-				return;
-			}
+			UE_LOG(LogTemp, Error, TEXT("GridManager is null before fetching attack tile"));
+			return;
 		}
 
-		// Verify movement range to attack tile
+		AGridTile* AttackTile = GridManager->GetTileAtPosition(AttackTileGridPos.X, AttackTileGridPos.Y);
+		if (!AttackTile)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("No valid attack tile found at X=%f, Y=%f |PlayerAttack_PlayerUnit.cpp|"), AttackTileGridPos.X, AttackTileGridPos.Y);
+			return;
+		}
+
+		if (AttackTile->GridPosition == PlayerPosition)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Attack tile is the same as player position |PlayerAttack_PlayerUnit.cpp|"));
+			PlayerUnit->EnemyToAttack = this;
+			PlayerUnit->AttackAfterMovement();
+			PlayerCharacter->GetCurrentUnit()->FinishTurn();
+			return;
+		}
+
+		if (AttackTile->bIsOccupied)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Attack tile is occupied |PlayerAttack_PlayerUnit.cpp|"));
+			return;
+		}
+
 		if (ChebyshevDistance(PlayerPosition, AttackTileGridPos) > PlayerUnit->MovementSpeed + 1)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Attack tile out of range |PlayerAttack_PlayerUnit.cpp|"));
 			return;
 		}
 
-		// Execute attack
-		PlayerUnit->EnemyToAttack = this;
-		PlayerUnit->OnMovementComplete.BindUObject(PlayerUnit, &APlayerUnit::AttackAfterMovement);
-		PlayerUnit->MoveToTile(AttackTile->GridPosition);
-
+		if (AttackTile)
+		{
+			PlayerUnit->EnemyToAttack = this;
+			PlayerUnit->OnMovementComplete.BindUObject(PlayerUnit, &APlayerUnit::AttackAfterMovement);
+			PlayerUnit->MoveToTile(AttackTile->GridPosition);
+		}
 	}
 }
 
-FVector2D APlayerUnit::GetCardinalDirection(FVector2D FromGridPos, FVector2D ToGridPos)
+FVector2D APlayerUnit::GetCardinalDirection(FVector2D EnemyPos, FVector2D MousePos)
 {
-	FVector2D Direction = (ToGridPos - FromGridPos).GetSafeNormal();
+	FVector2D Delta = MousePos - EnemyPos; // Get difference vector
+	FVector2D Direction = FVector2D::ZeroVector;
 
-	return FVector2D(
-		FMath::RoundToInt(Direction.X),
-		FMath::RoundToInt(Direction.Y)
-	);
+	// Prioritize the dominant axis
+	if (FMath::Abs(Delta.X) > FMath::Abs(Delta.Y))
+	{
+		Direction.X = (Delta.X > 0) ? -1 : 1;
+	}
+	else
+	{
+		Direction.Y = (Delta.Y > 0) ? 1 : -1;
+	}
+
+	return Direction;
 }
+
 
 void APlayerUnit::AttackAfterMovement()
 {
