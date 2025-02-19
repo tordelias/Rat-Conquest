@@ -84,6 +84,12 @@ void APlayerUnit::BeginPlay()
 	{
 		mesh->SetCustomDepthStencilValue(2);
 	}
+	if (StartWeapon)
+	{
+		//spawn from bp
+		AItem* StartWeaponItem = GetWorld()->SpawnActor<AItem>(StartWeapon, GetActorLocation(), FRotator::ZeroRotator);
+		EquipStartWeapon(StartWeaponItem);
+	}
 }
 
 // Called every frame
@@ -692,6 +698,42 @@ void APlayerUnit::ResetPosition()
 	}
 	SetInitalPosition(GridStartPosition);
 }
+void APlayerUnit::EquipStartWeapon(AItem* ItemToAdd)
+{
+	if (!ItemToAdd)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ItemToAdd is null"));
+		return;
+	}
+	// Determine the appropriate slot index for the new item
+	int32 SlotIndex = 0; // Default to weapon slot
+	// Check if the slot is already occupied
+	if (ItemSlots[SlotIndex])
+	{
+		AItem* OldItem = ItemSlots[SlotIndex];
+		// Unequip the old item
+		OldItem->DropItem();
+		// Drop the old item back into the game world
+		DropItem(OldItem, CurrentGridPosition);
+	}
+	// Equip the new item
+	ItemSlots[SlotIndex] = ItemToAdd;
+	ItemToAdd->EquipItem(this);
+	//set the unit according to the item
+	if (ItemToAdd->bIsMelee)
+	{
+		bIsRangedUnit = false;
+	}
+	else
+	{
+		bIsRangedUnit = true;
+	}
+	if (bIsRangedUnit)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Player is a Ranged unit"));
+	}
+
+}
 
 void APlayerUnit::CheckForItems()
 {
@@ -820,9 +862,10 @@ void APlayerUnit::DropItem(AItem* OldItem, FVector2D CurrentPosition)
 void APlayerUnit::BeginFocus()
 {
 	this->UpdateInteractableData();
-	if (mesh)
+	if (mesh || SkeletalMesh)
 	{
 		mesh->SetRenderCustomDepth(true);
+		SkeletalMesh->SetRenderCustomDepth(true);
 	}
 	// Store movement tiles in MovementTiles
 	MovedTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed);
@@ -842,8 +885,9 @@ void APlayerUnit::BeginFocus()
 
 void APlayerUnit::EndFocus()
 {
-	if (mesh)
+	if (mesh || SkeletalMesh)
 	{
+		SkeletalMesh->SetRenderCustomDepth(false);
 		mesh->SetRenderCustomDepth(false);
 	}
 	// Process MovementTiles instead of MovedTiles
@@ -859,6 +903,7 @@ void APlayerUnit::BeginMouseHoverFocus()
 	if(!this->bIsCurrentUnit)
 	{
 		mesh->SetRenderCustomDepth(true);
+		SkeletalMesh->SetRenderCustomDepth(true);
 		if (GridManager && !bIsCurrentUnit)
 		{
 			// Use HoverTiles instead of MovedTiles
@@ -897,6 +942,7 @@ void APlayerUnit::EndMouseHoverFocus()
 	if(!this->bIsCurrentUnit)
 	{
 		mesh->SetRenderCustomDepth(false);
+		SkeletalMesh->SetRenderCustomDepth(false);
 		for (AGridTile* Tile : HoverTiles)
 		{
 			if (Tile)

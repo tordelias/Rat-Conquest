@@ -44,6 +44,7 @@ public:
 	void DestoryUnit();
 
 	void ResetPosition();
+	void EquipStartWeapon(AItem* ItemToAdd);
 	float ChebyshevDistance(FVector2D A, FVector2D B);
 
 
@@ -71,6 +72,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat Manager")
 	ACombatManager* combatManager;
+
+	//Optional start item to spawn with
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	TSubclassOf<AItem> StartWeapon;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	FVector2D GridStartPosition;
