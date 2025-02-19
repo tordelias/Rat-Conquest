@@ -51,22 +51,7 @@ void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float TileSize)
             if (Tile != nullptr)
             {
 
-                FVector TileCenter = Tile->GetActorLocation();
-                FVector BoxExtent(TileSize / 2, TileSize / 2, 10.0f); // Adjust Z height as needed
-                FColor DebugColor = FColor::Yellow;
-
-                // Draw debug box around the tile
-                DrawDebugBox(
-                    GetWorld(),
-                    TileCenter,
-                    BoxExtent,
-                    FQuat::Identity,
-                    DebugColor,
-                    true,       
-                    -1.0f,       
-                    0,           
-                    2.0f         // Thickness
-                );
+               
                 // Logical position with (0,0) as bottom-left corner
                 FVector2D LogicalGridPosition(i, j);
 
@@ -161,6 +146,55 @@ void AGridManager::ScanWorldForObjects()
     }
 	UE_LOG(LogTemp, Error, TEXT("Found %d occupied tiles in the grid"), num);
 
+}
+
+void AGridManager::UpdateGridPosition()
+{
+    const int32 Rows = GridSize.X;
+    const int32 Columns = GridSize.Y;
+    const FVector NewOrigin = GetActorLocation() + GridOffset;
+
+    // Recalculate offsets for centering
+    const int32 RowOffset = (Rows - 1) / 2;
+    const int32 ColumnOffset = (Columns - 1) / 2;
+
+    for (const auto& TilePair : GridTiles)
+    {
+        AActor* Tile = TilePair.Value;
+        if (!Tile) continue;
+
+        // Get original logical position from map key
+        const FVector2D LogicalPos = TilePair.Key;
+
+        // Reverse the logical X position calculation
+        int32 OriginalRowIndex = Rows - 1 - LogicalPos.X;
+        int32 OriginalColumnIndex = LogicalPos.Y;
+
+        // Calculate new world position
+        float XPos = NewOrigin.X + (OriginalRowIndex - RowOffset) * Tilesize;
+        float YPos = NewOrigin.Y + (OriginalColumnIndex - ColumnOffset) * Tilesize;
+        FVector NewLocation(XPos, YPos, NewOrigin.Z);
+
+        // Update tile position
+        Tile->SetActorLocation(NewLocation);
+
+        // Optional: Update debug visualization
+        if (AGridTile* GridTile = Cast<AGridTile>(Tile))
+        {
+            DrawDebugBox(
+                GetWorld(),
+                NewLocation,
+                FVector(Tilesize / 2, Tilesize / 2, 10),
+                FColor::Yellow,
+                true,
+                -1.0f,
+                0,
+                2.0f
+            );
+        }
+    }
+
+    UE_LOG(LogTemp, Display, TEXT("Grid moved to new origin: %s"), *NewOrigin.ToString());
 }
 
 AActor* AGridManager::GetClosestAvailableTile(FVector2D Location)

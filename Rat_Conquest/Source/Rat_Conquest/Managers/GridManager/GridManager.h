@@ -23,6 +23,8 @@ public:
 	void GetCenterTile(int32 Row, int32 Column);
 	void SetGridSize(int32 Rows, int32 Colums);
 	void ScanWorldForObjects();
+	void UpdateGridPosition();
+
 	AActor* GetClosestAvailableTile(FVector2D Location);
 
 	FVector2D GetGridSize();
@@ -63,4 +65,8 @@ private:
 	// The class type of the tiles to spawn
 	UPROPERTY(EditAnywhere, Category = "Grid")
 	TSubclassOf<AActor> GridTileClass;
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+	FVector GridOffset = FVector::ZeroVector; // World-space offset
 };

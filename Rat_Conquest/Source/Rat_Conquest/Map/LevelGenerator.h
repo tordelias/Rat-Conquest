@@ -9,7 +9,8 @@
 
 
 class ARoom;
-
+class APlayerCamera;
+class AGridManager;
 UCLASS()
 class RAT_CONQUEST_API ALevelGenerator : public AActor
 {
@@ -35,6 +36,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Grid Settings")
 	int32 MaxRooms = 4;
 
+	float InputCooldown = 0.5f;
+	float LastMoveTime = -1.0f;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -43,6 +47,10 @@ public:
 	FVector2D StartPosition = FVector2D::ZeroVector;
 	int32 CurrentRooms = 0;
 	FRandomStream RandomStream;
+
+	ARoom* CurrentRoom = nullptr;
+	APlayerCamera* PlayerCamera = nullptr;
+	AGridManager* GridManager = nullptr;
 
 	void GenerateInitialRooms();
 	void GenerateRooms(ARoom* CurrentRoom);
@@ -59,8 +67,13 @@ public:
 	void PutRoomInList(ARoom* Room, const FVector2D& GridPosition);
 	int32 GetOppositeDirection(int32 DirectionIndex);
 	TArray<bool> CheckNeighbors(const FVector2D& GridPosition, int32 DirectionIndex);
-
+	void DebugConnectedRooms();
+	TArray<ARoom*> FindConnectedRooms(ARoom* TargetRoom);
+	void MoveToRoom(int32 DirectionIndex);
 	void ShuffleRoomTemplates();
 
 	void DrawDebugGrid();
+	ARoom* GetRoomAtPosition(const FVector2D& GridPosition);
+
+	void OnPlayerEnterRoom(ARoom* _NewRoom);
 };

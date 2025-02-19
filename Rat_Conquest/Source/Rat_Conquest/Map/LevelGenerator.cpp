@@ -3,7 +3,9 @@
 
 #include "LevelGenerator.h"
 #include "Room.h"
-
+#include "Rat_Conquest/Player/PlayerCamera.h"
+#include "Rat_Conquest/Managers/GridManager/GridManager.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Called when the game starts or when spawned
@@ -17,11 +19,94 @@ void ALevelGenerator::DrawDebugGrid()
             FColor::Green, true, -1, 0, 5);
     }
 }
+ARoom* ALevelGenerator::GetRoomAtPosition(const FVector2D& GridPosition)
+{
+	for (ARoom* Room : RoomInstances)
+	{
+		if (Room && Room->GetGridPosition() == GridPosition)
+		{
+			return Room;
+		}
+	}
+	return nullptr;
+
+}
+void ALevelGenerator::OnPlayerEnterRoom(ARoom* _NewRoom)
+{
+    if (!_NewRoom)
+        return;
+
+    // Update the current room
+    CurrentRoom = _NewRoom;
+
+    // Find the player camera in the world
+    PlayerCamera = nullptr;
+    PlayerCamera = Cast<APlayerCamera>(
+        UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCamera::StaticClass())
+    );
+	GridManager = nullptr;
+	GridManager = Cast<AGridManager>(   
+		UGameplayStatics::GetActorOfClass(GetWorld(), AGridManager::StaticClass())
+	);
+    // Move the camera to match the room's position
+	if (GridManager)
+	{   
+		FVector NewGridLocation = FVector(CurrentRoom->GetActorLocation().X, CurrentRoom->GetActorLocation().Y, 0);
+		//GridManager->SetActorLocation(NewGridLocation);
+		GridManager->GridOffset = FVector(CurrentRoom->GetActorLocation().X, CurrentRoom->GetActorLocation().Y, 0);
+        GridManager->UpdateGridPosition();
+		
+	}
+    if (PlayerCamera)
+    {
+		FVector NewCameraLocation = FVector(CurrentRoom->GetActorLocation().X,CurrentRoom->GetActorLocation().Y,PlayerCamera->GetActorLocation().Z);
+        PlayerCamera->SetActorLocation(NewCameraLocation);
+    }
+}
 // Called every frame
 void ALevelGenerator::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-  
+
+    if (GetWorld()->GetTimeSeconds() - LastMoveTime < InputCooldown) return;
+    if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Q)) {
+
+        DebugConnectedRooms();
+
+    }
+    if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Up))
+    {
+        MoveToRoom(0); // North
+    }
+    else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Right))
+    {
+        MoveToRoom(1); // East
+    }
+    else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Down))
+    {
+        MoveToRoom(2); // South
+    }
+    else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Left))
+    {
+        MoveToRoom(3); // West
+    }
+    if (CurrentRoom)
+    {
+        // Draw persistent debug sphere over current room
+        const FVector RoomLocation = CurrentRoom->GetActorLocation() + FVector(0, 0, 200);
+        DrawDebugSphere(
+            GetWorld(),
+            RoomLocation,
+            100.0f,
+            12,
+            FColor::Yellow,
+            false,
+            -1.0f,
+            0,
+            5.0f
+        );
+		
+    }
 }
 
 ALevelGenerator::ALevelGenerator()
@@ -64,6 +149,7 @@ void ALevelGenerator::GenerateInitialRooms()
                     UE_LOG(LogTemp, Warning, TEXT("Found valid starting room"));
                     PutRoomInList(StartRoom, StartPosition);
                     GenerateRooms(StartRoom);
+                    CurrentRoom = StartRoom;
                     bFoundValidRoom = true;
                     return;
                 }
@@ -185,6 +271,102 @@ TArray<bool> ALevelGenerator::CheckNeighbors(const FVector2D& GridPosition, int3
     return NeighborDirections;
 }
 
+void ALevelGenerator::DebugConnectedRooms()
+{
+    if (!CurrentRoom)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No current room selected!"));
+        return;
+    }
+
+    TArray<ARoom*> ConnectedRooms = FindConnectedRooms(CurrentRoom);
+    UE_LOG(LogTemp, Display, TEXT("Found %d connected rooms to current room at (%d,%d)"),
+        ConnectedRooms.Num(),
+        FMath::RoundToInt(CurrentRoom->GetGridPosition().X),
+        FMath::RoundToInt(CurrentRoom->GetGridPosition().Y));
+
+    // Draw debug lines to connected rooms
+    const FVector CurrentLocation = CurrentRoom->GetActorLocation() + FVector(0, 0, 100);
+    for (ARoom* Room : ConnectedRooms)
+    {
+        if (Room)
+        {
+            const FVector TargetLocation = Room->GetActorLocation() + FVector(0, 0, 100);
+            DrawDebugLine(
+                GetWorld(),
+                CurrentLocation,
+                TargetLocation,
+                FColor::Emerald,
+                false,
+                5.0f,
+                0,
+                5.0f
+            );
+        }
+    }
+}
+
+TArray<ARoom*> ALevelGenerator::FindConnectedRooms(ARoom* TargetRoom)
+{
+    TArray<ARoom*> ConnectedRooms;
+    if (!TargetRoom) return ConnectedRooms;
+
+    const FVector2D CurrentPos = TargetRoom->GetGridPosition();
+
+    // Check all 4 directions
+    for (int32 DirIndex = 0; DirIndex < 4; DirIndex++)
+    {
+        const FVector2D CheckPos = CurrentPos + GetDirectionVector(DirIndex);
+
+        for (ARoom* Room : RoomInstances)
+        {
+            if (Room && Room != TargetRoom && Room->GetGridPosition() == CheckPos)
+            {
+                ConnectedRooms.Add(Room);
+            }
+        }
+    }
+
+    return ConnectedRooms;
+}
+
+void ALevelGenerator::MoveToRoom(int32 DirectionIndex)
+{
+    if (!CurrentRoom || DirectionIndex < 0 || DirectionIndex > 3) return;
+
+    // Get target position
+    const FVector2D Direction = GetDirectionVector(DirectionIndex);
+    const FVector2D TargetPosition = CurrentRoom->GetGridPosition() + Direction;
+
+    // Find room at target position
+    if (ARoom* TargetRoom = GetRoomAtPosition(TargetPosition))
+    {
+        // Verify door connection (optional)
+        if (TargetRoom->GetDoorDirection(GetOppositeDirection(DirectionIndex)))
+        {
+            CurrentRoom = TargetRoom;
+            UE_LOG(LogTemp, Display, TEXT("Moved to room at (%d, %d)"),
+                FMath::RoundToInt(TargetPosition.X),
+                FMath::RoundToInt(TargetPosition.Y));
+			OnPlayerEnterRoom(CurrentRoom);
+            LastMoveTime = GetWorld()->GetTimeSeconds();
+			
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("No door connection to room at (%d, %d)"),
+                FMath::RoundToInt(TargetPosition.X),
+                FMath::RoundToInt(TargetPosition.Y));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No room exists at (%d, %d)"),
+            FMath::RoundToInt(TargetPosition.X),
+            FMath::RoundToInt(TargetPosition.Y));
+    }
+}
+
 void ALevelGenerator::ShuffleRoomTemplates()
 {
     for (int32 i = RoomTemplates.Num() - 1; i > 0; i--)
@@ -238,16 +420,16 @@ void ALevelGenerator::RegenerateRooms()
     GenerateInitialRooms();
 }
 
-void ALevelGenerator::GenerateRooms(ARoom* CurrentRoom)
+void ALevelGenerator::GenerateRooms(ARoom* _CurrentRoom)
 {
     TArray<bool> Directions;
-    CurrentRoom->GetDoorDirections(Directions);
+    _CurrentRoom->GetDoorDirections(Directions);
 
     for (int32 i = 0; i < Directions.Num(); ++i)
     {
         if (Directions[i] && RoomInstances.Num() < MaxRooms)
         {
-            FVector2D NewPosition = CurrentRoom->GetGridPosition() + GetDirectionVector(i);
+            FVector2D NewPosition = _CurrentRoom->GetGridPosition() + GetDirectionVector(i);
 
             if (IsPositionValid(NewPosition))
             {
