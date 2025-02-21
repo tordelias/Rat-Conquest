@@ -24,6 +24,7 @@ APlayerUnit::APlayerUnit()
 	SkeletalMesh->SetupAttachment(RootComponent);
 
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	mesh->SetupAttachment(SkeletalMesh);
 
 	ItemSlots.SetNum(3);
 	GridStartPosition = FVector2D(0, 0);
