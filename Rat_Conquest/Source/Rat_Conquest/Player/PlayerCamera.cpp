@@ -152,7 +152,7 @@ void APlayerCamera::FoundInteractable(AActor* NewInteractable)
 
         if (PlayerUnit)
         {
-            //UE_LOG(LogTemp, Error, TEXT("Successfully casted to APlayerUnit"));
+            UE_LOG(LogTemp, Error, TEXT("Successfully casted to APlayerUnit"));
             if (mainHUD)
             {
                 mainHUD->ShowStatWidget();

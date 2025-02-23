@@ -5,6 +5,7 @@
 
 //Engine
 #include "Kismet/GameplayStatics.h" // Include for UGameplayStatics
+#include "Components/CapsuleComponent.h" // Include for UCapsuleComponent
 //includes
 #include "Rat_Conquest/Managers/GridManager/GridManager.h"
 #include "Rat_Conquest/Player/PlayerCamera.h"
@@ -14,26 +15,48 @@
 #include "Rat_Conquest/Items/Item.h"
 #include "Rat_Conquest/AI/EnemyAIController.h"
 #include "Rat_Conquest/Projectiles/GenericProjectile.h"
-// Sets default values
+
+
+
 APlayerUnit::APlayerUnit()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this pawn to call Tick() every frame.
 	PrimaryActorTick.bCanEverTick = true;
 
+	UE_LOG(LogTemp, Warning, TEXT("APlayerUnit Constructor - Start"));
+
+	// ? Create CapsuleComponent FIRST before assigning it to RootComponent
+	UCapsuleComponent* CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComponent"));
+	CapsuleComp->InitCapsuleSize(42.f, 96.0f);
+	CapsuleComp->SetCollisionProfileName(TEXT("Pawn"));
+
+	// ? Assign it as the RootComponent
+	RootComponent = CapsuleComp;
+
+	UE_LOG(LogTemp, Warning, TEXT("CapsuleComponent Created and Assigned as RootComponent"));
+
+	// ? Now create the SkeletalMeshComponent
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
-	SkeletalMesh->SetupAttachment(RootComponent);
+	SkeletalMesh->SetupAttachment(RootComponent); // Attach properly
 
-	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	mesh->SetupAttachment(SkeletalMesh);
+	SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	SkeletalMesh->SetCollisionObjectType(ECC_Pawn);
+	SkeletalMesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	SkeletalMesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	SkeletalMesh->SetGenerateOverlapEvents(true);
 
+	UE_LOG(LogTemp, Warning, TEXT("SkeletalMesh Created and Collision Set"));
+
+	// Initialize other properties
 	ItemSlots.SetNum(3);
 	GridStartPosition = FVector2D(0, 0);
 	GridManager = nullptr;
 	combatManager = nullptr;
 	bIsRangedUnit = false;
-	// Search all instances
-	
+
+	UE_LOG(LogTemp, Warning, TEXT("APlayerUnit Constructor - End"));
 }
+
 
 // Called when the game starts or when spawned
 void APlayerUnit::BeginPlay()
@@ -74,16 +97,24 @@ void APlayerUnit::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("No CombatManager found in the level!"));
 	}
+
+		AGameManager* GameManager = Cast<AGameManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass()));
+
+		if (!GameManager)
+		{
+			UE_LOG(LogTemp, Error, TEXT("BeginPlay(): No GameManager found!"));
+		}
+
 	DelayedInitalPosition();
 	this->UpdateInteractableData();
 
 	if (bIsPlayerUnit)
 	{
-		mesh->SetCustomDepthStencilValue(1);
+		SkeletalMesh->SetCustomDepthStencilValue(1);
 	}
 	else
 	{
-		mesh->SetCustomDepthStencilValue(2);
+		SkeletalMesh->SetCustomDepthStencilValue(2);
 	}
 	if (StartWeapon)
 	{
@@ -660,12 +691,17 @@ void APlayerUnit::ExecuteAITurn()
 void APlayerUnit::FinishTurn()
 {
 	AGameManager* GameManager = Cast<AGameManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass()));
-	if (GameManager)
+
+	if (!GameManager)
 	{
-		CheckForItems();
-		GameManager->EndUnitTurn();
+		UE_LOG(LogTemp, Error, TEXT("FinishTurn() failed: GameManager is nullptr!"));
+		return;
 	}
+
+	CheckForItems();
+	GameManager->EndUnitTurn();
 }
+
 
 void APlayerUnit::DestoryUnit()
 {
@@ -863,9 +899,8 @@ void APlayerUnit::DropItem(AItem* OldItem, FVector2D CurrentPosition)
 void APlayerUnit::BeginFocus()
 {
 	this->UpdateInteractableData();
-	if (mesh || SkeletalMesh)
+	if (SkeletalMesh)
 	{
-		mesh->SetRenderCustomDepth(true);
 		SkeletalMesh->SetRenderCustomDepth(true);
 	}
 	// Store movement tiles in MovementTiles
@@ -886,10 +921,9 @@ void APlayerUnit::BeginFocus()
 
 void APlayerUnit::EndFocus()
 {
-	if (mesh || SkeletalMesh)
+	if (SkeletalMesh)
 	{
 		SkeletalMesh->SetRenderCustomDepth(false);
-		mesh->SetRenderCustomDepth(false);
 	}
 	// Process MovementTiles instead of MovedTiles
 	for (auto tile : MovedTiles)
@@ -903,7 +937,6 @@ void APlayerUnit::BeginMouseHoverFocus()
 {
 	if(!this->bIsCurrentUnit)
 	{
-		mesh->SetRenderCustomDepth(true);
 		SkeletalMesh->SetRenderCustomDepth(true);
 		if (GridManager && !bIsCurrentUnit)
 		{
@@ -942,7 +975,6 @@ void APlayerUnit::EndMouseHoverFocus()
 {
 	if(!this->bIsCurrentUnit)
 	{
-		mesh->SetRenderCustomDepth(false);
 		SkeletalMesh->SetRenderCustomDepth(false);
 		for (AGridTile* Tile : HoverTiles)
 		{

@@ -29,18 +29,25 @@ void AEnemyAIController::MoveToGridPosition()
 
 	if (IsValid(closestEnemy))
 	{
-		float Distance = FVector2D::Distance(AI->CurrentGridPosition, closestEnemy->CurrentGridPosition);
+		//if (!AI->bIsRangedUnit)
+		//{
+			float Distance = FVector2D::Distance(AI->CurrentGridPosition, closestEnemy->CurrentGridPosition);
 
-		if (Distance < AI->MovementSpeed + 1)
-		{
-			UE_LOG(LogTemp, Error, TEXT("AI trying to Attack"));
-			this->Attack(closestEnemy);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("AI moving to closest possible tile"));
-			this->MoveToClosestPossibleTile(closestEnemy);
-		}
+			if (Distance < AI->MovementSpeed + 1)
+			{
+				UE_LOG(LogTemp, Error, TEXT("AI trying to Attack"));
+				this->Attack(closestEnemy);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("AI moving to closest possible tile"));
+				this->MoveToClosestPossibleTile(closestEnemy);
+			}
+		//}
+		//else
+		//{
+		//	this->RandedAttack(closestEnemy);
+		//}
 	}
 	else
 	{
@@ -208,4 +215,14 @@ void AEnemyAIController::Attack(APlayerUnit* Enemy)
 		if (!Enemy) UE_LOG(LogTemp, Error, TEXT("Enemy is null"));
 		if (AI->bIsPlayerUnit) UE_LOG(LogTemp, Warning, TEXT("Player-controlled units cannot use this AI logic"));
 	}
+}
+
+void AEnemyAIController::RandedAttack(APlayerUnit* Enemy)
+{
+	APlayerUnit* AI = Cast<APlayerUnit>(GetPawn());
+	//Attack the enemy
+
+	AI->EnemyToAttack = Enemy;
+	AI->AttackAfterMovement();
+	AI->FinishTurn();
 }

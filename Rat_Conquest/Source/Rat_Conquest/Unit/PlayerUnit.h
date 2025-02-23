@@ -52,9 +52,6 @@ public:
 	void CheckForItems();
 	void CalculateStats();
 	void DropItem(AItem* OldItem, FVector2D CurrentPosition);
-	//should be skeleton mesh
-	UPROPERTY(EditAnywhere, Category = "Mesh")
-	UStaticMeshComponent* mesh;
 	//Skeleton mesh
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	USkeletalMeshComponent* SkeletalMesh;
@@ -150,7 +147,7 @@ public:
 	UPROPERTY(VisibleInstanceOnly, Category = "Interact")
 	FInteractableData InstanceInteractableData;
 
-	UStaticMeshComponent* GetMesh() { return mesh; }
+	USkeletalMeshComponent* GetMesh() { return SkeletalMesh; }
 
 	//temp
 	FVector KnockbackStartPosition; 

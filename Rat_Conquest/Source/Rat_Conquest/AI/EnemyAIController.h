@@ -25,5 +25,6 @@ public:
 	void MoveToClosestPossibleTile(APlayerUnit* Enemy);
 
 	void Attack(APlayerUnit* Enemy);
+	void RandedAttack(APlayerUnit* Enemy);
 	
 };
