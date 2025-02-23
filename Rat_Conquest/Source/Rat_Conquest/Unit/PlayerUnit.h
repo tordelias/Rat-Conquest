@@ -8,6 +8,7 @@
 #include "PlayerUnit.generated.h"
 
 class AGridManager;
+class AGameManager;
 class ACombatManager;
 class AGridTile;
 class AItem;
@@ -66,6 +67,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	AGridManager* GridManager;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+	AGameManager* GameManager;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat Manager")
 	ACombatManager* combatManager;

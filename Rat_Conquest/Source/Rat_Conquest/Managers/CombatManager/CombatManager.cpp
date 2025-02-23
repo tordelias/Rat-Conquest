@@ -132,9 +132,10 @@ void ACombatManager::KillUnit(APlayerUnit* unit)
 		GameManager->RemoveUnitFromQueue(unit);
 		GameManager->EndUnitTurn();
 	}
+	PlayerCharacter->SetCurrentUnit(GameManager->CurrentUnit);
 	unit->DestoryUnit();
 	// Destroy the unit
-	unit->Destroy();
+	
 }
 
 // Called when the game starts or when spawned

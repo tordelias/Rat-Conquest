@@ -98,7 +98,7 @@ void APlayerUnit::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("No CombatManager found in the level!"));
 	}
 
-		AGameManager* GameManager = Cast<AGameManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass()));
+		GameManager = Cast<AGameManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass()));
 
 		if (!GameManager)
 		{
@@ -569,7 +569,10 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 			UE_LOG(LogTemp, Warning, TEXT("Attack tile is the same as player position |PlayerAttack_PlayerUnit.cpp|"));
 			PlayerUnit->EnemyToAttack = this;
 			PlayerUnit->AttackAfterMovement();
+			
 			PlayerCharacter->GetCurrentUnit()->FinishTurn();
+			
+			
 			return;
 		}
 
@@ -690,16 +693,20 @@ void APlayerUnit::ExecuteAITurn()
 
 void APlayerUnit::FinishTurn()
 {
-	AGameManager* GameManager = Cast<AGameManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass()));
-
 	if (!GameManager)
 	{
-		UE_LOG(LogTemp, Error, TEXT("FinishTurn() failed: GameManager is nullptr!"));
+		UE_LOG(LogTemp, Error, TEXT("GameManager is null"));
 		return;
 	}
+	else {
+		CheckForItems();
+		GameManager->EndUnitTurn();
 
-	CheckForItems();
-	GameManager->EndUnitTurn();
+	}
+	
+
+
+	
 }
 
 
@@ -717,6 +724,8 @@ void APlayerUnit::DestoryUnit()
 			
 		}
 	}
+	Destroy();
+	
 
 	
 }
