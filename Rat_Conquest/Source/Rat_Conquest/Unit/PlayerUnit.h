@@ -79,6 +79,7 @@ public:
 	TSubclassOf<AItem> StartWeapon;
 
 
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	FVector2D GridStartPosition;
 

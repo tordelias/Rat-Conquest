@@ -10,6 +10,7 @@
 #include "Rat_Conquest/Widgets/MainHUD.h"
 #include "Rat_Conquest/Widgets/MainWidget.h"
 #include "Rat_Conquest/Widgets/TurnIndicatorWidget.h"
+#include "Rat_Conquest/AI/EnemyAIController.h"
 // Sets default values
 AGameManager::AGameManager()
 {
@@ -26,6 +27,7 @@ void AGameManager::BeginPlay()
     //StartEncounter();
 
     //AMainHUD* MainHUD = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+	
 }
 
 void AGameManager::TogglePlayerTurn()
@@ -60,56 +62,54 @@ void AGameManager::StartTurnOrder()
 {
     MainHUD = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
     TurnQueue.Empty();
-   
+
+    // Create fresh turn order
+    TArray<APlayerUnit*> AllUnits;
     if (bisPlayersturn)
     {
-        if (PlayerUnits.Num() > 0)
-        {
-            TurnQueue.Append(PlayerUnits);
-
-        }
-        if (EnemyUnits.Num() > 0)
-        {
-            TurnQueue.Append(EnemyUnits);
-        }
+        AllUnits.Append(PlayerUnits);
+        AllUnits.Append(EnemyUnits);
     }
     else
     {
-        if (PlayerUnits.Num() > 0)
-        {
-            TurnQueue.Append(PlayerUnits);
-        }
-        if (EnemyUnits.Num() > 0)
-        {
-            TurnQueue.Append(EnemyUnits);
-        }
-       
+        AllUnits.Append(EnemyUnits);
+        AllUnits.Append(PlayerUnits);
     }
-	for (APlayerUnit* unit : TurnQueue)
-	{
-        if (MainHUD)
-        {
-            MainHUD->AddTurnImage(unit);
-        }
-        else
-        {
-            UE_LOG(LogTemp, Error, TEXT("MainHUD is null!"));
-        }
-	}
 
+    // Filter out null units
+    AllUnits.RemoveAll([](APlayerUnit* Unit) { return !IsValid(Unit); });
+
+    // Create turn queue for multiple rounds
+    for (int32 i = 0; i < VisibleTurnsAhead; i++)
+    {
+        TurnQueue.Append(AllUnits);
+    }
+
+    // Trim to visible limit
+    if (TurnQueue.Num() > VisibleTurnsAhead)
+    {
+        TurnQueue.SetNum(VisibleTurnsAhead);
+    }
+
+    // Update UI
+    if (MainHUD)
+    {
+       
+        for (APlayerUnit* Unit : TurnQueue)
+        {
+            if (IsValid(Unit))
+            {
+                MainHUD->AddTurnImage(Unit);
+            }
+        }
+    }
 
     if (TurnQueue.Num() > 0)
     {
         CurrentUnit = TurnQueue[0];
         HighlightUnitAndTiles(CurrentUnit);
+        ExecuteTurn();
     }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("TurnQueue is empty! No unit to execute turn."));
-        return;
-    }
-    UE_LOG(LogTemp, Warning, TEXT("Size of TurnQueue: %d"), TurnQueue.Num());
-    ExecuteTurn();
 }
 
 void AGameManager::ExecuteTurn()
@@ -147,67 +147,80 @@ void AGameManager::ExecuteTurn()
 
 void AGameManager::EndUnitTurn()
 {
-    if (EnemyUnits.Num() == 0)
-    {
-        StartEncounter();
-        
-    }
-    else if (PlayerUnits.Num() == 0) {
+    if (!CurrentUnit) return;
 
-        UE_LOG(LogTemp, Warning, TEXT("No more units to take turn!"));
-        return;
-    }
-
-    if (TurnQueue.Num() == 0)
-    {
-        
-        UE_LOG(LogTemp, Warning, TEXT("TurnQueue is empty! No unit to execute turn."));
-		return;
-    }
-
-    TurnQueue.RemoveAt(0);
-    if (MainHUD)
-    {
-		MainHUD->RemoveTurnImage();
-    }
+    // Clear current unit state
+    CurrentUnit->bIsCurrentUnit = false;
+    CurrentUnit = nullptr;
 
     if (TurnQueue.Num() > 0)
     {
-        CurrentUnit = TurnQueue[0];
-        HighlightUnitAndTiles(CurrentUnit);
-        ExecuteTurn();
+        // Remove the front unit (current) and get next
+        TurnQueue.RemoveAt(0);
+
+        if (MainHUD)
+        {
+            MainHUD->RemoveTurnImage();
+        }
+
+        if (TurnQueue.Num() > 0)
+        {
+			
+            CurrentUnit = TurnQueue[0];
+            HighlightUnitAndTiles(CurrentUnit);
+            ExecuteTurn();
+        }
+        else
+        {
+            // Only switch sides when queue is empty
+
+            bisPlayersturn = !bisPlayersturn;
+            StartTurnOrder();
+        }
+
+        
+        
     }
     else
     {
+        // Queue empty but units might still exist
         bisPlayersturn = !bisPlayersturn;
         StartTurnOrder();
     }
    
 }
 
-void AGameManager::RemoveUnitFromQueue(APlayerUnit* unit)
+void AGameManager::RemoveUnitFromQueue(APlayerUnit* Unit)
 {
-    if (!unit)
+    if (!Unit) return;
+
+    // Remove ALL instances from queue
+    TurnQueue.RemoveAll([Unit](APlayerUnit* Entry) {
+        return Entry == Unit;
+        });
+
+    // Update HUD first
+    if (MainHUD)
     {
-        UE_LOG(LogTemp, Error, TEXT("RemoveUnitFromQueue failed: Unit is null!"));
-        return;
+        MainHUD->RemoveTurnImage(); // Modified to take specific unit
     }
 
-    // Remove the unit from the turn queue
-    TurnQueue.Remove(unit);
-
-    // Remove the unit from PlayerUnits or EnemyUnits
-    if (unit->bIsPlayerUnit)
-    {
-        PlayerUnits.Remove(unit);
+    // Remove from team lists
+    if (Unit->bIsPlayerUnit) {
+        PlayerUnits.Remove(Unit);
     }
-    else
-    {
-        EnemyUnits.Remove(unit);
+    else {
+        EnemyUnits.Remove(Unit);
     }
 
-    // Log for debugging
-    UE_LOG(LogTemp, Display, TEXT("Unit removed from queue and lists."));
+    // Handle active unit
+    if (CurrentUnit == Unit) {
+        CurrentUnit->FinishTurn();
+        EndUnitTurn();
+    }
+
+    // Full queue update
+    UpdateTurnQueue();
 }
 
 void AGameManager::HandleAITurnAfterDelay()
@@ -218,7 +231,7 @@ void AGameManager::HandleAITurnAfterDelay()
         UE_LOG(LogTemp, Warning, TEXT("AI unit turn executed"));
 
         // Proceed to the next turn after the AI completes its turn
-        
+		
     }
 }
 
@@ -262,6 +275,17 @@ void AGameManager::StartEncounter()
                 SpawnRotation,
                 SpawnParams
             );
+            NewEnemy->SpawnDefaultController();
+
+            // Ensure possession
+            if (AEnemyAIController* AIController = Cast<AEnemyAIController>(NewEnemy->GetController()))
+            {
+                AIController->Possess(NewEnemy);
+            }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("Failed to get AI Controller for spawned enemy"));
+            }
 			if (NewEnemy)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("New enemy spawned: %s"), *NewEnemy->GetName());
@@ -296,7 +320,7 @@ void AGameManager::StartEncounter()
             AIUnitTurnTimerHandle,
             FTimerDelegate::CreateLambda([P_unit]()
                 {
-                    P_unit->ResetPosition();
+                    //P_unit->ResetPosition();
                 }),
             InitialDelay,
             false
@@ -315,7 +339,7 @@ void AGameManager::StartEncounter()
             AIUnitTurnTimerHandle,
             FTimerDelegate::CreateLambda([E_unit]()
                 {
-                    E_unit->ResetPosition();
+                    //E_unit->ResetPosition();
                 }),
             InitialDelay,
             false
@@ -331,6 +355,57 @@ void AGameManager::StartEncounter()
 
 
 
+}
+
+void AGameManager::UpdateTurnQueue()
+{
+    for (APlayerUnit* Unit : TurnQueue) {
+        if (MainHUD) {
+            MainHUD->RemoveTurnImage();
+        }
+    }
+    
+	TurnQueue.Empty();
+    TArray<APlayerUnit*> ValidUnits;
+    if (bisPlayersturn) {
+        ValidUnits.Append(PlayerUnits);
+        ValidUnits.Append(EnemyUnits);
+    }
+    else {
+        ValidUnits.Append(EnemyUnits);
+        ValidUnits.Append(PlayerUnits);
+    }
+    ValidUnits.RemoveAll([](APlayerUnit* Unit) { return !IsValid(Unit); });
+
+    // Regenerate visible queue
+    TurnQueue.Empty();
+    for (int32 i = 0; i < VisibleTurnsAhead; i++) {
+        TurnQueue.Append(ValidUnits);
+    }
+    TurnQueue.SetNum(FMath::Min(VisibleTurnsAhead, TurnQueue.Num()));
+
+    // Update HUD
+    if (MainHUD) {
+        for (APlayerUnit* Unit : TurnQueue) {
+            if (IsValid(Unit)) {
+                MainHUD->AddTurnImage(Unit);
+            }
+        }
+    }
+
+    // Handle current unit
+    if (TurnQueue.Num() > 0 && !CurrentUnit) {
+        CurrentUnit = TurnQueue[0];
+        HighlightUnitAndTiles(CurrentUnit);
+    }
+ 
+}
+
+void AGameManager::GenerateTurnBuffer()
+{
+    while (MasterTurnQueue.Num() < TurnBufferSize) {
+       
+    }
 }
 
 void AGameManager::HighlightUnitAndTiles(APlayerUnit* NewUnit)
@@ -374,8 +449,12 @@ void AGameManager::Tick(float DeltaTime)
 			UE_LOG(LogTemp, Warning, TEXT("Player Unit: %s"), *unit->GetName());
 		}
         UE_LOG(LogTemp, Warning, TEXT("Size of TurnQueue: %d"), TurnQueue.Num());
-
-
+        UE_LOG(LogTemp, Display, TEXT("Current Turn Queue:"));
+        if (!hasSpawned) {
+            StartEncounter();
+			hasSpawned = true;
+        }
+       
        
     }
 }

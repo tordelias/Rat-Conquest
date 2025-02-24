@@ -37,6 +37,13 @@ public:
 
 	void StartEncounter();
 
+	void UpdateTurnQueue();
+
+	void GenerateTurnBuffer();
+	TArray<APlayerUnit*> MasterTurnQueue;
+	const int32 TurnBufferSize = 10;
+
+	bool hasSpawned = false;
 	UPROPERTY()
 	TArray<APlayerUnit*> PlayerUnits;
 
@@ -47,7 +54,8 @@ public:
 	UPROPERTY()
 	TArray<APlayerUnit*> TurnQueue;
 
-
+	UPROPERTY(EditAnywhere, Category = "UI")
+	int32 VisibleTurnsAhead = 15;
 	
 	UPROPERTY(EditAnywhere, Category = "Enemies")
 	TArray<TSubclassOf<APlayerUnit>> EnemyList;
