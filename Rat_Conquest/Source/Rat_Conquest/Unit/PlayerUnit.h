@@ -108,6 +108,9 @@ public:
 	int AttackRange = 6;
 	bool bFirstMove = true;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	FVector2D animationToPlay; //0 = idle, 25 = walk, 50 = attack, 75 = secound attack, 100 = death
+
 	
 
 	TArray<AItem*> ItemSlots; //0 = weapon, 1 = armor, 2 = accessory

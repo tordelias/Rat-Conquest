@@ -122,6 +122,8 @@ void APlayerUnit::BeginPlay()
 		AItem* StartWeaponItem = GetWorld()->SpawnActor<AItem>(StartWeapon, GetActorLocation(), FRotator::ZeroRotator);
 		EquipStartWeapon(StartWeaponItem);
 	}
+
+	animationToPlay = FVector2D(0, 0);
 }
 
 // Called every frame
@@ -175,6 +177,9 @@ void APlayerUnit::Tick(float DeltaTime)
 				// Path is complete
 				UE_LOG(LogTemp, Display, TEXT("Finished moving along the path."));
 
+				//add logic to choose animation based on weapon type
+				animationToPlay = FVector2D(0, 0);
+
 				// Trigger the OnMovementComplete delegate if it's bound
 				if (OnMovementComplete.IsBound())
 				{
@@ -183,11 +188,11 @@ void APlayerUnit::Tick(float DeltaTime)
 				}
 
 				// Other logic (e.g., checking for items, finishing the turn)
-				
 				if (bIsPlayerUnit)
 				{
 					FinishTurn();
 				}
+				//this->FinishTurn();
 			}
 		}
 		else
@@ -337,6 +342,9 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 			TargetGridPosition = NextTilePosition;
 			MovementProgress = 0.0f; // Reset progress
 			bIsMoving = true;        // Start movement
+
+			//PlayWalkAnimation
+			//animationToPlay = FVector2D(25, 0);
 		}
 	}
 }
@@ -626,6 +634,7 @@ void APlayerUnit::AttackAfterMovement()
 	}
 	if (EnemyToAttack)
 	{
+		animationToPlay = FVector2D(50, 0);
 		combatManager->DealDamageToUnit(this, EnemyToAttack);
 	}
 	else
@@ -703,7 +712,8 @@ void APlayerUnit::FinishTurn()
 		GameManager->EndUnitTurn();
 
 	}
-	
+
+	//animationToPlay = FVector2D(0, 0);
 
 
 	
