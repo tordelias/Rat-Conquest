@@ -15,7 +15,8 @@
 #include "Rat_Conquest/Items/Item.h"
 #include "Rat_Conquest/AI/EnemyAIController.h"
 #include "Rat_Conquest/Projectiles/GenericProjectile.h"
-
+#include "Rat_Conquest/Data/MutationData.h"
+#include "Rat_Conquest/Widgets/MainHUD.h"
 
 
 APlayerUnit::APlayerUnit()
@@ -124,6 +125,11 @@ void APlayerUnit::BeginPlay()
 	}
 
 	animationToPlay = FVector2D(0, 0);
+
+	mutationData = std::make_shared<MutationData>();
+	mutationData->SetExperienceNeeded(10);
+
+	UnitName = FName("PlayerUnit");
 }
 
 // Called every frame
@@ -1026,6 +1032,77 @@ void APlayerUnit::Interact(APlayerCamera* PlayerCharacter)
 	}
 }
 
+void APlayerUnit::Mutate()
+{
+	if (mutationData)
+	{
+		//pause game only
+		if (GameManager)
+		{
+			GameManager->PauseGame();
+		}
+		mutationData->Mutate();
+		//call mutation selection widget
+		if (AMainHUD* hud = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD()))
+		{
+			hud->UpdateMutationWidget(GetMutationC1(), GetMutationC2(), GetMutationC3(),this->UnitName, this);
+			hud->ShowMutationWidget(); 
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("HUD is null |Mutate_PlayerUnit.cpp|"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("MutationData is null"));
+	}
+}
+
+TArray<int> APlayerUnit::GetMutationC1()
+{
+	return mutationData->GetStatsC1();
+}
+
+TArray<int> APlayerUnit::GetMutationC2()
+{
+	return mutationData->GetStatsC2();
+}
+
+TArray<int> APlayerUnit::GetMutationC3()
+{
+	return mutationData->GetStatsC3();
+}
+
+void APlayerUnit::ApplyMutation(TArray<int> statsToAdd)
+{
+	//speed = 0, attack = 1, defense = 2, health = 3
+
+	if (AMainHUD* hud = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD()))
+	{
+		hud->CloseMutationWidget();
+	}
+
+	if (statsToAdd.Num() >= 3)
+	{
+		this->MovementSpeed += statsToAdd[0];
+		this->Damage += statsToAdd[1];
+		this->Defence += statsToAdd[2];
+		this->Health += statsToAdd[3];
+
+		this->MovementSpeed = (this->MovementSpeed <= 0) ? this->MovementSpeed : 1;
+		this->Damage = (this->Damage <= 0) ? this->Damage : 1;
+		this->Defence = (this->Defence <= 0) ? this->Defence : 1;
+		this->Health = (this->Health <= 0) ? this->Health : 1;
+	}
+
+
+
+	if (GameManager)
+	{
+		GameManager->ResumeGame();
+	}
+}
 
 
 void APlayerUnit::UpdateInteractableData()
@@ -1035,13 +1112,16 @@ void APlayerUnit::UpdateInteractableData()
 	if (bIsPlayerUnit)
 	{
 		InstanceInteractableData.UnitName = FText::FromString("SwordsMan");
+		this->UnitName = FName("PlayerUnit");
 	}
 	else if (bIsPlayerUnit && bIsRangedUnit) {
 		InstanceInteractableData.UnitName = FText::FromString("BowMan");
+		this->UnitName = FName("BowMan");
 	}
 	else
 	{
 		InstanceInteractableData.UnitName = FText::FromString("Rat");
+		this->UnitName = FName("Rat");
 	}
 
 	InstanceInteractableData.UnitHealth = Health;

@@ -13,6 +13,7 @@ class ACombatManager;
 class AGridTile;
 class AItem;
 class AGenericProjectile;
+class MutationData;
 
 DECLARE_DELEGATE(FOnMovementCompleteSignature);
 
@@ -38,6 +39,8 @@ public:
 
 	FOnMovementCompleteSignature OnMovementComplete;
 	APlayerUnit* EnemyToAttack;
+
+	std::shared_ptr<MutationData> mutationData;
 
 	void ExecutePlayerTurn();
 	void ExecuteAITurn();
@@ -107,6 +110,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	int AttackRange = 6;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	int experienceReward = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	FName UnitName; 
+
 	bool bFirstMove = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
@@ -121,6 +131,13 @@ public:
 	virtual void BeginMouseHoverFocus() override; 
 	virtual void EndMouseHoverFocus() override;
 	virtual void Interact(APlayerCamera* PlayerCharacter) override;
+
+	//Mutation
+	void Mutate();
+	TArray<int> GetMutationC1();
+	TArray<int> GetMutationC2();
+	TArray<int> GetMutationC3();
+	void ApplyMutation(TArray<int>);
 
 	FVector TargetPosition;
 	FVector2D TargetGridPosition;

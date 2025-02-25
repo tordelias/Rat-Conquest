@@ -5,6 +5,7 @@
 #include "UnitStatWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "MainWidget.h"
+#include "MutationWidget.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
 
 void AMainHUD::BeginPlay()
@@ -29,6 +30,16 @@ void AMainHUD::BeginPlay()
 		{
 			StatWidget->AddToViewport();
 			StatWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+
+	if (MutationWidgetClass)
+	{
+		MutationWidget = CreateWidget<UMutationWidget>(GetWorld(), MutationWidgetClass);
+		if (MutationWidget)
+		{
+			MutationWidget->AddToViewport();
+			MutationWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }
@@ -78,5 +89,41 @@ void AMainHUD::RemoveTurnImage()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("MainWidget is null!"));
+	}
+}
+
+void AMainHUD::ShowMutationWidget()
+{
+	if (MutationWidget)
+	{
+		MutationWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("MutationWidget is null!"));
+	}
+}
+
+void AMainHUD::CloseMutationWidget()
+{
+	if (MutationWidget)
+	{
+		MutationWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("MutationWidget is null!"));
+	}
+}
+
+void AMainHUD::UpdateMutationWidget(TArray<int> statsC1, TArray<int> statsC2, TArray<int> statsC3, FName UnitName, APlayerUnit* unit)
+{
+	if (MutationWidget)
+	{
+		MutationWidget->SetData(statsC1, statsC2, statsC3, UnitName, unit);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("MutationWidget is null!"));
 	}
 }

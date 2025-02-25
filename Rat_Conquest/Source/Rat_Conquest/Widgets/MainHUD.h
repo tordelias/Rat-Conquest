@@ -9,6 +9,8 @@
 struct FInteractableData; 
 class UUnitStatWidget; 
 class UMainWidget;
+class UMutationWidget;
+class APlayerUnit;
 /**
  * 
  */
@@ -26,11 +28,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget", meta = (AllowPrivate = "true"))
 	TSubclassOf<UMainWidget> MainWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget", meta = (AllowPrivate = "true"))
+	TSubclassOf<UMutationWidget> MutationWidgetClass;
+
 	UPROPERTY()
 	UUnitStatWidget* StatWidget;
 
 	UPROPERTY()
 	UMainWidget* MainWidget;
+
+	UPROPERTY()
+	UMutationWidget* MutationWidget;
 
 
 public: 
@@ -41,5 +49,8 @@ public:
 	void UpdateStatWidget(FInteractableData* data);
 	void AddTurnImage(class APlayerUnit* unit);
 	void RemoveTurnImage();
+	void ShowMutationWidget();
+	void CloseMutationWidget();
+	void UpdateMutationWidget(TArray<int> statsC1, TArray<int> statsC2, TArray<int> statsC3, FName UnitName, APlayerUnit* unit);
 	
 };

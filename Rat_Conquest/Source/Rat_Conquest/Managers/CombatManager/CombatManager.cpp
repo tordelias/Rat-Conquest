@@ -33,6 +33,11 @@ void ACombatManager::DealDamageToUnit(APlayerUnit* Attackerunit, APlayerUnit* De
     }
     int TotalDamage = Attackerunit->Damage + weaponDamage;
 
+    if (TotalDamage >= Defenderunit->Health && Attackerunit->bIsPlayerUnit)
+    {
+		Attackerunit->Mutate();
+    }
+
     UE_LOG(LogTemp, Warning, TEXT("Dealing %d damage to %s"), TotalDamage, *Defenderunit->GetName());
 
     // Add a small knockback effect

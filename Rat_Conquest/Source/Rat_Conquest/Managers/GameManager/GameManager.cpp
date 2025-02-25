@@ -114,8 +114,13 @@ void AGameManager::StartTurnOrder()
 
 void AGameManager::ExecuteTurn()
 {
-    if (!CurrentUnit)
+    if (bIsGamePaused)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Game is paused. Turn execution halted."));
         return;
+    }
+
+    if (!CurrentUnit) return;
 
     if (CurrentUnit->bIsPlayerUnit)
     {
@@ -126,24 +131,23 @@ void AGameManager::ExecuteTurn()
             CurrentUnit->bIsCurrentUnit = true;
         }
         CurrentUnit->ExecutePlayerTurn();
-		UE_LOG(LogTemp, Warning, TEXT("Player unit turn executed"));
+        UE_LOG(LogTemp, Warning, TEXT("Player unit turn executed"));
     }
     else
     {
-		//Adds a random delay to the AI unit's turn 
-		float RandomDelay = FMath::RandRange(0.90f, 1.9f);
-		FTimerHandle AIUnitTurnTimerHandle;
+        //Adds a random delay to the AI unit's turn 
+        float RandomDelay = FMath::RandRange(0.90f, 1.9f);
+        FTimerHandle AIUnitTurnTimerHandle;
         GetWorld()->GetTimerManager().SetTimer(
-            AIUnitTurnTimerHandle,  
-            this,                  
-            &AGameManager::HandleAITurnAfterDelay, 
-            RandomDelay,                
-            false                
+            AIUnitTurnTimerHandle,
+            this,
+            &AGameManager::HandleAITurnAfterDelay,
+            RandomDelay,
+            false
         );
     }
-        
-    
 }
+
 
 void AGameManager::EndUnitTurn()
 {
@@ -408,6 +412,44 @@ void AGameManager::GenerateTurnBuffer()
        
     }
 }
+
+void AGameManager::PauseGame()
+{
+    bIsGamePaused = true;
+
+    // Disable player input
+    APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+    //if (PlayerController)
+    //{
+    //    PlayerController->SetPause(true);
+    //    PlayerController->bShowMouseCursor = true; // Show cursor for stat selection
+    //}
+
+    UE_LOG(LogTemp, Warning, TEXT("Game Paused"));
+}
+
+
+void AGameManager::ResumeGame()
+{
+    bIsGamePaused = false;
+
+    // Enable player input again
+    APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+    //if (PlayerController)
+    //{
+    //    PlayerController->SetPause(false);
+    //    PlayerController->bShowMouseCursor = false; // Hide cursor after selection
+    //}
+
+    UE_LOG(LogTemp, Warning, TEXT("Game Resumed"));
+
+    // Continue turn execution
+    if (CurrentUnit)
+    {
+        ExecuteTurn();
+    }
+}
+
 
 void AGameManager::HighlightUnitAndTiles(APlayerUnit* NewUnit)
 {

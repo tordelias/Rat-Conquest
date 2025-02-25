@@ -40,6 +40,10 @@ public:
 	void UpdateTurnQueue();
 
 	void GenerateTurnBuffer();
+
+	void PauseGame();
+	void ResumeGame();
+
 	TArray<APlayerUnit*> MasterTurnQueue;
 	const int32 TurnBufferSize = 10;
 
@@ -81,6 +85,10 @@ private:
 	void HighlightUnitAndTiles(APlayerUnit* NewUnit); 
 
 	AMainHUD* MainHUD;
+
+
+	bool bIsGamePaused = false;
+
 
 
 };
