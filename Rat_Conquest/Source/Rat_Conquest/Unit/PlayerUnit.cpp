@@ -472,12 +472,21 @@ void APlayerUnit::SetInitalPosition(FVector2D position)
 		UE_LOG(LogTemp, Error, TEXT("NO MANAGER |SetInitalPosition_PlayerUnit.cpp|"));
 		return;
 	}
-
-	AActor* TargetTile = GridManager->SetStartingPositions(bIsPlayerUnit);
+	AActor* TargetTile;
+	TargetTile = GridManager->SetStartingPositions(bIsPlayerUnit);
 	if (!TargetTile) {
 		UE_LOG(LogTemp, Warning, TEXT("Invalid target tile at (%f, %f) |SetInitalPosition_PlayerUnit.cpp|"), position.X, position.Y);
-		return;
+		TargetTile = GridManager->GetClosestAvailableTile(position);
+		if (TargetTile) {
+			UE_LOG(LogTemp, Warning, TEXT("Target tile was set to default"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Target tile was not set"));
+			return;
+		}
 	}
+	
 	AGridTile* TargetGridTile = Cast<AGridTile>(TargetTile);
 	if (!TargetGridTile) {
 		return;
