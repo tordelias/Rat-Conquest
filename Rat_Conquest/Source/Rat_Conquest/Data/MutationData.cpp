@@ -30,9 +30,12 @@ void MutationData::Mutate()
 {
 	if (experience >= maxExperience)
 	{
-		statsC1 = MutateArray();
-		statsC2 = MutateArray();
-		statsC3 = MutateArray();
+		while (statsC1 == statsC2 || statsC1 == statsC3 || statsC2 == statsC3)
+		{
+			statsC1 = MutateArray();
+			statsC2 = MutateArray();
+			statsC3 = MutateArray();
+		}
 
 		level++;
 		experience = 0;

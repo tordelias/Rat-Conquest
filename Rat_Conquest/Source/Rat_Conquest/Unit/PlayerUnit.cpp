@@ -1107,7 +1107,7 @@ void APlayerUnit::ApplyMutation(TArray<int> statsToAdd)
 
 		this->MovementSpeed = (this->MovementSpeed > 0) ? this->MovementSpeed : 1;
 		this->Damage = (this->Damage > 0) ? this->Damage : 1;
-		this->Defence = (this->Defence > 0) ? this->Defence : 1;
+		this->Defence = (this->Defence > 0) ? this->Defence : 0;
 		this->Health = (this->Health > 0) ? this->Health : 1;
 	}
 
