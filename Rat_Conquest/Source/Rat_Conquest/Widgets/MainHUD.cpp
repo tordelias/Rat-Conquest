@@ -28,7 +28,7 @@ void AMainHUD::BeginPlay()
 		StatWidget = CreateWidget<UUnitStatWidget>(GetWorld(), UnitWidgetclass);
 		if (StatWidget)
 		{
-			StatWidget->AddToViewport();
+			StatWidget->AddToViewport(1);
 			StatWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
@@ -97,6 +97,10 @@ void AMainHUD::ShowMutationWidget()
 	if (MutationWidget)
 	{
 		MutationWidget->SetVisibility(ESlateVisibility::Visible);
+		if (MainWidget)
+		{
+			MainWidget->SetVisibility(ESlateVisibility::Collapsed);
+		}
 	}
 	else
 	{
@@ -109,6 +113,10 @@ void AMainHUD::CloseMutationWidget()
 	if (MutationWidget)
 	{
 		MutationWidget->SetVisibility(ESlateVisibility::Collapsed);
+		if (MainWidget)
+		{
+			MainWidget->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
 	else
 	{
@@ -120,6 +128,15 @@ void AMainHUD::UpdateMutationWidget(TArray<int> statsC1, TArray<int> statsC2, TA
 {
 	if (MutationWidget)
 	{
+		if (unit)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Unit is sendt to mutationWidget"))
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Unit is null in MainHUD!"));
+		}
+
 		MutationWidget->SetData(statsC1, statsC2, statsC3, UnitName, unit);
 	}
 	else

@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
+#include "Rat_Conquest/Unit/PlayerUnit.h"
 #include "MutationWidget.generated.h"
 
 /**
@@ -66,7 +67,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
 	class UButton* Choice3;
 
-	class APlayerUnit* unit;
+	UPROPERTY()
+	APlayerUnit* unit;
+
 
 	TArray<int> C1;
 	TArray<int> C2;

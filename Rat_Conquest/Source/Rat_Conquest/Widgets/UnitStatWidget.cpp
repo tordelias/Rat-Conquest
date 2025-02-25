@@ -9,21 +9,17 @@ void UUnitStatWidget::UpdateWidget(const FInteractableData* InteractableData) co
 {
     if (InteractableData)
     {
-        UnitName->SetText(FText::Format(NSLOCTEXT("UnitStats", "UnitName", "Unit Name: {0}"), InteractableData->UnitName));
-
-        UnitHealth->SetText(FText::FromString("Health: " + FString::FromInt(InteractableData->UnitHealth)));
-        UnitDamage->SetText(FText::FromString("Damage: " + FString::FromInt(InteractableData->UnitDamage)));
-        UnitMovementSpeed->SetText(FText::FromString("Speed: " + FString::FromInt(InteractableData->UnitMovementSpeed)));
-
-		//UE_LOG(LogTemp, Log, TEXT("Updated widget with data"));
-		//UE_LOG(LogTemp, Log, TEXT("Unit Name: %s"), *InteractableData->UnitName.ToString());
-		//UE_LOG(LogTemp, Log, TEXT("Unit Health: %d"), InteractableData->UnitHealth);
-		//UE_LOG(LogTemp, Log, TEXT("Unit Damage: %d"), InteractableData->UnitDamage);
-  //      UE_LOG(LogTemp, Log, TEXT("Unit Movement Speed: %d"), InteractableData->UnitMovementSpeed);
+        if (UnitName) UnitName->SetText(FText::Format(NSLOCTEXT("UnitStats", "UnitName", "Unit Name: {0}"), InteractableData->UnitName));
+        if (UnitHealth) UnitHealth->SetText(FText::FromString("Health: " + FString::FromInt(InteractableData->UnitHealth)));
+        if (UnitDamage) UnitDamage->SetText(FText::FromString("Damage: " + FString::FromInt(InteractableData->UnitDamage)));
+        if (UnitMovementSpeed) UnitMovementSpeed->SetText(FText::FromString("Speed: " + FString::FromInt(InteractableData->UnitMovementSpeed)));
+        if (UnitDefense) UnitDefense->SetText(FText::FromString("Defense: " + FString::FromInt(InteractableData->Defense)));
+        else UE_LOG(LogTemp, Error, TEXT("UnitDefense is nullptr!"));
     }
     else
     {
         UE_LOG(LogTemp, Warning, TEXT("InteractableData is nullptr"));
     }
 }
+
 

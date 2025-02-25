@@ -3,9 +3,11 @@
 #include "CombatManager.h"
 #include "Rat_Conquest/Player/PlayerCamera.h"
 #include "Kismet/GameplayStatics.h"
+#include "Rat_Conquest/Data/MutationData.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
 #include "Rat_Conquest/Managers/GameManager/GameManager.h"
 #include "Rat_Conquest/Items/Item.h"
+#include "Rat_Conquest/Data/MutationData.h"
 
 // Sets default values
 ACombatManager::ACombatManager()
@@ -35,6 +37,7 @@ void ACombatManager::DealDamageToUnit(APlayerUnit* Attackerunit, APlayerUnit* De
 
     if (TotalDamage >= Defenderunit->Health && Attackerunit->bIsPlayerUnit)
     {
+        Attackerunit->mutationData->AddExperience(Defenderunit->experienceReward);
 		Attackerunit->Mutate();
     }
 

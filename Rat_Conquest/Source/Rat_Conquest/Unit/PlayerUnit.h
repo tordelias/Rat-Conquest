@@ -145,6 +145,9 @@ public:
 	TSubclassOf<AGenericProjectile> ProjectileClass;
 
 private:
+
+	int unitLevel = 0;
+
 	bool bIsMoving = false;                 
 	FVector StartPosition;                  
 	

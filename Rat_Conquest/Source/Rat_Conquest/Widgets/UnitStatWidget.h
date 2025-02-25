@@ -32,4 +32,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
 	class UTextBlock* UnitMovementSpeed;
 
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
+	class UTextBlock* UnitDefense;
+
 };

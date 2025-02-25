@@ -1045,12 +1045,18 @@ void APlayerUnit::Mutate()
 {
 	if (mutationData)
 	{
+		mutationData->Mutate();
+		if (mutationData->GetLevel() <= unitLevel)
+		{
+			//UE_LOG(LogTemp, Error, TEXT("Mutation level is higher than unit level"));
+			return;
+		}
 		//pause game only
 		if (GameManager)
 		{
 			GameManager->PauseGame();
 		}
-		mutationData->Mutate();
+		++unitLevel;
 		//call mutation selection widget
 		if (AMainHUD* hud = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD()))
 		{
@@ -1099,13 +1105,13 @@ void APlayerUnit::ApplyMutation(TArray<int> statsToAdd)
 		this->Defence += statsToAdd[2];
 		this->Health += statsToAdd[3];
 
-		this->MovementSpeed = (this->MovementSpeed <= 0) ? this->MovementSpeed : 1;
-		this->Damage = (this->Damage <= 0) ? this->Damage : 1;
-		this->Defence = (this->Defence <= 0) ? this->Defence : 1;
-		this->Health = (this->Health <= 0) ? this->Health : 1;
+		this->MovementSpeed = (this->MovementSpeed > 0) ? this->MovementSpeed : 1;
+		this->Damage = (this->Damage > 0) ? this->Damage : 1;
+		this->Defence = (this->Defence > 0) ? this->Defence : 1;
+		this->Health = (this->Health > 0) ? this->Health : 1;
 	}
 
-
+	UpdateInteractableData();
 
 	if (GameManager)
 	{
@@ -1136,5 +1142,6 @@ void APlayerUnit::UpdateInteractableData()
 	InstanceInteractableData.UnitHealth = Health;
 	InstanceInteractableData.UnitDamage = Damage;
 	InstanceInteractableData.UnitMovementSpeed = MovementSpeed;
+	InstanceInteractableData.Defense = Defence;
 
 }

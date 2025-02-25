@@ -9,6 +9,8 @@
 void UMutationWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	UE_LOG(LogTemp, Warning, TEXT("MutationWidget Constructed!"));  // ADD THIS LOG
+
 	if (Choice1)
 	{
 		Choice1->OnClicked.AddDynamic(this, &UMutationWidget::OnChoice1Clicked);
@@ -23,9 +25,15 @@ void UMutationWidget::NativeConstruct()
 	}
 }
 
+
 void UMutationWidget::SetData(TArray<int> statsC1, TArray<int> statsC2, TArray<int> statsC3, FName NewUnitName, APlayerUnit* currentUnit )
 {
 	//speed = 0, attack = 1, defense = 2, health = 3
+
+	unit = currentUnit;
+	C1 = statsC1;
+	C2 = statsC2;
+	C3 = statsC3;
 
 	if (this->UnitName)
 	{
@@ -77,16 +85,16 @@ void UMutationWidget::SetData(TArray<int> statsC1, TArray<int> statsC2, TArray<i
 	SetStatText(this->DefenseC3, statsC3[2]);
 	SetStatText(this->HealthC3, statsC3[3]);
 
-	unit = currentUnit;
-	C1 = statsC1;
-	C2 = statsC2;
-	C3 = statsC3;
 }
 
 void UMutationWidget::OnChoice1Clicked()
 {
 	if (unit)
 	unit->ApplyMutation(C1);
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Unit is null in MutationWidget!"));
+	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Choice 1 clicked"));
 }
@@ -95,6 +103,10 @@ void UMutationWidget::OnChoice2Clicked()
 {
 	if (unit)
 	unit->ApplyMutation(C2);
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Unit is null in MutationWidget!"));
+	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Choice 2 clicked"));
 }
@@ -103,6 +115,10 @@ void UMutationWidget::OnChoice3Clicked()
 {
 	if (unit)
 	unit->ApplyMutation(C3);
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Unit is null in MutationWidget!"));
+	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Choice 3 clicked"));
 }
