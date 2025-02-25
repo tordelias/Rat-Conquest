@@ -467,15 +467,19 @@ void APlayerUnit::SetInitalPosition(FVector2D position)
 		return;
 	}
 
-	AActor* TargetTile = GridManager->GetClosestAvailableTile(position);
+	AActor* TargetTile = GridManager->SetStartingPositions(bIsPlayerUnit);
 	if (!TargetTile) {
 		UE_LOG(LogTemp, Warning, TEXT("Invalid target tile at (%f, %f) |SetInitalPosition_PlayerUnit.cpp|"), position.X, position.Y);
+		return;
+	}
+	AGridTile* TargetGridTile = Cast<AGridTile>(TargetTile);
+	if (!TargetGridTile) {
 		return;
 	}
 
 	TargetPosition = TargetTile->GetActorLocation();
 	SetActorLocation(FVector(TargetPosition.X, TargetPosition.Y, GetActorLocation().Z));
-	CurrentGridPosition = position;
+	CurrentGridPosition = TargetGridTile->GridPosition;
 	//set the unit pointer on the grid tile
 	AGridTile* GridTile = Cast<AGridTile>(TargetTile);
 	if (GridTile) {

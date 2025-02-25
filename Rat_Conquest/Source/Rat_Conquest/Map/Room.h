@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Room.generated.h"
 
+
+
 UCLASS()
 class RAT_CONQUEST_API ARoom : public AActor
 {
@@ -38,7 +40,8 @@ public:
 public:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables",
+		Meta = (Tooltip = "Door directions: 0=North, 1=East, 2=South, 3=West"))
 	TArray<bool> DoorDirections;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")

@@ -138,7 +138,15 @@ void AGridManager::ScanWorldForObjects()
 				UE_LOG(LogTemp, Error, TEXT("Found item at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
 			}
             if (StaticMeshComp && Actor->ActorHasTag(TEXT("PlayerPos"))) {
+				PlayerPositions.Add(FVector2D(Tile->GridPosition.X, Tile->GridPosition.Y));
+
                 UE_LOG(LogTemp, Error, TEXT("FOUND PLAYER POS at Row:"));
+
+            }
+            if (StaticMeshComp && Actor->ActorHasTag(TEXT("EnemyPos"))) {
+                EnemyPositions.Add(FVector2D(Tile->GridPosition.X, Tile->GridPosition.Y));
+
+                UE_LOG(LogTemp, Error, TEXT("FOUND ENEMY POS at Row:"));
 
             }
 
@@ -195,6 +203,43 @@ void AGridManager::UpdateGridPosition()
     }
 
     UE_LOG(LogTemp, Display, TEXT("Grid moved to new origin: %s"), *NewOrigin.ToString());
+}
+
+AActor* AGridManager::SetStartingPositions(bool _bPlayerUnit)
+{
+    if (_bPlayerUnit) {
+
+		for (int i = 0; i < PlayerPositions.Num(); ++i)
+		{
+			FVector2D GridPosition = PlayerPositions[i];
+			AGridTile* Tile = GetTileAtPosition(GridPosition.X, GridPosition.Y);
+			if (Tile && !Tile->bIsOccupied)
+			{
+				Tile->bIsOccupied = true;
+                UE_LOG(LogTemp, Display, TEXT("Set player unit at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
+                return Tile;
+                
+				
+			}
+		}
+        
+    }
+    else {
+
+        for (int i = 0; i < EnemyPositions.Num(); ++i)
+        {
+            FVector2D GridPosition = EnemyPositions[i];
+            AGridTile* Tile = GetTileAtPosition(GridPosition.X, GridPosition.Y);
+            if (Tile && !Tile->bIsOccupied)
+            {
+                Tile->bIsOccupied = true;
+                UE_LOG(LogTemp, Display, TEXT("Set enemy unit at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
+                return Tile;
+            }
+        }
+    }
+    return nullptr;
+	
 }
 
 AActor* AGridManager::GetClosestAvailableTile(FVector2D Location)

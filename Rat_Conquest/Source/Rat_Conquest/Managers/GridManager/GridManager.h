@@ -25,6 +25,7 @@ public:
 	void ScanWorldForObjects();
 	void UpdateGridPosition();
 
+	AActor* SetStartingPositions(bool _bPlayerUnit);
 	AActor* GetClosestAvailableTile(FVector2D Location);
 
 	FVector2D GetGridSize();
@@ -58,6 +59,9 @@ public:
 	FVector2D WorldToGridPosition(FVector WorldPosition) const;
 	FVector GridToWorldPosition(FVector2D GridPosition) const;
 	float Tilesize = 100.f; 
+
+	TArray<FVector2D> PlayerPositions;
+	TArray<FVector2D> EnemyPositions;
 private:
 	UPROPERTY(EditAnywhere, Category = "Grid")
 	FVector2D GridSize;

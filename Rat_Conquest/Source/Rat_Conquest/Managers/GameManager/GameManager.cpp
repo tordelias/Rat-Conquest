@@ -275,6 +275,7 @@ void AGameManager::StartEncounter()
                 SpawnRotation,
                 SpawnParams
             );
+            NewEnemy->DelayedInitalPosition();
             NewEnemy->SpawnDefaultController();
 
             // Ensure possession
