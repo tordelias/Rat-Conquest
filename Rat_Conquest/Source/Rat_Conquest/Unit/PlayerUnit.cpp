@@ -132,7 +132,6 @@ void APlayerUnit::BeginPlay()
 	UnitName = FName("PlayerUnit");
 }
 
-// Called every frame
 void APlayerUnit::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -141,112 +140,117 @@ void APlayerUnit::Tick(float DeltaTime)
 	{
 		MovementProgress += DeltaTime / MovementDuration;
 		bIsCurrentUnit = false;
+
 		if (MovementProgress >= 1.0f)
 		{
 			MovementProgress = 1.0f;
 			bIsMoving = false;
-			
-			// Update the unit's position to the target tile
+
+			// Snap to final position
 			SetActorLocation(FVector(TargetPosition.X, TargetPosition.Y, GetActorLocation().Z));
 			UE_LOG(LogTemp, Display, TEXT("Finished moving to tile: %s"), *TargetPosition.ToString());
 
-			// Update the current grid position
+			// Update grid position
 			CurrentGridPosition = TargetGridPosition;
 
-			// Check if there are more tiles in the path
+			// Continue movement if there are more tiles
 			if (PathToTake.Num() > 0)
 			{
-				// Pop the next tile from the path
+				// Get the next tile
 				FVector2D NextTilePosition = PathToTake[0];
 				PathToTake.RemoveAt(0);
 
-				// Log the updated path for debugging
-				UE_LOG(LogTemp, Display, TEXT("Updated PathToTake:"));
-				for (FVector2D TilePosition : PathToTake)
-				{
-					UE_LOG(LogTemp, Display, TEXT("- %s"), *TilePosition.ToString());
-				}
-
-				// Set up movement to the next tile
 				AActor* NextTile = GridManager->GetTileAt(NextTilePosition.X, NextTilePosition.Y);
 				if (NextTile)
 				{
 					StartPosition = GetActorLocation();
 					TargetPosition = NextTile->GetActorLocation();
 					TargetGridPosition = NextTilePosition;
-					MovementProgress = 0.0f; // Reset progress
-					bIsMoving = true;        // Start movement
+					MovementProgress = 0.0f;
+					bIsMoving = true;
 				}
 			}
 			else
 			{
-				// Path is complete
+				// Movement finished
 				UE_LOG(LogTemp, Display, TEXT("Finished moving along the path."));
 
-				//add logic to choose animation based on weapon type
+				if (EnemyToAttack)
+				{
+					// Face the enemy
+					FVector EnemyDirection = (EnemyToAttack->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+					FRotator EnemyRotation = EnemyDirection.Rotation();
+					SetActorRotation(EnemyRotation);
+				}
+				else
+				{
+					// Face forward (default)
+					if (!bIsPlayerUnit)
+					SetActorRotation(FRotator(0, 0, 0));
+					else
+						SetActorRotation(FRotator(0, 180, 0));
+				}
+
+				// Trigger animation reset
 				animationToPlay = FVector2D(0, 0);
 
-				// Trigger the OnMovementComplete delegate if it's bound
+				// Notify movement completion
 				if (OnMovementComplete.IsBound())
 				{
 					OnMovementComplete.Execute();
-					OnMovementComplete.Unbind(); // Unbind the delegate after execution
+					OnMovementComplete.Unbind();
 				}
 
-				// Other logic (e.g., checking for items, finishing the turn)
+				// Finish turn if player-controlled
 				if (bIsPlayerUnit)
 				{
 					FinishTurn();
 				}
-				//this->FinishTurn();
 			}
 		}
 		else
 		{
-			// Interpolate position between StartPosition and TargetPosition
+			// Interpolate movement
 			FVector NewPosition = FMath::Lerp(StartPosition, TargetPosition, MovementProgress);
 			SetActorLocation(FVector(NewPosition.X, NewPosition.Y, GetActorLocation().Z));
 
-			// Rotate the unit to face the direction of movement
-			FVector Direction = (TargetPosition - StartPosition).GetSafeNormal();
-			FRotator TargetRotation = Direction.Rotation();
-			FRotator CurrentRotation = GetActorRotation();
+			// Ensure the unit rotates correctly (only up/down/left/right)
+			FVector Direction = TargetPosition - StartPosition;
+			FRotator TargetRotation = GetActorRotation();
 
-			// Adjust rotation to align with the unit's forward direction
-			TargetRotation.Yaw += 90.0f * -1;
+			if (FMath::Abs(Direction.X) > FMath::Abs(Direction.Y))
+			{
+				// Moving Left or Right
+				TargetRotation.Yaw = (Direction.X > 0) ? 0.0f : 180.0f; // Right (0°), Left (180°)
+			}
+			else
+			{
+				// Moving Up or Down
+				TargetRotation.Yaw = (Direction.Y > 0) ? 90.0f : -90.0f; // Up (90°), Down (-90°)
+			}
 
-			// Constrain rotation to yaw only
-			TargetRotation.Pitch = CurrentRotation.Pitch;
-			TargetRotation.Roll = CurrentRotation.Roll;
-
-			// Smoothly interpolate to the target yaw rotation
-			FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, 5.0f);
-			SetActorRotation(NewRotation);
+			SetActorRotation(TargetRotation);
 		}
 	}
 
-	//temp
+	// Handle knockback movement
 	if (bIsKnockbackActive)
 	{
-		// Update knockback progress
 		KnockbackProgress += DeltaTime / KnockbackDuration;
 
 		if (KnockbackProgress >= 1.0f)
 		{
-			// Snap to the target position when the knockback is complete
 			SetActorLocation(KnockbackTargetPosition);
 			bIsKnockbackActive = false;
 		}
 		else
 		{
-			// Interpolate between the start and target positions
 			FVector NewPosition = FMath::Lerp(KnockbackStartPosition, KnockbackTargetPosition, KnockbackProgress);
 			SetActorLocation(NewPosition);
 		}
 	}
-
-
 }
+
 
 FVector2D APlayerUnit::GetMousePosition(FVector WorldLocation, FVector WorldDirection)
 {
@@ -433,7 +437,12 @@ TArray<FVector2D> APlayerUnit::GetPathToTile(FVector2D InTargetGridPosition, FVe
 		ClosedList.Add(CurrentTile);
 
 		// Get the neighboring tiles
-		TArray<AGridTile*> NeighbourTiles = GridManager->GetNeighbourTiles(CurrentTile->GridPosition.X, CurrentTile->GridPosition.Y);
+		TArray<AGridTile*> NeighbourTiles;
+		NeighbourTiles.Add(GridManager->GetTileAtPosition(CurrentTile->GridPosition.X + 1, CurrentTile->GridPosition.Y)); // Right
+		NeighbourTiles.Add(GridManager->GetTileAtPosition(CurrentTile->GridPosition.X - 1, CurrentTile->GridPosition.Y)); // Left
+		NeighbourTiles.Add(GridManager->GetTileAtPosition(CurrentTile->GridPosition.X, CurrentTile->GridPosition.Y + 1)); // Up
+		NeighbourTiles.Add(GridManager->GetTileAtPosition(CurrentTile->GridPosition.X, CurrentTile->GridPosition.Y - 1)); // Down
+
 
 		for (AGridTile* Neighbour : NeighbourTiles)
 		{
@@ -655,6 +664,7 @@ void APlayerUnit::AttackAfterMovement()
 	{
 		animationToPlay = FVector2D(50, 0);
 		combatManager->DealDamageToUnit(this, EnemyToAttack);
+		EnemyToAttack = nullptr;
 	}
 	else
 	{
@@ -753,10 +763,7 @@ void APlayerUnit::DestoryUnit()
 			
 		}
 	}
-	Destroy();
-	
-
-	
+	Destroy(true, true);
 }
 
 void APlayerUnit::ResetPosition()
@@ -938,7 +945,7 @@ void APlayerUnit::KillAfterAnim()
 {
 	//ToBE changed. Run DestroyUnit() after 3 secound
 	animationToPlay = FVector2D(100, 0);
-	GetWorldTimerManager().SetTimer(DeathTimer, this, &APlayerUnit::DestoryUnit, 3.0f, false);
+	GetWorldTimerManager().SetTimer(DeathTimer, this, &APlayerUnit::DestoryUnit, 1.0f, false);
 }
 
 void APlayerUnit::BeginFocus()
