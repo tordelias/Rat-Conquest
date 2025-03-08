@@ -350,7 +350,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 			bIsMoving = true;        // Start movement
 
 			//PlayWalkAnimation
-			//animationToPlay = FVector2D(25, 0);
+			animationToPlay = FVector2D(25, 0);
 		}
 	}
 }
@@ -932,6 +932,13 @@ void APlayerUnit::DropItem(AItem* OldItem, FVector2D CurrentPosition)
 
 	UE_LOG(LogTemp, Log, TEXT("Player dropped item at location (%s)"), *DropLocation.ToString());
 
+}
+
+void APlayerUnit::KillAfterAnim()
+{
+	//ToBE changed. Run DestroyUnit() after 3 secound
+	animationToPlay = FVector2D(100, 0);
+	GetWorldTimerManager().SetTimer(DeathTimer, this, &APlayerUnit::DestoryUnit, 3.0f, false);
 }
 
 void APlayerUnit::BeginFocus()

@@ -140,7 +140,7 @@ void ACombatManager::KillUnit(APlayerUnit* unit)
 		GameManager->RemoveUnitFromQueue(unit);
 	}
 	PlayerCharacter->SetCurrentUnit(GameManager->CurrentUnit);
-	unit->DestoryUnit();
+	unit->KillAfterAnim();
 	// Destroy the unit
 	
 }

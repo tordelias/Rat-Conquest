@@ -56,6 +56,9 @@ public:
 	void CheckForItems();
 	void CalculateStats();
 	void DropItem(AItem* OldItem, FVector2D CurrentPosition);
+
+	void KillAfterAnim();
+	FTimerHandle DeathTimer; 
 	//Skeleton mesh
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	USkeletalMeshComponent* SkeletalMesh;
