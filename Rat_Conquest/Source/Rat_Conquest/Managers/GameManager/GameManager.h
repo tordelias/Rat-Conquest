@@ -53,7 +53,9 @@ public:
 	const int32 TurnBufferSize = 10;
 
 	bool hasSpawned = false;
+	bool bLevelFinishedGenerating = false;
 	bool bEncounterComplete = false;
+	
 	UPROPERTY()
 	TArray<APlayerUnit*> PlayerUnits;
 
@@ -76,7 +78,8 @@ public:
 	UPROPERTY()
 	APlayerUnit* CurrentUnit;
 
-
+	UPROPERTY(EditAnywhere, Category = "Test")
+	bool bTestEncounter = true;
 
 protected:
 	// Called when the game starts or when spawned

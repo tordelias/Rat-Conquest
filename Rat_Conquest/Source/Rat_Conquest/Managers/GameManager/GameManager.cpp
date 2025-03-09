@@ -22,7 +22,8 @@ AGameManager::AGameManager()
 void AGameManager::BeginPlay()
 {
     Super::BeginPlay();
-	GetWorldTimerManager().SetTimerForNextTick(this, &AGameManager::InitalizeUnits);
+    
+	
     //InitalizeUnits();
     TArray<AActor*> FoundGridManagers;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGridManager::StaticClass(), FoundGridManagers);
@@ -39,10 +40,19 @@ void AGameManager::BeginPlay()
     {
         UE_LOG(LogTemp, Error, TEXT("No GridManager found in the level!"));
     }
+    if (bTestEncounter) {
+        GridManager->ScanWorldForObjects();
+        GetWorldTimerManager().SetTimerForNextTick(this, &AGameManager::InitalizeUnits);
+    }
+    else {
+        CheckForEncounter();
+    }
    
-    CheckForEncounter();
+    
+ 
 
-    //AMainHUD* MainHUD = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+  
+    
 	
 }
 
@@ -54,20 +64,25 @@ void AGameManager::TogglePlayerTurn()
 
 void AGameManager::InitalizeUnits()
 {
+  
     for (TActorIterator<APlayerUnit> It(GetWorld()); It; ++It)
     {
         APlayerUnit* Unit = *It;
-        if (Unit->bIsPlayerUnit)
+        if (Unit && Unit->bIsPlayerUnit)
         {
+            
             PlayerUnits.Add(Unit);
             UE_LOG(LogTemp, Warning, TEXT("Player unit added"));
         }
-        else
+        else if (Unit)
         {
             EnemyUnits.Add(Unit);
             UE_LOG(LogTemp, Warning, TEXT("Enemy unit added"));
         }
 
+    }
+    if (bTestEncounter) {
+        GridManager->ScanWorldForObjects();
     }
     TogglePlayerTurn();
     StartTurnOrder();
@@ -98,9 +113,15 @@ void AGameManager::StartTurnOrder()
     // Create turn queue for multiple rounds
     for (int32 i = 0; i < VisibleTurnsAhead; i++)
     {
-        TurnQueue.Append(AllUnits);
+        for (APlayerUnit* Unit : AllUnits)
+        {
+            if (IsValid(Unit))
+            {
+                TurnQueue.Add(Unit);
+            }
+        }
     }
-
+    
     // Trim to visible limit
     if (TurnQueue.Num() > VisibleTurnsAhead)
     {
@@ -281,9 +302,10 @@ void AGameManager::EndEncounter()
 
 void AGameManager::CheckForEncounter()
 {
-    if (!GridManager) return;
-    if (GridManager->bIsGridFinished() && GridManager->bIsGridScanned)
+    
+    if (GridManager && GridManager->bIsGridFinished() && bLevelFinishedGenerating)
     {
+        
         StartEncounter();
     }
     else
@@ -308,6 +330,7 @@ void AGameManager::StartEncounter()
 {
 
     if (!GridManager) return;
+    GridManager->ScanWorldForObjects();
     //Spawn new enemies
 	for (int i = 0; i < 1; ++i)
 	{
@@ -315,7 +338,7 @@ void AGameManager::StartEncounter()
 		{
             int RandomIndex = FMath::RandRange(0, EnemyList.Num() - 1);
 
-            FVector SpawnLocation = FVector(0.f, 0.f, 0.f); // Adjust as needed
+            FVector SpawnLocation = FVector(0.f, 50.f, 0.f); // Adjust as needed
             FRotator SpawnRotation = FRotator::ZeroRotator;
 
             FActorSpawnParameters SpawnParams;
@@ -328,8 +351,16 @@ void AGameManager::StartEncounter()
                 SpawnRotation,
                 SpawnParams
             );
-            NewEnemy->DelayedInitalPosition();
-            NewEnemy->SpawnDefaultController();
+            if (NewEnemy->GridManager && NewEnemy->GridManager->bIsGridScanned) {
+
+                NewEnemy->SpawnDefaultController();
+                NewEnemy->DelayedInitalPosition();
+                UE_LOG(LogTemp, Error, TEXT("SET POSITON enemy"));
+            }
+            else {
+                UE_LOG(LogTemp, Error, TEXT("Failed to get GM for enemy"));
+            }
+         
 
             
             if (AEnemyAIController* AIController = Cast<AEnemyAIController>(NewEnemy->GetController()))
@@ -357,10 +388,8 @@ void AGameManager::StartEncounter()
 		}
 	}
 
-
-	// Initialize the player and enemy units
-	InitalizeUnits();
-    UpdateTurnQueue();
+  
+    GetWorldTimerManager().SetTimerForNextTick(this, &AGameManager::InitalizeUnits);
     float InitialDelay = 0.0f; // Starting delay in seconds
     float DelayIncrement = 1.0f; // Delay between each unit
 
@@ -370,25 +399,29 @@ void AGameManager::StartEncounter()
 
         // Incremental delay for each unit
         FTimerHandle AIUnitTurnTimerHandle;
-        GetWorld()->GetTimerManager().SetTimer(
-            AIUnitTurnTimerHandle,
-            FTimerDelegate::CreateLambda([P_unit]()
-                {
-                   P_unit->DelayedInitalPosition();
-                }),
-            InitialDelay,
-            false
-        );
+        if (P_unit->GridManager && P_unit->GridManager->bIsGridScanned) {
+            GetWorld()->GetTimerManager().SetTimer(
+                AIUnitTurnTimerHandle,
+                FTimerDelegate::CreateLambda([P_unit]()
+                    {
+                        P_unit->DelayedInitalPosition();
+                    }),
+                InitialDelay,
+                false
+            );
+            // Increase the delay for the next unit
+            InitialDelay += DelayIncrement;
+        }
+        else {
+            UE_LOG(LogTemp, Warning, TEXT("COULD NOT MOVE PLAYER!"));
+        }
+       
 
-        // Increase the delay for the next unit
-        InitialDelay += DelayIncrement;
+       
     }
    
+    //// Initialize the player and enemy units
    
-	
-	
-
-
 
 }
 
@@ -400,15 +433,16 @@ void AGameManager::UpdateTurnQueue()
         }
     }
     
-	TurnQueue.Empty();
+	
     TArray<APlayerUnit*> ValidUnits;
     if (bisPlayersturn) {
         ValidUnits.Append(PlayerUnits);
         ValidUnits.Append(EnemyUnits);
     }
     else {
-        ValidUnits.Append(EnemyUnits);
+       
         ValidUnits.Append(PlayerUnits);
+        ValidUnits.Append(EnemyUnits);
     }
     ValidUnits.RemoveAll([](APlayerUnit* Unit) { return !IsValid(Unit); });
 

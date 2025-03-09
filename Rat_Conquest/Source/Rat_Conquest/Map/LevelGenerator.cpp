@@ -123,8 +123,6 @@ ALevelGenerator::ALevelGenerator()
 void ALevelGenerator::BeginPlay()
 {
     Super::BeginPlay();
-    GenerateInitialRooms();
-    DrawDebugGrid();
     TArray<AActor*> FoundGameManagers;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGameManager::StaticClass(), FoundGameManagers);
 
@@ -140,6 +138,9 @@ void ALevelGenerator::BeginPlay()
     {
         UE_LOG(LogTemp, Error, TEXT("No GAMEdManager found in the level!"));
     }
+    GenerateInitialRooms();
+    DrawDebugGrid();
+    
 }
 
 void ALevelGenerator::GenerateInitialRooms()
@@ -469,6 +470,10 @@ void ALevelGenerator::GenerateRooms(ARoom* _CurrentRoom)
     {
         //PlaceEndRooms();
     }
+    if (GameManager) {
+        GameManager->bLevelFinishedGenerating = true;
+    }
+   
 }
 
 void ALevelGenerator::CheckOpenDoors()

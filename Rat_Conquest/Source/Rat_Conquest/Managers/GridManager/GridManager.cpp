@@ -106,6 +106,7 @@ void AGridManager::ScanWorldForObjects()
     int num = 0;
     PlayerPositions.Empty();
     EnemyPositions.Empty();
+    bIsGridScanned = false;
     for (auto& TilePair : GridTiles)
     {
         AGridTile* Tile = Cast<AGridTile>(TilePair.Value);
@@ -436,7 +437,7 @@ void AGridManager::BeginPlay()
 	//GetCenterTile(Rows, Columns);
     //GetNeighbourTiles(2, 1,Rows,Columns);
     //GetDistanceBetweenTiles(GetTileAt(2, 3), GetTileAt(3, 1));
-	ScanWorldForObjects();
+	//ScanWorldForObjects();
     
 }
 
