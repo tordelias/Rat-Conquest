@@ -104,6 +104,8 @@ void AGridManager::SetGridSize(int32 Rows, int32 Colums)
 void AGridManager::ScanWorldForObjects()
 {
     int num = 0;
+    PlayerPositions.Empty();
+    EnemyPositions.Empty();
     for (auto& TilePair : GridTiles)
     {
         AGridTile* Tile = Cast<AGridTile>(TilePair.Value);
@@ -153,6 +155,7 @@ void AGridManager::ScanWorldForObjects()
         }
     }
 	UE_LOG(LogTemp, Error, TEXT("Found %d occupied tiles in the grid"), num);
+    bIsGridScanned = true;
 
 }
 
@@ -304,6 +307,7 @@ AActor* AGridManager::GetTileAt(int32 Row, int32 Column)
 {
     FVector2D GridPosition(Row, Column);
 
+    if (GridTiles.Num() < 0) return nullptr;
     if (GridTiles.Contains(GridPosition))
     {
         AActor* Tile = GridTiles[GridPosition];
@@ -431,7 +435,7 @@ void AGridManager::BeginPlay()
 	//GetTileAt(3, 2);
 	//GetCenterTile(Rows, Columns);
     //GetNeighbourTiles(2, 1,Rows,Columns);
-    GetDistanceBetweenTiles(GetTileAt(2, 3), GetTileAt(3, 1));
+    //GetDistanceBetweenTiles(GetTileAt(2, 3), GetTileAt(3, 1));
 	ScanWorldForObjects();
     
 }

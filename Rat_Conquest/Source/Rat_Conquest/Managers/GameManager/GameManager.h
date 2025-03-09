@@ -9,6 +9,7 @@
 
 class APlayerUnit;
 class AMainHUD;
+class AGridManager;
 UCLASS()
 class RAT_CONQUEST_API AGameManager : public AActor
 {
@@ -35,6 +36,10 @@ public:
 
 	void EndEncounter();
 
+	void CheckForEncounter();
+
+	void LoadNextEncounter();
+
 	void StartEncounter();
 
 	void UpdateTurnQueue();
@@ -48,11 +53,15 @@ public:
 	const int32 TurnBufferSize = 10;
 
 	bool hasSpawned = false;
+	bool bEncounterComplete = false;
 	UPROPERTY()
 	TArray<APlayerUnit*> PlayerUnits;
 
 	UPROPERTY()
 	TArray<APlayerUnit*> EnemyUnits;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+	AGridManager* GridManager;
 
 
 	UPROPERTY()

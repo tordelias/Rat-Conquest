@@ -41,6 +41,8 @@ public:
 
 	bool bIsGridFinished() { return GridTiles.Num() > 0; };
 
+	bool bIsGridScanned = false;
+
 	UPROPERTY()
 	TMap<FVector2D, AActor*> GridTiles;
 protected:

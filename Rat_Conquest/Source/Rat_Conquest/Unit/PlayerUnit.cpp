@@ -519,7 +519,7 @@ void APlayerUnit::SetInitalPosition(FVector2D position)
 
 void APlayerUnit::DelayedInitalPosition()
 {
-	if (GridManager && GridManager->bIsGridFinished())
+	if (GridManager && GridManager->bIsGridFinished() && GridManager->bIsGridScanned)
 	{
 		SetInitalPosition(GridStartPosition);
 	}

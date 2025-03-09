@@ -11,6 +11,7 @@
 class ARoom;
 class APlayerCamera;
 class AGridManager;
+class AGameManager;
 UCLASS()
 class RAT_CONQUEST_API ALevelGenerator : public AActor
 {
@@ -51,6 +52,7 @@ public:
 	ARoom* CurrentRoom = nullptr;
 	APlayerCamera* PlayerCamera = nullptr;
 	AGridManager* GridManager = nullptr;
+	AGameManager* GameManager = nullptr;
 
 	void GenerateInitialRooms();
 	void GenerateRooms(ARoom* CurrentRoom);

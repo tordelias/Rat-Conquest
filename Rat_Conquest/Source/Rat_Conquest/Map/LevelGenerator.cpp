@@ -5,6 +5,7 @@
 #include "Room.h"
 #include "Rat_Conquest/Player/PlayerCamera.h"
 #include "Rat_Conquest/Managers/GridManager/GridManager.h"
+#include "Rat_Conquest/Managers/GameManager/GameManager.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -69,27 +70,6 @@ void ALevelGenerator::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
     if (GetWorld()->GetTimeSeconds() - LastMoveTime < InputCooldown) return;
-    if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Q)) {
-
-        DebugConnectedRooms();
-
-    }
-    if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Up))
-    {
-        MoveToRoom(0); // North
-    }
-    else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Right))
-    {
-        MoveToRoom(1); // East
-    }
-    else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Down))
-    {
-        MoveToRoom(2); // South
-    }
-    else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Left))
-    {
-        MoveToRoom(3); // West
-    }
     if (CurrentRoom)
     {
         // Draw persistent debug sphere over current room
@@ -105,14 +85,39 @@ void ALevelGenerator::Tick(float DeltaTime)
             0,
             5.0f
         );
-		
+
     }
+    //if (GameManager && !GameManager->bEncounterComplete) return;
+    if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Q)) {
+
+        DebugConnectedRooms();
+       
+    }
+    if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Up))
+    {
+        MoveToRoom(0); // North
+
+    }
+    else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Right))
+    {
+        MoveToRoom(1); // East
+    }
+    else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Down))
+    {
+        MoveToRoom(2); // South
+    }
+    else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Left))
+    {
+        MoveToRoom(3); // West
+    }
+   
 }
 
 ALevelGenerator::ALevelGenerator()
 {
     PrimaryActorTick.bCanEverTick = true;
     RandomStream.GenerateNewSeed();
+   
 }
 
 void ALevelGenerator::BeginPlay()
@@ -120,6 +125,21 @@ void ALevelGenerator::BeginPlay()
     Super::BeginPlay();
     GenerateInitialRooms();
     DrawDebugGrid();
+    TArray<AActor*> FoundGameManagers;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGameManager::StaticClass(), FoundGameManagers);
+
+    if (FoundGameManagers.Num() > 0)
+    {
+        GameManager = Cast<AGameManager>(FoundGameManagers[0]);
+        if (FoundGameManagers.Num() > 1)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Multiple GAMEdManagers found! Using first instance."));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("No GAMEdManager found in the level!"));
+    }
 }
 
 void ALevelGenerator::GenerateInitialRooms()
@@ -163,7 +183,7 @@ void ALevelGenerator::GenerateInitialRooms()
         }
         Attempts++;
     }
-
+   
     UE_LOG(LogTemp, Error, TEXT("Failed to find valid starting room after %d attempts"), MaxAttempts);
   
 }
@@ -264,7 +284,7 @@ TArray<bool> ALevelGenerator::CheckNeighbors(const FVector2D& GridPosition, int3
         else
         {
             // Random chance for potential door
-            NeighborDirections[DirIdx] = FMath::RandRange(0,4) == 0;
+            NeighborDirections[DirIdx] = FMath::RandRange(0,2) == 0;
         }
     }
 
@@ -348,9 +368,11 @@ void ALevelGenerator::MoveToRoom(int32 DirectionIndex)
             UE_LOG(LogTemp, Display, TEXT("Moved to room at (%d, %d)"),
                 FMath::RoundToInt(TargetPosition.X),
                 FMath::RoundToInt(TargetPosition.Y));
+           
 			OnPlayerEnterRoom(CurrentRoom);
+           
             LastMoveTime = GetWorld()->GetTimeSeconds();
-			
+            GameManager->LoadNextEncounter();
         }
         else
         {
