@@ -37,6 +37,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Grid Settings")
 	int32 MaxRooms = 4;
 
+
+
 	float InputCooldown = 0.5f;
 	float LastMoveTime = -1.0f;
 

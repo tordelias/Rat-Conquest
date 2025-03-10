@@ -28,6 +28,9 @@ public:
 
     FVector2D GridPosition;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+    bool bIsBridgeTile = false;
+
     void BeginFocus();
     void EndFocus();
     void GreenHighlight();

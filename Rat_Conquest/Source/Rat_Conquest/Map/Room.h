@@ -37,6 +37,9 @@ public:
 	UStaticMeshComponent* RoomMesh;
 	void DrawDebugDoors();
 
+	UFUNCTION(BlueprintCallable)
+	void ConstructBridges();
+
 public:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -52,6 +55,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	bool bIsLootRoom = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	int bridgeLength = 10;
+
+	UPROPERTY(EditAnywhere, Category = "Grid Settings")
+	TSubclassOf<AActor> GridTileClass;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
