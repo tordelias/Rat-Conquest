@@ -182,6 +182,13 @@ void APlayerCamera::FoundInteractable(AActor* NewInteractable)
 					}
 				}
             }
+            else
+            {
+                if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController()))
+                {
+                    PC->UseMouseDefaultPointer();
+                }
+            }
         }
         else
         {
@@ -290,7 +297,7 @@ void APlayerCamera::SwitchMouseCursor(TObjectPtr<APlayerUnit> Enemy)
         FVector2D PlayerLocation = CurrentUnit->CurrentGridPosition;
         float Distance = FVector2D::Distance(PlayerLocation, Enemy->CurrentGridPosition);
 
-        if (Distance <= Range)
+        if (Distance <= Range + 1)
         {
 
             PC->UseMouseMeleeAttackPointer();
