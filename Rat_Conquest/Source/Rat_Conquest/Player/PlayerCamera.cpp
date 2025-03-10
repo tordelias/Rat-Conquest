@@ -292,23 +292,25 @@ void APlayerCamera::SwitchMouseCursor(TObjectPtr<APlayerUnit> Enemy)
 {
     if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController())) // Cast to your custom controller
     {
+        if (Enemy)
+	    {
+		    float Range = CurrentUnit->MovementSpeed;
+	    	FVector2D PlayerLocation = CurrentUnit->CurrentGridPosition;
+	    	float Distance = FVector2D::Distance(PlayerLocation, Enemy->CurrentGridPosition);
 
-        float Range = CurrentUnit->MovementSpeed;
-        FVector2D PlayerLocation = CurrentUnit->CurrentGridPosition;
-        float Distance = FVector2D::Distance(PlayerLocation, Enemy->CurrentGridPosition);
+	    	if (Distance <= Range + 1)
+	    	{
 
-        if (Distance <= Range + 1)
-        {
+	    		PC->UseMouseMeleeAttackPointer();
+	    		float RotationAngle = Enemy->GetMouseRotationToEnemy(this);
 
-            PC->UseMouseMeleeAttackPointer();
-			float RotationAngle = Enemy->GetMouseRotationToEnemy(this);
-
-            PC->changeMouseRotation(RotationAngle);  // Pass the calculated rotation
-        }
-        else
-        {
-            PC->UseMouseDefaultPointer();
-        }
+	    		PC->changeMouseRotation(RotationAngle);  // Pass the calculated rotation
+	    	}
+	    	else
+	    	{
+	    		PC->UseMouseDefaultPointer();
+	    	}
+	    }
     }
 }
 

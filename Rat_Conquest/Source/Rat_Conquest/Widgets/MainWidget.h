@@ -22,6 +22,9 @@ public:
 
 	void AddTurnImage(class APlayerUnit* unit);
 	void RemoveTurnImage();
+    void ClearTurnImages();
+	void UpdateTurnQueue(const TArray<APlayerUnit*>& TurnQueue);
+	void RemoveUnitFromQueue(APlayerUnit* unit);
 
 protected:
     // Reference to the TurnIndicatorWidget class

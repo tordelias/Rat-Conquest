@@ -213,13 +213,12 @@ void AGameManager::EndUnitTurn()
     CurrentUnit = nullptr;
 
     if (EnemyUnits.Num() == 0) {
-
         bEncounterComplete = true;
         if (LevelGenerator) {
             LevelGenerator->SetupRoomSelectUI();
         }
-       
     }
+
     if (TurnQueue.Num() > 0)
     {
         // Remove the front unit (current) and get next
@@ -227,50 +226,41 @@ void AGameManager::EndUnitTurn()
 
         if (MainHUD)
         {
-            MainHUD->RemoveTurnImage();
+            MainHUD->RemoveTurnImage();  // Remove the image for the unit that just finished its turn
         }
 
         if (TurnQueue.Num() > 0)
         {
-			
             CurrentUnit = TurnQueue[0];
             HighlightUnitAndTiles(CurrentUnit);
             ExecuteTurn();
         }
         else
         {
-            // Only switch sides when queue is empty
-
             bisPlayersturn = !bisPlayersturn;
-            StartTurnOrder();
+            StartTurnOrder();  // Restart the turn order if queue is empty
         }
 
-        
-        
+        // Update turn queue UI after removing a unit
+        //MainHUD->RemoveTurnImage(); 
     }
     else
     {
-        // Queue empty but units might still exist
         bisPlayersturn = !bisPlayersturn;
-        StartTurnOrder();
+        StartTurnOrder();  // Restart the turn order if queue is empty
     }
-   
 }
+
+
 
 void AGameManager::RemoveUnitFromQueue(APlayerUnit* Unit)
 {
     if (!Unit) return;
 
-    // Remove ALL instances from queue
+    // Remove all instances of the unit from the turn queue
     TurnQueue.RemoveAll([Unit](APlayerUnit* Entry) {
         return Entry == Unit;
         });
-
-    // Update HUD first
-    if (MainHUD)
-    {
-        MainHUD->RemoveTurnImage(); // Modified to take specific unit
-    }
 
     // Remove from team lists
     if (Unit->bIsPlayerUnit) {
@@ -280,15 +270,23 @@ void AGameManager::RemoveUnitFromQueue(APlayerUnit* Unit)
         EnemyUnits.Remove(Unit);
     }
 
-    // Handle active unit
+    // Handle current unit
     if (CurrentUnit == Unit) {
         CurrentUnit->FinishTurn();
-        EndUnitTurn();
+        EndUnitTurn(); // Ensures turn progression
     }
 
-    // Full queue update
+    // Now, instead of manually handling UI updates here, delegate it to the widget's method
+    if (MainHUD) {
+        MainHUD->RemoveUnitFromQueue(Unit);  // Call the widget method to handle UI updates
+    }
+
+    // Update the turn queue after removing a unit
     UpdateTurnQueue();
 }
+
+
+
 
 void AGameManager::HandleAITurnAfterDelay()
 {
@@ -447,48 +445,48 @@ void AGameManager::StartEncounter()
 
 void AGameManager::UpdateTurnQueue()
 {
-    for (APlayerUnit* Unit : TurnQueue) {
-        if (MainHUD) {
-            MainHUD->RemoveTurnImage();
-        }
+    // Clear UI first
+    if (MainHUD) {
+        MainHUD->ClearTurnImages(); // Make sure this is clearing all previous turn indicators
     }
-    
-	
+
+    // Create a fresh list of valid units for the current turn order
     TArray<APlayerUnit*> ValidUnits;
     if (bisPlayersturn) {
         ValidUnits.Append(PlayerUnits);
         ValidUnits.Append(EnemyUnits);
     }
     else {
-       
-        ValidUnits.Append(PlayerUnits);
         ValidUnits.Append(EnemyUnits);
+        ValidUnits.Append(PlayerUnits);
     }
+
+    // Remove invalid units (this is important to ensure we don’t display dead units)
     ValidUnits.RemoveAll([](APlayerUnit* Unit) { return !IsValid(Unit); });
 
-    // Regenerate visible queue
+    // Clear previous queue and regenerate it
     TurnQueue.Empty();
     for (int32 i = 0; i < VisibleTurnsAhead; i++) {
-        TurnQueue.Append(ValidUnits);
+        TurnQueue.Append(ValidUnits); // Append the units repeatedly to simulate the upcoming turns
     }
     TurnQueue.SetNum(FMath::Min(VisibleTurnsAhead, TurnQueue.Num()));
 
-    // Update HUD
+    // Now add the new valid turn images to the HUD
     if (MainHUD) {
         for (APlayerUnit* Unit : TurnQueue) {
             if (IsValid(Unit)) {
-                MainHUD->AddTurnImage(Unit);
+                MainHUD->AddTurnImage(Unit); // Add turn indicator for each valid unit
             }
         }
     }
 
-    // Handle current unit
-    if (TurnQueue.Num() > 0 && !CurrentUnit) {
+    // Set the new current unit
+    if (TurnQueue.Num() > 0) {
         CurrentUnit = TurnQueue[0];
         HighlightUnitAndTiles(CurrentUnit);
     }
- 
 }
+
 
 void AGameManager::GenerateTurnBuffer()
 {

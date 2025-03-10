@@ -108,6 +108,42 @@ void AMainHUD::RemoveTurnImage()
 	}
 }
 
+void AMainHUD::ClearTurnImages()
+{
+	if (MainWidget)
+	{
+		MainWidget->ClearTurnImages(); 
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("MainWidget is null!"));
+	}
+}
+
+void AMainHUD::UpdateTurnQueue(const TArray<APlayerUnit*>& TurnQueue)
+{
+	if (MainWidget)
+	{
+		MainWidget->UpdateTurnQueue(TurnQueue);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("MainWidget is null!"));
+	}
+}
+
+void AMainHUD::RemoveUnitFromQueue(APlayerUnit* unit)
+{
+	if (MainWidget)
+	{
+		MainWidget->RemoveUnitFromQueue(unit);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("MainWidget is null!"));
+	}
+}
+
 void AMainHUD::ShowMutationWidget()
 {
 	if (MutationWidget)

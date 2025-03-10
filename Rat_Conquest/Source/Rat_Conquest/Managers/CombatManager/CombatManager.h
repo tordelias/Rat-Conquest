@@ -19,7 +19,7 @@ public:
 	void DealDamageToUnit(APlayerUnit* Attackerunit, APlayerUnit* Defenderunit);
 	void ApplyKnockback(APlayerUnit* Attackerunit, APlayerUnit* Defenderunit);
 	void ResetKnockbackPosition(APlayerUnit* Defenderunit);
-	void TakeDamage(APlayerUnit* unit, int amount);
+	void HandleUnitDamage(APlayerUnit* unit, int amount);
 	void KillUnit(APlayerUnit* unit);
 
 protected:

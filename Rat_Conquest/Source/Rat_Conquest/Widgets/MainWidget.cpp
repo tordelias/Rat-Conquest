@@ -52,3 +52,26 @@ void UMainWidget::RemoveTurnImage()
 		TurnIndicatorWidget->RemoveTurnImage();
 	}
 }
+void UMainWidget::ClearTurnImages()
+{
+	if (TurnIndicatorWidget)
+	{
+		TurnIndicatorWidget->ClearTurnImages();
+	}
+}
+
+void UMainWidget::UpdateTurnQueue(const TArray<APlayerUnit*>& TurnQueue)
+{
+	if (TurnIndicatorWidget)
+	{
+		TurnIndicatorWidget->UpdateTurnQueue(TurnQueue);
+	}
+}
+
+void UMainWidget::RemoveUnitFromQueue(APlayerUnit* unit)
+{
+	if (TurnIndicatorWidget)
+	{
+		TurnIndicatorWidget->RemoveUnitFromQueue(unit);
+	}
+}

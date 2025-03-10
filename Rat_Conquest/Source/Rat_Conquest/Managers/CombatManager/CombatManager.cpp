@@ -47,7 +47,7 @@ void ACombatManager::DealDamageToUnit(APlayerUnit* Attackerunit, APlayerUnit* De
     ApplyKnockback(Attackerunit, Defenderunit);
 
     // Apply damage to the defender
-    TakeDamage(Defenderunit, TotalDamage);
+    HandleUnitDamage(Defenderunit, TotalDamage);
 }
 
 void ACombatManager::ApplyKnockback(APlayerUnit* Attackerunit, APlayerUnit* Defenderunit)
@@ -96,7 +96,7 @@ void ACombatManager::ResetKnockbackPosition(APlayerUnit* Defenderunit)
     Defenderunit->bIsKnockbackActive = false;
 }
 
-void ACombatManager::TakeDamage(APlayerUnit* unit, int amount)
+void ACombatManager::HandleUnitDamage(APlayerUnit* unit, int amount)
 {
 	if (!unit)
 	{
@@ -122,28 +122,40 @@ void ACombatManager::TakeDamage(APlayerUnit* unit, int amount)
 
 void ACombatManager::KillUnit(APlayerUnit* unit)
 {
-	if (!unit)
-	{
-		UE_LOG(LogTemp, Error, TEXT("KillUnit failed: Unit is null!"));
-		return;
-	}
+    if (!unit)
+    {
+        UE_LOG(LogTemp, Error, TEXT("KillUnit failed: Unit is null!"));
+        return;
+    }
 
-	// If there's a player character, clear the current unit reference
-	APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	if (PlayerCharacter)
-	{
-		PlayerCharacter->SetCurrentUnit(nullptr);
-	}
-	AGameManager* GameManager = Cast<AGameManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass()));
-	if (GameManager)
-	{
-		GameManager->RemoveUnitFromQueue(unit);
-	}
-	PlayerCharacter->SetCurrentUnit(GameManager->CurrentUnit);
-	unit->KillAfterAnim();
-	// Destroy the unit
-	
+    // Clear player's current unit reference
+    APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+    if (PlayerCharacter)
+    {
+        PlayerCharacter->SetCurrentUnit(nullptr);
+    }
+
+    // Get the game manager
+    AGameManager* GameManager = Cast<AGameManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass()));
+    if (GameManager)
+    {
+        // Check if the killed unit was the current unit
+        bool bWasCurrentUnit = (GameManager->CurrentUnit == unit);
+
+        // Remove unit from queue
+        GameManager->RemoveUnitFromQueue(unit);
+
+        // If the killed unit was the current turn unit, properly move to the next turn
+        if (bWasCurrentUnit)
+        {
+            GameManager->EndUnitTurn();
+        }
+    }
+
+    // Destroy the unit (after playing death animation, if needed)
+    unit->KillAfterAnim();
 }
+
 
 // Called when the game starts or when spawned
 void ACombatManager::BeginPlay()

@@ -27,6 +27,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetCurrentUnit(APlayerUnit* Unit);
 
+	void UpdateTurnQueue(const TArray<APlayerUnit*>& sentTurnQueue);
+	void RemoveUnitFromQueue(APlayerUnit* unit);
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
 	TSubclassOf<UUserWidget> UnitImageWidgetClass;
@@ -34,6 +37,8 @@ protected:
 	TArray<UUserWidget*> UnitImageWidgets;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
 	UUserWidget* CurrentUnitImageWidget;
+
+	TArray<APlayerUnit*> TurnQueue;
 	
 	
 };

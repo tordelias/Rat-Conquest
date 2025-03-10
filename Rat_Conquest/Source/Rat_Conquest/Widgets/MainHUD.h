@@ -57,6 +57,9 @@ public:
 	void UpdateStatWidget(FInteractableData* data);
 	void AddTurnImage(class APlayerUnit* unit);
 	void RemoveTurnImage();
+	void ClearTurnImages();
+	void UpdateTurnQueue(const TArray<APlayerUnit*>& TurnQueue);
+	void RemoveUnitFromQueue(APlayerUnit* unit);
 	void ShowMutationWidget();
 	void CloseMutationWidget();
 	void UpdateMutationWidget(TArray<int> statsC1, TArray<int> statsC2, TArray<int> statsC3, FName UnitName, APlayerUnit* unit);
