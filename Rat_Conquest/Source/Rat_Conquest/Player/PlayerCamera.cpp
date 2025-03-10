@@ -19,6 +19,7 @@
 #include "Rat_Conquest/Components/InteractionInterface.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
 #include "Rat_Conquest/Widgets/MainHUD.h"
+#include "Rat_Conquest/GridTile/GridTile.h"
 
 // Sets default values
 APlayerCamera::APlayerCamera()
@@ -149,14 +150,44 @@ void APlayerCamera::FoundInteractable(AActor* NewInteractable)
     if (TargetInteractable)
     {
         APlayerUnit* PlayerUnit = Cast<APlayerUnit>(TargetInteractable.GetObject());
+        //cast to gridTile
+		AGridTile* GridTile = Cast<AGridTile>(TargetInteractable.GetObject());
 
         if (PlayerUnit)
         {
-            UE_LOG(LogTemp, Error, TEXT("Successfully casted to APlayerUnit"));
             if (mainHUD)
             {
                 mainHUD->ShowStatWidget();
 				mainHUD->UpdateStatWidget(&PlayerUnit->InstanceInteractableData);
+            }
+            if (!PlayerUnit->bIsPlayerUnit)
+            {
+                UE_LOG(LogTemp, Error, TEXT("Successfully found Enemy"));
+				SwitchMouseCursor(PlayerUnit);
+            }
+        }
+		else if (GridTile)
+        {
+            if (GridTile->unitRefrence)
+            {
+	            if (!GridTile->unitRefrence->bIsPlayerUnit)
+				{
+					SwitchMouseCursor(GridTile->unitRefrence);
+				}
+                else
+				{
+					if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController()))
+					{
+						PC->UseMouseDefaultPointer();
+					}
+				}
+            }
+        }
+        else
+        {
+            if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController()))
+            {
+                PC->UseMouseDefaultPointer();
             }
         }
     }
@@ -198,22 +229,33 @@ void APlayerCamera::NoInteractableFound()
 void APlayerCamera::BeginInteract()
 {
     PerformInteractionCheck();
+
     if (InteractionData.CurrentInteractable)
     {
         if (IsValid(TargetInteractable.GetObject()))
         {
             TargetInteractable->BeginMouseHoverFocus();
+
+            // Interaction logic
             if (FMath::IsNearlyZero(TargetInteractable->InteractableData.InteractionDuration, 0.1f))
             {
                 Interact();
             }
             else
             {
-                GetWorldTimerManager().SetTimer(TimerHandleInteraction, this, &APlayerCamera::Interact, TargetInteractable->InteractableData.InteractionDuration, false);
+                GetWorldTimerManager().SetTimer(
+                    TimerHandleInteraction,
+                    this,
+                    &APlayerCamera::Interact,
+                    TargetInteractable->InteractableData.InteractionDuration,
+                    false
+                );
             }
         }
     }
+
 }
+
 
 void APlayerCamera::EndInteract()
 {
@@ -238,6 +280,32 @@ void APlayerCamera::Interact()
         }
     }
 }
+
+void APlayerCamera::SwitchMouseCursor(TObjectPtr<APlayerUnit> Enemy)
+{
+    if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController())) // Cast to your custom controller
+    {
+
+        float Range = CurrentUnit->MovementSpeed;
+        FVector2D PlayerLocation = CurrentUnit->CurrentGridPosition;
+        float Distance = FVector2D::Distance(PlayerLocation, Enemy->CurrentGridPosition);
+
+        if (Distance <= Range)
+        {
+
+            PC->UseMouseMeleeAttackPointer();
+			float RotationAngle = Enemy->GetMouseRotationToEnemy(this);
+
+            PC->changeMouseRotation(RotationAngle);  // Pass the calculated rotation
+        }
+        else
+        {
+            PC->UseMouseDefaultPointer();
+        }
+    }
+}
+
+
 
 void APlayerCamera::Look(const FInputActionValue& Value)
 {

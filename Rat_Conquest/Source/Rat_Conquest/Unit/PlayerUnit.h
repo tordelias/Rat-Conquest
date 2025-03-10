@@ -123,6 +123,7 @@ public:
 	TArray<int> GetMutationC1();
 	TArray<int> GetMutationC2();
 	TArray<int> GetMutationC3();
+	float GetMouseRotationToEnemy(APlayerCamera* Camera);
 	void ApplyMutation(TArray<int>);
 
 	void BeginFocus();

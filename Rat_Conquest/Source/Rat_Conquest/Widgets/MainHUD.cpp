@@ -41,7 +41,7 @@ void AMainHUD::BeginPlay()
 		if (MutationWidget)
 		{
 			MutationWidget->AddToViewport();
-			MutationWidget->SetVisibility(ESlateVisibility::Hidden);
+			MutationWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
 	if (RoomSelectWidgetClass) {

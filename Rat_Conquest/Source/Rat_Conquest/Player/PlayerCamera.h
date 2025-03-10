@@ -101,6 +101,9 @@ protected:
 
 	void Interact();
 
+	void SwitchMouseCursor(TObjectPtr<APlayerUnit> Enemy);
+	bool bIsDeaultCursor = true;
+
 	//PlayerUnit movement
 	APlayerUnit* CurrentUnit;
 

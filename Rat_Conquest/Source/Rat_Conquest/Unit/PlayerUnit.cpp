@@ -583,6 +583,9 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		UE_LOG(LogTemp, Display, TEXT("Mouse pos X=%f, Y=%f, Enemy pos X=%f, Y=%f"), MouseGridPos.X, MouseGridPos.Y, TargetEnemyLocation.X, TargetEnemyLocation.Y);
 
 		FVector2D AttackDirection = GetCardinalDirection(FVector2D(this->GetTargetLocation().X,this->GetTargetLocation().Y), MouseGridPos);
+
+		UE_LOG(LogTemp, Display, TEXT("Cardinal Direction when attacking: %s"), *AttackDirection.ToString());
+
 		FVector2D AttackTileGridPos = EnemyPosition + AttackDirection;
 		UE_LOG(LogTemp, Display, TEXT("Attack tile pos X=%f, Y=%f"), AttackTileGridPos.X, AttackTileGridPos.Y);
 
@@ -1102,6 +1105,40 @@ TArray<int> APlayerUnit::GetMutationC3()
 {
 	return mutationData->GetStatsC3();
 }
+
+float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
+{
+	// Get the mouse position on the world grid
+	MouseGridPos = GetMousePosition(Camera->GetMouseWorldLocation(), Camera->GetMouseWorldDirection());
+	FVector2D AttackDirection = GetCardinalDirection(FVector2D(this->GetTargetLocation().X, this->GetTargetLocation().Y), MouseGridPos);
+	float Angle = 0.0f;
+
+	// Check if the mouse is to the left, right, up, or down of the enemy
+	if (AttackDirection.X == 1 && AttackDirection.Y == 0) // Down
+	{
+		Angle = 180.0f;
+	}
+	else if (AttackDirection.X == -1 && AttackDirection.Y == 0) // Up
+	{
+		Angle = 0.0f;
+
+	}
+	else if (AttackDirection.Y == 1 && AttackDirection.X == 0) // Left
+	{
+		Angle = 90.0f;
+	}
+	else if (AttackDirection.Y == -1 && AttackDirection.X == 0) // Right
+	{
+		Angle = 270.0f;
+	}
+
+
+	// Return the angle
+	return Angle;
+}
+
+
+
 
 void APlayerUnit::ApplyMutation(TArray<int> statsToAdd)
 {

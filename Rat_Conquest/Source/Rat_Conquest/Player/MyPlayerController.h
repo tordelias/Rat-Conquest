@@ -9,7 +9,7 @@
 struct FInputActionValue;
 class UInputMappingContext;
 class UInputAction;
-
+class UUserWidget;
 /**
  * 
  */
@@ -23,5 +23,19 @@ protected:
 	UInputMappingContext* InputMappingContext;
 
 	virtual void SetupInputComponent() override;
+
+	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widgets")
+	TSubclassOf<UUserWidget> MouseMeleeAttackPointerClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	TObjectPtr<UUserWidget> MouseMeleeAttackPointer;
+
+public:
+	void UseMouseMeleeAttackPointer();
+	void changeMouseRotation(float rotation);
+
+	void UseMouseDefaultPointer(); 
 	
 };
