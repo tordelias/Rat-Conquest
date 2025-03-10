@@ -21,7 +21,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddTurnImage(APlayerUnit* unit);
 	UFUNCTION(BlueprintCallable)
-	void RemoveTurnImage();
+	void RemoveTurnImage(APlayerUnit* unit);
 	UFUNCTION(BlueprintCallable)
 	void ClearTurnImages();
 	UFUNCTION(BlueprintCallable)
@@ -38,7 +38,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
 	UUserWidget* CurrentUnitImageWidget;
 
-	TArray<APlayerUnit*> TurnQueue;
 	
 	
 };

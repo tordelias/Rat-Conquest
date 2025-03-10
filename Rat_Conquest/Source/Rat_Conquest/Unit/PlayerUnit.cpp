@@ -1116,20 +1116,20 @@ float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
 	// Check if the mouse is to the left, right, up, or down of the enemy
 	if (AttackDirection.X == 1 && AttackDirection.Y == 0) // Down
 	{
-		Angle = 180.0f;
+		Angle = 0.0f;
 	}
 	else if (AttackDirection.X == -1 && AttackDirection.Y == 0) // Up
 	{
-		Angle = 0.0f;
+		Angle = 180.0f;
 
 	}
 	else if (AttackDirection.Y == 1 && AttackDirection.X == 0) // Left
 	{
-		Angle = 90.0f;
+		Angle = 270.0f;
 	}
 	else if (AttackDirection.Y == -1 && AttackDirection.X == 0) // Right
 	{
-		Angle = 270.0f;
+		Angle = 90.0f;
 	}
 
 

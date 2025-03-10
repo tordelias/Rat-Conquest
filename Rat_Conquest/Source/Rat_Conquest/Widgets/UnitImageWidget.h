@@ -28,6 +28,6 @@ public:
     void SetSize(bool bIsFirstElement);
 
     //// Reference to the unit this widget represents
-    //UPROPERTY()
-    //APlayerUnit* Unit;
+    UPROPERTY()
+    APlayerUnit* Unit;
 };

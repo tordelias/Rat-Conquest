@@ -292,25 +292,48 @@ void APlayerCamera::SwitchMouseCursor(TObjectPtr<APlayerUnit> Enemy)
 {
     if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController())) // Cast to your custom controller
     {
-        if (Enemy)
-	    {
-		    float Range = CurrentUnit->MovementSpeed;
-	    	FVector2D PlayerLocation = CurrentUnit->CurrentGridPosition;
-	    	float Distance = FVector2D::Distance(PlayerLocation, Enemy->CurrentGridPosition);
+        if (Enemy && CurrentUnit)
+        {
+            float Range = CurrentUnit->MovementSpeed;
+            FVector2D PlayerLocation = CurrentUnit->CurrentGridPosition;
+            float Distance = FVector2D::Distance(PlayerLocation, Enemy->CurrentGridPosition);
 
-	    	if (Distance <= Range + 1)
-	    	{
+            if (Distance <= Range + 1)
+            {
+                // Use melee attack pointer when in range
+                PC->UseMouseMeleeAttackPointer();
 
-	    		PC->UseMouseMeleeAttackPointer();
-	    		float RotationAngle = Enemy->GetMouseRotationToEnemy(this);
+                // Get the mouse rotation to the enemy
+                float RotationAngle = Enemy->GetMouseRotationToEnemy(this);
 
-	    		PC->changeMouseRotation(RotationAngle);  // Pass the calculated rotation
-	    	}
-	    	else
-	    	{
-	    		PC->UseMouseDefaultPointer();
-	    	}
-	    }
+                // Adjust the rotation angle based on the camera's yaw
+                // Get the camera's yaw (only horizontal rotation)
+                FRotator CameraRotation = ThirdPersonCameraComponent->GetComponentRotation(); // Get the camera's rotation
+                
+                float CameraYaw = CameraRotation.Yaw;
+
+                // Adjust the mouse rotation by subtracting the camera's yaw to make it relative to the camera
+                float AdjustedRotation = RotationAngle - CameraYaw;
+
+                // Normalize the angle to ensure it's within a valid range
+                if (AdjustedRotation < 0.0f)
+                {
+                    AdjustedRotation += 360.0f;
+                }
+                else if (AdjustedRotation >= 360.0f)
+                {
+                    AdjustedRotation -= 360.0f;
+                }
+
+                // Apply the adjusted rotation to the mouse pointer
+                PC->changeMouseRotation(AdjustedRotation);
+            }
+            else
+            {
+                // Default mouse pointer when out of range
+                PC->UseMouseDefaultPointer();
+            }
+        }
     }
 }
 

@@ -49,7 +49,7 @@ void UMainWidget::RemoveTurnImage()
 {
 	if (TurnIndicatorWidget)
 	{
-		TurnIndicatorWidget->RemoveTurnImage();
+		TurnIndicatorWidget->RemoveTurnImage(nullptr);
 	}
 }
 void UMainWidget::ClearTurnImages()

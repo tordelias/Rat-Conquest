@@ -150,11 +150,15 @@ void ACombatManager::KillUnit(APlayerUnit* unit)
         {
             GameManager->EndUnitTurn();
         }
+
+        // Optionally update the turn order after a unit dies
+        GameManager->UpdateTurnQueue();
     }
 
     // Destroy the unit (after playing death animation, if needed)
     unit->KillAfterAnim();
 }
+
 
 
 // Called when the game starts or when spawned

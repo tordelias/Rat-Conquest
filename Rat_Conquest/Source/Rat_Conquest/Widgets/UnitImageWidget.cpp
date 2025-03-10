@@ -5,16 +5,16 @@
 #include "Components/TextBlock.h"
 #include "Components/SizeBox.h"
 
-void UUnitImageWidget::SetData(APlayerUnit* Unit)
+void UUnitImageWidget::SetData(APlayerUnit* _Unit)
 {
-    if (Unit)
+    if (_Unit)
     {
-       // this->Unit = Unit;
+        this->Unit = _Unit;
 
         // Set the unit's image (assuming APlayerUnit has a GetUnitTexture() function)
-        if (UnitImage && Unit->UnitIcon)
+        if (UnitImage && _Unit->UnitIcon)
         {
-            UnitImage->SetBrushFromTexture(Unit->UnitIcon);
+            UnitImage->SetBrushFromTexture(_Unit->UnitIcon);
         }
 
         // Set the unit's name (assuming APlayerUnit has a GetUnitName() function)
