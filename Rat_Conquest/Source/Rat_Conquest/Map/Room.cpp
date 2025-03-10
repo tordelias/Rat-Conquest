@@ -68,46 +68,70 @@ void ARoom::ConstructBridges()
     SpawnParams.Owner = this;
     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-    int BridgeLength = 5; // Adjust to control bridge length
-    int InitialOffsetX = 4.25; // How many tiles away the bridge starts on the X axis
-    int InitialOffsetY = 6; // How many tiles away the bridge starts on the Y axis
+    const int32 BridgeLength = 5; // Adjust to control bridge length
+    const int32 InitialOffsetX = 1; // Tiles away on X axis
+    const int32 InitialOffsetY = 1; // Tiles away on Y axis
 
-    // Offsets for moving directionally
-    FVector DirectionOffsets[4] = {
+    // Configuration structure for direction parameters
+    struct FDirectionConfig
+    {
+        float OffsetMultiplier;
+        FVector2D PositionAdjustments;
+        bool bAdjustX;
+    };
+
+    // Direction order: North, East, South, West
+    const FDirectionConfig DirectionConfigs[4] = {
+        {525.0f, FVector2D(25.0f, -75.0f), true},   // North
+        {425.0f, FVector2D(-25.0f, 75.0f), false},  // East
+        {575.0f, FVector2D(25.0f, -75.0f), true},   // South
+        {475.0f, FVector2D(-25.0f, 75.0f), false}   // West
+    };
+
+    const FVector DirectionVectors[4] = {
         FVector(0, -1, 0),  // North
         FVector(1, 0, 0),   // East
         FVector(0, 1, 0),   // South
         FVector(-1, 0, 0)   // West
     };
 
-    // Initial offset based on direction (applied before bridge extension)
-    FVector InitialOffsets[4] = {
-        FVector(0, -InitialOffsetY, 0),  // North: Offset on Y
-        FVector(InitialOffsetX, 0, 0),   // East: Offset on X
-        FVector(0, InitialOffsetY, 0),   // South: Offset on Y
-        FVector(-InitialOffsetX, 0, 0)   // West: Offset on X
+    const FVector InitialOffsets[4] = {
+        FVector(0, -InitialOffsetY, 0),  // North
+        FVector(InitialOffsetX, 0, 0),   // East
+        FVector(0, InitialOffsetY, 0),   // South
+        FVector(-InitialOffsetX, 0, 0)   // West
     };
 
-    for (int i = 0; i < 4; ++i)
+    for (int32 i = 0; i < 4; ++i)
     {
-        if (DoorDirections[i])
+        const FDirectionConfig& Config = DirectionConfigs[i];
+        const FVector BaseOffset = InitialOffsets[i] * Config.OffsetMultiplier;
+        const FVector BaseLocation = GetActorLocation() + BaseOffset;
+
+        // Create two parallel bridge starting points
+        for (const float Adjustment : {Config.PositionAdjustments.X, Config.PositionAdjustments.Y})
         {
-            // Start further away using the appropriate initial offset
-            FVector Location = GetActorLocation() + (InitialOffsets[i] * 100);
-            Location.Z = 50.f; // Ensure Z remains the same
+            FVector SpawnLocation = BaseLocation;
+            SpawnLocation.Z = GetActorLocation().Z - 25;
 
-            for (int j = 0; j < BridgeLength; ++j)
+            // Apply position adjustment
+            if (Config.bAdjustX) {
+                SpawnLocation.X += Adjustment;
+            }
+            else {
+                SpawnLocation.Y += Adjustment;
+            }
+
+            // Spawn bridge tiles
+            for (int32 j = 0; j < BridgeLength; ++j)
             {
-                // Extend the bridge in the direction
-                Location += (DirectionOffsets[i] * 100);
-
-                // Spawn the tile
-                AActor* Tile = GetWorld()->SpawnActor<AActor>(GridTileClass, Location, FRotator::ZeroRotator, SpawnParams);
+                SpawnLocation += DirectionVectors[i] * 100;
+                GetWorld()->SpawnActor<AActor>(GridTileClass, SpawnLocation, FRotator::ZeroRotator, SpawnParams);
             }
         }
     }
-
 }
+
 
 // Called when the game starts or when spawned
 void ARoom::BeginPlay()

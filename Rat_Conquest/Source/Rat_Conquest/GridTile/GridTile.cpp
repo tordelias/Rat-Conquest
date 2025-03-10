@@ -58,7 +58,11 @@ void AGridTile::EndFocus()
 
 void AGridTile::GreenHighlight()
 {
-    	//Highlight Collors Green == 1, Red == 2, Yellow == 3
+    if (bIsBridgeTile) {
+        return;
+    }
+    
+    //Highlight Collors Green == 1, Red == 2, Yellow == 3
 	if (!bIsHighlightedByUnit)
 	{
 		TileMesh->SetRenderCustomDepth(true);
@@ -70,6 +74,10 @@ void AGridTile::GreenHighlight()
 
 void AGridTile::RedHighlight()
 {
+
+    if (bIsBridgeTile) {
+        return;
+    }
     //Highlight Collors Green == 1, Red == 2, Yellow == 3
     if(!bIsHighlightedByUnit)
 	{
@@ -91,6 +99,10 @@ void AGridTile::YellowHighlight()
 
 void AGridTile::EndHighlight()
 {
+    if (bIsBridgeTile) {
+        return;
+    }
+
     if (!bIsHighlightedByUnit)
 	{
         if(!bIsGreenHighlighted && !bIsRedHighlighted)
@@ -108,6 +120,9 @@ void AGridTile::EndHighlight()
 void AGridTile::BeginMouseHoverFocus()
 {
     //Highlight Collors Green == 1, Red == 2, Yellow == 3
+    if (bIsBridgeTile) {
+        return;
+    }
     if (!bIsHighlightedByUnit) 
     {
         TileMesh->SetVisibility(true);
@@ -122,6 +137,11 @@ void AGridTile::BeginMouseHoverFocus()
 
 void AGridTile::EndMouseHoverFocus()
 {
+
+    if (bIsBridgeTile) {
+        return;
+    }
+
     if (!bIsHighlightedByUnit)
     {
         TileMesh->SetRenderCustomDepth(false);

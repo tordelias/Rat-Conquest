@@ -396,9 +396,9 @@ void ALevelGenerator::MoveToRoom(int32 DirectionIndex)
            
 
             LastMoveTime = GetWorld()->GetTimeSeconds();
-            if (TargetRoom->bIsExplored) {
+           /* if (TargetRoom->bIsExplored) {
                 return;
-            }
+            }*/
             TargetRoom->bIsExplored = true;
             GameManager->LoadNextEncounter();
         }
