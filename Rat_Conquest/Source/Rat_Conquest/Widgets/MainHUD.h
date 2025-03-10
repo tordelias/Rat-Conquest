@@ -11,6 +11,8 @@ class UUnitStatWidget;
 class UMainWidget;
 class UMutationWidget;
 class APlayerUnit;
+class USelectRoomWidget;
+class ALevelGenerator;
 /**
  * 
  */
@@ -31,6 +33,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget", meta = (AllowPrivate = "true"))
 	TSubclassOf<UMutationWidget> MutationWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget", meta = (AllowPrivate = "true"))
+	TSubclassOf<USelectRoomWidget> RoomSelectWidgetClass;
+
 	UPROPERTY()
 	UUnitStatWidget* StatWidget;
 
@@ -39,6 +44,9 @@ protected:
 
 	UPROPERTY()
 	UMutationWidget* MutationWidget;
+
+	UPROPERTY()
+	USelectRoomWidget* RoomWidget;
 
 
 public: 
@@ -52,5 +60,8 @@ public:
 	void ShowMutationWidget();
 	void CloseMutationWidget();
 	void UpdateMutationWidget(TArray<int> statsC1, TArray<int> statsC2, TArray<int> statsC3, FName UnitName, APlayerUnit* unit);
+	void ShowRoomSelectWidget();
+	void CloseRoomSelectWidget();
+	void SetupRoomSelectWidget(ALevelGenerator* _Levelgen);
 	
 };

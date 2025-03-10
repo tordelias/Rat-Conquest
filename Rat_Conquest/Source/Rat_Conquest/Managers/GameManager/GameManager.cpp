@@ -5,6 +5,7 @@
 #include "Rat_Conquest/Player/PlayerCamera.h"
 #include "Kismet/GameplayStatics.h"
 #include "Rat_Conquest/Managers/GridManager/GridManager.h"
+#include "Rat_Conquest/Map/LevelGenerator.h"
 #include "Rat_Conquest/GridTile/GridTile.h"
 #include "EngineUtils.h"
 #include "Rat_Conquest/Widgets/MainHUD.h"
@@ -40,6 +41,23 @@ void AGameManager::BeginPlay()
     {
         UE_LOG(LogTemp, Error, TEXT("No GridManager found in the level!"));
     }
+
+    TArray<AActor*> FoundLevelGen;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALevelGenerator::StaticClass(), FoundLevelGen);
+
+    if (FoundLevelGen.Num() > 0)
+    {
+        LevelGenerator = Cast<ALevelGenerator>(FoundLevelGen[0]);
+        if (FoundLevelGen.Num() > 1)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Multiple GridManagers found! Using first instance."));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("No GridManager found in the level!"));
+    }
+
     if (bTestEncounter) {
         GridManager->ScanWorldForObjects();
         GetWorldTimerManager().SetTimerForNextTick(this, &AGameManager::InitalizeUnits);
@@ -194,10 +212,12 @@ void AGameManager::EndUnitTurn()
     CurrentUnit->bIsCurrentUnit = false;
     CurrentUnit = nullptr;
 
-    if (EnemyUnits.Num() < 0) {
+    if (EnemyUnits.Num() == 0) {
 
         bEncounterComplete = true;
-       
+        if (LevelGenerator) {
+            LevelGenerator->SetupRoomSelectUI();
+        }
        
     }
     if (TurnQueue.Num() > 0)

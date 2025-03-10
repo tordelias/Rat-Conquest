@@ -10,6 +10,7 @@
 class APlayerUnit;
 class AMainHUD;
 class AGridManager;
+class ALevelGenerator;
 UCLASS()
 class RAT_CONQUEST_API AGameManager : public AActor
 {
@@ -64,6 +65,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	AGridManager* GridManager;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level")
+	ALevelGenerator* LevelGenerator;
 
 
 	UPROPERTY()

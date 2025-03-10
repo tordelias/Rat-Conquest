@@ -6,6 +6,7 @@
 #include "Rat_Conquest/Player/PlayerCamera.h"
 #include "Rat_Conquest/Managers/GridManager/GridManager.h"
 #include "Rat_Conquest/Managers/GameManager/GameManager.h"
+#include "Rat_Conquest/Widgets/MainHUD.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -62,6 +63,18 @@ void ALevelGenerator::OnPlayerEnterRoom(ARoom* _NewRoom)
     {
 		FVector NewCameraLocation = FVector(CurrentRoom->GetActorLocation().X,CurrentRoom->GetActorLocation().Y,PlayerCamera->GetActorLocation().Z);
         PlayerCamera->SetActorLocation(NewCameraLocation);
+    }
+}
+void ALevelGenerator::SetupRoomSelectUI()
+{
+    if (AMainHUD* hud = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD()))
+    {
+        hud->SetupRoomSelectWidget(this);
+        hud->ShowRoomSelectWidget();
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("HUD is null |Mutate_PlayerUnit.cpp|"));
     }
 }
 // Called every frame
@@ -140,6 +153,7 @@ void ALevelGenerator::BeginPlay()
     }
     GenerateInitialRooms();
     DrawDebugGrid();
+   
     
 }
 
@@ -369,7 +383,15 @@ void ALevelGenerator::MoveToRoom(int32 DirectionIndex)
             UE_LOG(LogTemp, Display, TEXT("Moved to room at (%d, %d)"),
                 FMath::RoundToInt(TargetPosition.X),
                 FMath::RoundToInt(TargetPosition.Y));
-           
+            if (AMainHUD* hud = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD()))
+            {
+                hud->SetupRoomSelectWidget(this);
+                hud->CloseRoomSelectWidget();
+            }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("HUD is null |Mutate_PlayerUnit.cpp|"));
+            }
 			OnPlayerEnterRoom(CurrentRoom);
            
             LastMoveTime = GetWorld()->GetTimeSeconds();

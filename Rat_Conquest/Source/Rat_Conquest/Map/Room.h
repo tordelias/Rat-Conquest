@@ -48,6 +48,9 @@ public:
 	bool bIsBossRoom = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	bool bIsExplored = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	bool bIsLootRoom = false;
 public:	
 	// Called every frame

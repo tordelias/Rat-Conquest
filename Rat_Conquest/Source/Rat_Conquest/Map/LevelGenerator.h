@@ -78,4 +78,5 @@ public:
 	ARoom* GetRoomAtPosition(const FVector2D& GridPosition);
 
 	void OnPlayerEnterRoom(ARoom* _NewRoom);
+	void SetupRoomSelectUI();
 };

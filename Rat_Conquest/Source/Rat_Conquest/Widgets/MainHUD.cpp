@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "MainWidget.h"
 #include "MutationWidget.h"
+#include "SelectRoomWidget.h"
+#include "Rat_Conquest/Map/LevelGenerator.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
 
 void AMainHUD::BeginPlay()
@@ -41,6 +43,20 @@ void AMainHUD::BeginPlay()
 			MutationWidget->AddToViewport();
 			MutationWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
+	}
+	if (RoomSelectWidgetClass) {
+
+		RoomWidget = CreateWidget<USelectRoomWidget>(GetWorld(), RoomSelectWidgetClass);
+		if (RoomWidget) {
+
+			RoomWidget->AddToViewport();
+			RoomWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+		else {
+			UE_LOG(LogTemp, Error, TEXT("RoomWidget is null!"));
+		}
+
+
 	}
 }
 
@@ -142,5 +158,60 @@ void AMainHUD::UpdateMutationWidget(TArray<int> statsC1, TArray<int> statsC2, TA
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("MutationWidget is null!"));
+	}
+}
+
+void AMainHUD::ShowRoomSelectWidget()
+{
+	if (RoomSelectWidgetClass) {
+
+		RoomWidget->SetVisibility(ESlateVisibility::Collapsed);
+		if (RoomWidget) {
+
+			
+			RoomWidget->SetVisibility(ESlateVisibility::Visible);
+		}
+		else {
+			UE_LOG(LogTemp, Error, TEXT("RoomWidget is null!"));
+		}
+
+
+	}
+	
+}
+
+void AMainHUD::CloseRoomSelectWidget()
+{
+	if (RoomSelectWidgetClass) {
+
+		RoomWidget->SetVisibility(ESlateVisibility::Collapsed);
+		if (RoomWidget) {
+
+
+			RoomWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+		else {
+			UE_LOG(LogTemp, Error, TEXT("RoomWidget is null!"));
+		}
+
+
+	}
+}
+
+void AMainHUD::SetupRoomSelectWidget(ALevelGenerator* _Levelgen)
+{
+	if (RoomSelectWidgetClass) {
+
+		
+		if (RoomWidget) {
+
+			RoomWidget->SetLevelGeneratorRefrence(_Levelgen);
+			
+		}
+		else {
+			UE_LOG(LogTemp, Error, TEXT("RoomWidget is null!"));
+		}
+
+
 	}
 }
