@@ -541,7 +541,11 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		UE_LOG(LogTemp, Error, TEXT("PlayerCharacter or GridManager is null"));
 		return;
 	}
-
+	if (!PlayerCharacter->GetCurrentUnit())
+	{
+		UE_LOG(LogTemp, Error, TEXT("PlayerCharacter->GetCurrentUnit() is null"));
+		return;
+	}
 	auto PlayerUnit = PlayerCharacter->GetCurrentUnit();
 	if (!PlayerUnit)
 	{
@@ -608,10 +612,11 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 			UE_LOG(LogTemp, Warning, TEXT("Attack tile is the same as player position |PlayerAttack_PlayerUnit.cpp|"));
 			PlayerUnit->EnemyToAttack = this;
 			PlayerUnit->AttackAfterMovement();
-			
-			PlayerCharacter->GetCurrentUnit()->FinishTurn();
-			
-			
+			if (PlayerCharacter->GetCurrentUnit())
+			{
+				PlayerCharacter->GetCurrentUnit()->FinishTurn();
+			}
+
 			return;
 		}
 
