@@ -63,24 +63,24 @@ void AItem::InitializeItem()
     }
     if (ItemData)
     {
-        UItemBase* ItemBase = NewObject<UItemBase>();
-        ItemBase->ID = ItemData->ID;
-        ItemBase->ItemType = ItemData->ItemType;
-        ItemBase->ItemQuality = ItemData->ItemQuality;
-        ItemBase->ItemStatistics = ItemData->ItemStatistics;
-        ItemBase->ItemTextData = ItemData->ItemTextData;
-        ItemBase->ItemAssetData = ItemData->ItemAssetData;
+         ItemDataB = NewObject<UItemBase>();
+         ItemDataB->ID = ItemData->ID;
+         ItemDataB->ItemType = ItemData->ItemType;
+         ItemDataB->ItemQuality = ItemData->ItemQuality;
+         ItemDataB->ItemStatistics = ItemData->ItemStatistics;
+         ItemDataB->ItemTextData = ItemData->ItemTextData;
+         ItemDataB->ItemAssetData = ItemData->ItemAssetData;
 
-        Damage = ItemBase->ItemStatistics.Damage;
-        bIsMelee = ItemBase->ItemStatistics.bIsMelee;
-        if (ItemBase->ItemAssetData.Mesh)
+        Damage = ItemDataB->ItemStatistics.Damage;
+        bIsMelee = ItemDataB->ItemStatistics.bIsMelee;
+        if (ItemDataB->ItemAssetData.Mesh)
         {
-            ItemMesh->SetStaticMesh(ItemBase->ItemAssetData.Mesh);
-            UE_LOG(LogTemp, Warning, TEXT("Static Mesh Set Successfully: %s"), *ItemBase->ItemAssetData.Mesh->GetName());
+            ItemMesh->SetStaticMesh(ItemDataB->ItemAssetData.Mesh);
+            UE_LOG(LogTemp, Warning, TEXT("Static Mesh Set Successfully: %s"), *ItemDataB->ItemAssetData.Mesh->GetName());
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("Static Mesh is null for Item ID: %s"), *ItemBase->ID.ToString());
+            UE_LOG(LogTemp, Error, TEXT("Static Mesh is null for Item ID: %s"), *ItemDataB->ID.ToString());
         }
 
 	

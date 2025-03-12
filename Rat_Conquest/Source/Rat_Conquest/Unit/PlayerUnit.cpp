@@ -143,6 +143,13 @@ void APlayerUnit::BeginPlay()
 	mutationData->SetExperienceNeeded(10);
 
 	UnitName = FName("PlayerUnit");
+
+	if (ItemSlots.Num() == 0)
+	{
+		ItemSlots.Add(nullptr);
+		ItemSlots.Add(nullptr);
+		ItemSlots.Add(nullptr);
+	}
 }
 
 void APlayerUnit::Tick(float DeltaTime)

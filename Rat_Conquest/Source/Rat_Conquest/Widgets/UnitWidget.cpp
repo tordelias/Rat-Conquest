@@ -43,6 +43,7 @@ void UUnitWidget::NativeConstruct()
 void UUnitWidget::OnUnitImage1Clicked()
 {
 	OnUnitImageClicked(UnitImageWidget1);
+	
 }
 
 void UUnitWidget::OnUnitImage2Clicked()
@@ -95,7 +96,7 @@ void UUnitWidget::OnUnitImageClicked(UUnitImageWidget* ClickedWidget)
 		ESlateVisibility NewVisibility = (UnitTabWidget1->GetVisibility() == ESlateVisibility::Visible)
 			? ESlateVisibility::Collapsed
 			: ESlateVisibility::Visible;
-
+		UnitTabWidget1->SetData(ClickedWidget->Unit);
 		UnitTabWidget1->SetVisibility(NewVisibility);
 	}
 	else

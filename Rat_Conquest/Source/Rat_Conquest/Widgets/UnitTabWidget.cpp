@@ -15,43 +15,39 @@ void UUnitTabWidget::SetData(APlayerUnit* _Unit)
 
     Unit = _Unit;
 
-    // Create the tooltip once
     if (!ToolTipInstance && ItemToolTipWidgetClass)
     {
         ToolTipInstance = CreateWidget<UItemToolTipWidget>(GetWorld(), ItemToolTipWidgetClass);
     }
-    if (Unit->Weapon)
+    if (Unit->ItemSlots.Num() > 0 && Unit->ItemSlots[0] && Unit->ItemSlots[0]->ItemDataB)
     {
-		ItemImage1->SetBrushFromTexture(Unit->Weapon->ItemDataB->ItemAssetData.Icon);
-		ItemName1->SetText(Unit->Weapon->ItemDataB->ItemTextData.Name);
-		bButton1Active = true;
+        ItemImage1->SetBrushFromTexture(Unit->ItemSlots[0]->ItemDataB->ItemAssetData.Icon);
+        bButton1Active = true;
     }
     else
 	{
 		ItemImage1->SetBrushFromTexture(DefaultIcon);
 		bButton1Active = false;
 	}
-    if (Unit->Armour)
+    if (Unit->ItemSlots.Num() > 0 && Unit->ItemSlots[1])
     {
-        ItemImage2->SetBrushFromTexture(Unit->Armour->ItemDataB->ItemAssetData.Icon);
-        ItemName2->SetText(Unit->Armour->ItemDataB->ItemTextData.Name);
+        ItemImage2->SetBrushFromTexture(Unit->ItemSlots[1]->ItemDataB->ItemAssetData.Icon);
 
 		bButton2Active = true;
     }
     else
     {
-        ItemImage1->SetBrushFromTexture(DefaultIcon);
+        ItemImage2->SetBrushFromTexture(DefaultIcon);
 		bButton2Active = false;
     }
-	if (Unit->Artifact)
+    if (Unit->ItemSlots.Num() > 0 && Unit->ItemSlots[2])
 	{
-		ItemImage3->SetBrushFromTexture(Unit->Artifact->ItemDataB->ItemAssetData.Icon);
-		ItemName3->SetText(Unit->Artifact->ItemDataB->ItemTextData.Name);
+		ItemImage3->SetBrushFromTexture(Unit->ItemSlots[2]->ItemDataB->ItemAssetData.Icon);
 		bButton3Active = true;
 	}
     else
     {
-        ItemImage1->SetBrushFromTexture(DefaultIcon);
+        ItemImage3->SetBrushFromTexture(DefaultIcon);
 		bButton3Active = false;
     }
 
@@ -90,8 +86,11 @@ void UUnitTabWidget::OnItemButton1Hovered()
         UItemToolTipWidget* ItemToolTip = Cast<UItemToolTipWidget>(ToolTipInstance);
         if (ItemToolTip)
         {
-            ItemToolTip->SetData(Unit->Weapon); // Set Item 1 data
-            SetToolTip(ToolTipInstance);
+            if (Unit->ItemSlots.Num() > 0)
+            {
+	            ItemToolTip->SetData(Unit->ItemSlots[0]); // Set Item 1 data
+            	SetToolTip(ToolTipInstance);
+            }
         }
     }
 }
@@ -104,8 +103,11 @@ void UUnitTabWidget::OnItemButton2Hovered()
         UItemToolTipWidget* ItemToolTip = Cast<UItemToolTipWidget>(ToolTipInstance);
         if (ItemToolTip)
         {
-            ItemToolTip->SetData(Unit->Armour); // Set Item 2 data
-            SetToolTip(ToolTipInstance);
+            if (Unit->ItemSlots.Num() > 1)
+            {
+	            ItemToolTip->SetData(Unit->ItemSlots[1]); // Set Item 2 data
+            	SetToolTip(ToolTipInstance);
+            }
         }
     }
 }
@@ -118,8 +120,11 @@ void UUnitTabWidget::OnItemButton3Hovered()
         UItemToolTipWidget* ItemToolTip = Cast<UItemToolTipWidget>(ToolTipInstance);
         if (ItemToolTip)
         {
-            ItemToolTip->SetData(Unit->Artifact); // Set Item 3 data
-            SetToolTip(ToolTipInstance);
+            if (Unit->ItemSlots.Num() > 2)
+            {
+	            ItemToolTip->SetData(Unit->ItemSlots[2]); // Set Item 3 data
+            	SetToolTip(ToolTipInstance);
+            }
         }
     }
 }
@@ -129,3 +134,4 @@ void UUnitTabWidget::OnItemButtonUnhovered()
 {
     SetToolTip(nullptr);
 }
+

@@ -67,7 +67,6 @@ public:
 	TArray<UAbilityComponent*> GetAbilities() const { return Abilities; }
 
 	void InitializeAbilities();
-public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	UItemBase* ItemDataB;
 
