@@ -34,7 +34,7 @@ public:
 	void SetLevelGeneratorRefrence(ALevelGenerator* _LevelGenerator);
 
 	UFUNCTION()
-	void HideInaccessibleDoorButtons();
+	void HideInaccessibleDoorButtons(TArray<bool> _DoorDirections);
 
 	UFUNCTION()
 	void OnNorthButtonClicked();
@@ -49,4 +49,6 @@ public:
 	void OnWestButtonClicked();
 
 	ALevelGenerator* LevelGen;
+
+	TArray<UButton*> ButtonList;
 };

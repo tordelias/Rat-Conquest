@@ -41,6 +41,8 @@ public:
 
 	void LoadNextEncounter();
 
+	void LoadExploredEncounter();
+
 	void StartEncounter();
 
 	void UpdateTurnQueue();

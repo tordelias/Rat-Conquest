@@ -349,9 +349,20 @@ void AGameManager::CheckForEncounter()
 
 void AGameManager::LoadNextEncounter()
 {
+    bEncounterComplete = false;
     GridManager->bIsGridScanned = false;
     GridManager->ScanWorldForObjects();
     CheckForEncounter();
+}
+
+void AGameManager::LoadExploredEncounter()
+{
+    GridManager->bIsGridScanned = false;
+    GridManager->ScanWorldForObjects();
+    bEncounterComplete = true;
+    if (LevelGenerator) {
+        LevelGenerator->SetupRoomSelectUI();
+    }
 }
 
 

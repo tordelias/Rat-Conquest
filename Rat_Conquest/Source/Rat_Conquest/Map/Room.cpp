@@ -104,6 +104,9 @@ void ARoom::ConstructBridges()
 
     for (int32 i = 0; i < 4; ++i)
     {
+        if (!DoorDirections[i]) {
+            continue;
+        }
         const FDirectionConfig& Config = DirectionConfigs[i];
         const FVector BaseOffset = InitialOffsets[i] * Config.OffsetMultiplier;
         const FVector BaseLocation = GetActorLocation() + BaseOffset;

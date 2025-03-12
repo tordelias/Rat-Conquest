@@ -70,6 +70,9 @@ void ALevelGenerator::SetupRoomSelectUI()
     if (AMainHUD* hud = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD()))
     {
         hud->SetupRoomSelectWidget(this);
+        if (CurrentRoom) {
+            hud->GetRoomSelectDoors(CurrentRoom->DoorDirections);
+        }
         hud->ShowRoomSelectWidget();
     }
     else
@@ -396,9 +399,10 @@ void ALevelGenerator::MoveToRoom(int32 DirectionIndex)
            
 
             LastMoveTime = GetWorld()->GetTimeSeconds();
-           /* if (TargetRoom->bIsExplored) {
+            if (TargetRoom->bIsExplored) {
+                GameManager->LoadExploredEncounter();
                 return;
-            }*/
+            }
             TargetRoom->bIsExplored = true;
             GameManager->LoadNextEncounter();
         }

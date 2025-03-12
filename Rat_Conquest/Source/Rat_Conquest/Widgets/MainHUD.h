@@ -66,5 +66,6 @@ public:
 	void ShowRoomSelectWidget();
 	void CloseRoomSelectWidget();
 	void SetupRoomSelectWidget(ALevelGenerator* _Levelgen);
+	void GetRoomSelectDoors(TArray<bool> _DoorDirections);
 	
 };

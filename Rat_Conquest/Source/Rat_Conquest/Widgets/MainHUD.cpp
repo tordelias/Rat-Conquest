@@ -34,16 +34,6 @@ void AMainHUD::BeginPlay()
 			StatWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
-
-	if (MutationWidgetClass)
-	{
-		MutationWidget = CreateWidget<UMutationWidget>(GetWorld(), MutationWidgetClass);
-		if (MutationWidget)
-		{
-			MutationWidget->AddToViewport();
-			MutationWidget->SetVisibility(ESlateVisibility::Collapsed);
-		}
-	}
 	if (RoomSelectWidgetClass) {
 
 		RoomWidget = CreateWidget<USelectRoomWidget>(GetWorld(), RoomSelectWidgetClass);
@@ -58,6 +48,16 @@ void AMainHUD::BeginPlay()
 
 
 	}
+	if (MutationWidgetClass)
+	{
+		MutationWidget = CreateWidget<UMutationWidget>(GetWorld(), MutationWidgetClass);
+		if (MutationWidget)
+		{
+			MutationWidget->AddToViewport();
+			MutationWidget->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	}
+	
 }
 
 void AMainHUD::ShowStatWidget()
@@ -243,6 +243,24 @@ void AMainHUD::SetupRoomSelectWidget(ALevelGenerator* _Levelgen)
 
 			RoomWidget->SetLevelGeneratorRefrence(_Levelgen);
 			
+		}
+		else {
+			UE_LOG(LogTemp, Error, TEXT("RoomWidget is null!"));
+		}
+
+
+	}
+}
+
+void AMainHUD::GetRoomSelectDoors(TArray<bool> _DoorDirections)
+{
+	if (RoomSelectWidgetClass) {
+
+
+		if (RoomWidget) {
+
+			RoomWidget->HideInaccessibleDoorButtons(_DoorDirections);
+
 		}
 		else {
 			UE_LOG(LogTemp, Error, TEXT("RoomWidget is null!"));

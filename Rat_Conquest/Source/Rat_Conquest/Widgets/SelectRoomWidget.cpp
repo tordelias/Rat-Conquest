@@ -12,24 +12,26 @@ void USelectRoomWidget::NativeConstruct()
 	if (NorthButton) {
 
 		NorthButton->OnClicked.AddDynamic(this, &USelectRoomWidget::OnNorthButtonClicked);
-		
-	}
-	if (SouthButton) {
-
-		SouthButton->OnClicked.AddDynamic(this, &USelectRoomWidget::OnSouthButtonClicked);
-
+		ButtonList.Add(NorthButton);
 	}
 	if (EastButton) {
 
 		EastButton->OnClicked.AddDynamic(this, &USelectRoomWidget::OnEastButtonClicked);
+		ButtonList.Add(EastButton);
+	}
+	if (SouthButton) {
+
+		SouthButton->OnClicked.AddDynamic(this, &USelectRoomWidget::OnSouthButtonClicked);
+		ButtonList.Add(SouthButton);
 
 	}
 	if (WestButton) {
 
 		WestButton->OnClicked.AddDynamic(this, &USelectRoomWidget::OnWestButtonClicked);
+		ButtonList.Add(WestButton);
 
 	}
-	
+	WestButton->SetVisibility(ESlateVisibility::Hidden);
 
 }
 
@@ -44,9 +46,18 @@ void USelectRoomWidget::SetLevelGeneratorRefrence(ALevelGenerator* _LevelGenerat
 	}*/
 }
 
-void USelectRoomWidget::HideInaccessibleDoorButtons()
+void USelectRoomWidget::HideInaccessibleDoorButtons(TArray<bool> _DoorDirections)
 {
+	for (int i = 0; i < _DoorDirections.Num(); ++i) {
 
+		if (!_DoorDirections[i]) {
+			ButtonList[i]->SetVisibility(ESlateVisibility::Hidden);
+		}
+		else {
+			ButtonList[i]->SetVisibility(ESlateVisibility::Visible);
+		}
+
+	}
 }
 
 void USelectRoomWidget::OnNorthButtonClicked()
