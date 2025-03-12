@@ -47,6 +47,18 @@ APlayerUnit::APlayerUnit()
 	SkeletalMesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	SkeletalMesh->SetGenerateOverlapEvents(true);
 
+
+	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
+	WeaponMesh->SetupAttachment(SkeletalMesh, TEXT("Hand_R")); 
+	WeaponMesh->SetRelativeScale3D(FVector(1.0f));
+
+	/*ArmorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ArmorMesh"));
+	ArmorMesh->SetupAttachment(SkeletalMesh, TEXT("Hand_R"));
+
+	ArmorMesh->SetRelativeScale3D(FVector(1.0f));*/
+	
+	
+
 	UE_LOG(LogTemp, Warning, TEXT("SkeletalMesh Created and Collision Set"));
 
 	// Initialize other properties
@@ -870,6 +882,7 @@ void APlayerUnit::CheckForItems()
 		// Equip the new item
 		ItemSlots[SlotIndex] = NewItem;
 		NewItem->EquipItem(this);
+		WeaponMesh->SetStaticMesh(NewItem->ItemMesh->GetStaticMesh());
 		//if (NewItem->ItemDataB->ItemType == EItemType::Weapon)
 		//{
 		//	// Equip the new item

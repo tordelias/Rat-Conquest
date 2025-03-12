@@ -30,6 +30,13 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	USkeletalMeshComponent* SkeletalMesh;
 
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UStaticMeshComponent* WeaponMesh;
+
+
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UStaticMeshComponent* ArmorMesh;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Icon")
 	UTexture2D* UnitIcon;
 

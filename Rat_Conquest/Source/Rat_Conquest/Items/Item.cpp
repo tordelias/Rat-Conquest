@@ -29,7 +29,7 @@ void AItem::EquipItem(AActor* UnitOwner)
     // Position the item relative to the unit
     FVector Offset(0.f, 0.f, 80.f); // Adjust the offset as needed
     SetActorRelativeLocation(Offset);
-	ItemMesh->SetVisibility(true);
+	ItemMesh->SetVisibility(false);
     bIsEquipped = true;    
 }
 
