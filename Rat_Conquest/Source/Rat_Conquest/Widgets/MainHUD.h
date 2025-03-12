@@ -49,20 +49,28 @@ protected:
 	USelectRoomWidget* RoomWidget;
 
 
-public: 
-
-
-	void ShowStatWidget();
-	void CloseStatWidget();
-	void UpdateStatWidget(FInteractableData* data);
+public:
+	//MainWidget functions
+	UFUNCTION(BlueprintCallable)
+	void ShowMainWidget();
 	void AddTurnImage(class APlayerUnit* unit);
 	void RemoveTurnImage();
 	void ClearTurnImages();
 	void UpdateTurnQueue(const TArray<APlayerUnit*>& TurnQueue);
 	void RemoveUnitFromQueue(APlayerUnit* unit);
+	void AddPlayerUnitToScreen(APlayerUnit* unit);
+
+	//statWidget functions
+	void ShowStatWidget();
+	void CloseStatWidget();
+	void UpdateStatWidget(FInteractableData* data);
+
+	//MutationWidget functions
 	void ShowMutationWidget();
 	void CloseMutationWidget();
 	void UpdateMutationWidget(TArray<int> statsC1, TArray<int> statsC2, TArray<int> statsC3, FName UnitName, APlayerUnit* unit);
+
+	//RoomSelectWidget functions
 	void ShowRoomSelectWidget();
 	void CloseRoomSelectWidget();
 	void SetupRoomSelectWidget(ALevelGenerator* _Levelgen);

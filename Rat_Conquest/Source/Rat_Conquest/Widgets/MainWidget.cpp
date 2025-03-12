@@ -3,6 +3,7 @@
 #include "TurnIndicatorWidget.h"
 #include "Components/PanelWidget.h" // For adding widgets to a container
 #include "Rat_Conquest/Unit/PlayerUnit.h" // Include the header for APlayerUnit
+#include "Rat_Conquest/Widgets/UnitWidget.h"
 
 void UMainWidget::NativeConstruct()
 {
@@ -30,6 +31,18 @@ void UMainWidget::InitializeTurnIndicator()
             // TurnIndicatorWidget->Initialize();
         }
     }
+
+	//if (UnitWidgetClass)
+	//{
+	//	UnitWidgetContainer = CreateWidget<UUnitWidget>(this, UnitWidgetClass);
+	//	if (UnitWidgetContainer)
+	//	{
+	//		if (UPanelWidget* Container = Cast<UPanelWidget>(GetWidgetFromName("UnitWidgetContainer")))
+	//		{
+	//			Container->AddChild(UnitWidgetContainer);
+	//		}
+	//	}
+	//}
 }
 
 void UMainWidget::AddTurnImage(APlayerUnit* unit)
@@ -73,5 +86,17 @@ void UMainWidget::RemoveUnitFromQueue(APlayerUnit* unit)
 	if (TurnIndicatorWidget)
 	{
 		TurnIndicatorWidget->RemoveUnitFromQueue(unit);
+	}
+}
+
+void UMainWidget::AddPlayerUnitToScreen(APlayerUnit* unit)
+{
+	if (UnitWidgetContainer)
+	{
+		UnitWidgetContainer->SetData(unit);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("UnitWidget is null!"));
 	}
 }

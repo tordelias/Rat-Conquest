@@ -107,6 +107,13 @@ void AGameManager::InitalizeUnits()
     }
     TogglePlayerTurn();
     StartTurnOrder();
+	for (APlayerUnit* Unit : PlayerUnits)
+	{
+        if (MainHUD)
+        {
+            MainHUD->AddPlayerUnitToScreen(Unit);
+        }
+	}
 
 }
 

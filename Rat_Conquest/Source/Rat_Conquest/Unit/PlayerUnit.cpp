@@ -17,6 +17,7 @@
 #include "Rat_Conquest/Projectiles/GenericProjectile.h"
 #include "Rat_Conquest/Data/MutationData.h"
 #include "Rat_Conquest/Widgets/MainHUD.h"
+#include "Rat_Conquest/Items/ItemBase.h"
 
 
 APlayerUnit::APlayerUnit()
@@ -869,6 +870,11 @@ void APlayerUnit::CheckForItems()
 		// Equip the new item
 		ItemSlots[SlotIndex] = NewItem;
 		NewItem->EquipItem(this);
+		//if (NewItem->ItemDataB->ItemType == EItemType::Weapon)
+		//{
+		//	// Equip the new item
+		//	Weapon = NewItem;
+		//}
 		Tile->ItemSlot = nullptr;
 		//set the unit according to the item
 		if (NewItem->bIsMelee) {

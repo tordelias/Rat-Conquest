@@ -1,9 +1,11 @@
 // UnitImageWidget.cpp
 #include "UnitImageWidget.h"
-#include "Rat_Conquest/Unit/PlayerUnit.h" // Include the header for APlayerUnit
+#include "Rat_Conquest/Unit/PlayerUnit.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/SizeBox.h"
+#include "ItemToolTipWidget.h"
+
 
 void UUnitImageWidget::SetData(APlayerUnit* _Unit)
 {
@@ -16,12 +18,14 @@ void UUnitImageWidget::SetData(APlayerUnit* _Unit)
         {
             UnitImage->SetBrushFromTexture(_Unit->UnitIcon);
         }
-
-        // Set the unit's name (assuming APlayerUnit has a GetUnitName() function)
-        //if (UnitName)
-        //{
-        //    UnitName->SetText(Unit->InstanceInteractableData.UnitName);
-        //}
+    }
+    else
+    {
+		// Set the default image
+		if (UnitImage && DefaultIcon)
+		{
+			UnitImage->SetBrushFromTexture(DefaultIcon);
+		}
     }
 }
 

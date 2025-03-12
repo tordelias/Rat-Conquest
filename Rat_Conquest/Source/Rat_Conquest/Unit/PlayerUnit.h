@@ -50,11 +50,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat Manager")
 	ACombatManager* combatManager;
 
+	UPROPERTY()
+	AItem* Weapon;
+
+	UPROPERTY()
+	AItem* Armour;
+
+	UPROPERTY()
+	AItem* Artifact;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	int MovementSpeed = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	int Health = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	int maxHealth = 5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	int Damage = 1;
@@ -64,6 +75,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	int AttackRange = 6;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	int Initiative = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	int Attack = 1; 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	int experienceReward = 10;

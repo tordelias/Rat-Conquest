@@ -22,6 +22,8 @@ void AMainHUD::BeginPlay()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("MainWidget created"));
 			MainWidget->AddToViewport();
+			MainWidget->SetVisibility(ESlateVisibility::Hidden);
+			MainWidget->SetUserFocus(GetOwningPlayerController());
 		}
 	}
 
@@ -31,7 +33,7 @@ void AMainHUD::BeginPlay()
 		if (StatWidget)
 		{
 			StatWidget->AddToViewport(1);
-			StatWidget->SetVisibility(ESlateVisibility::Hidden);
+			StatWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
 	if (RoomSelectWidgetClass) {
@@ -40,14 +42,13 @@ void AMainHUD::BeginPlay()
 		if (RoomWidget) {
 
 			RoomWidget->AddToViewport();
-			RoomWidget->SetVisibility(ESlateVisibility::Hidden);
+			RoomWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 		else {
 			UE_LOG(LogTemp, Error, TEXT("RoomWidget is null!"));
 		}
-
-
 	}
+<<<<<<< Updated upstream
 	if (MutationWidgetClass)
 	{
 		MutationWidget = CreateWidget<UMutationWidget>(GetWorld(), MutationWidgetClass);
@@ -57,6 +58,8 @@ void AMainHUD::BeginPlay()
 			MutationWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
+=======
+>>>>>>> Stashed changes
 	
 }
 
@@ -81,6 +84,19 @@ void AMainHUD::UpdateStatWidget(FInteractableData* data)
 	if (StatWidget)
 	{
 		StatWidget->UpdateWidget(data);
+	}
+}
+
+void AMainHUD::ShowMainWidget()
+{
+
+	if (MainWidget)
+	{
+		MainWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("MainWidget is null in ShowMainWidget!"));
 	}
 }
 
@@ -137,6 +153,19 @@ void AMainHUD::RemoveUnitFromQueue(APlayerUnit* unit)
 	if (MainWidget)
 	{
 		MainWidget->RemoveUnitFromQueue(unit);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("MainWidget is null!"));
+	}
+}
+
+void AMainHUD::AddPlayerUnitToScreen(APlayerUnit* unit)
+{
+	ShowMainWidget();
+	if (MainWidget)
+	{
+		MainWidget->AddPlayerUnitToScreen(unit);
 	}
 	else
 	{

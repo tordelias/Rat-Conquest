@@ -26,6 +26,7 @@ enum class EItemType : uint8
 	Weapon UMETA(DisplayName = "Weapon"),
 	Shield UMETA(DisplayName = "Shield"),
 	Spell UMETA(DisplayName = "Spell"),
+	Artifact UMETA(DisplayName = "Artifact"),
 	Consumable UMETA(DisplayName = "Consumable")
 };
 
@@ -40,6 +41,8 @@ struct FItemStatistics
 	
 	UPROPERTY(EditAnywhere)
 	float Damage;
+	UPROPERTY(EditAnywhere)
+	float Attack;
 
 	UPROPERTY(EditAnywhere)
 	float Range;
