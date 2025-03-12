@@ -48,7 +48,7 @@ void AMainHUD::BeginPlay()
 			UE_LOG(LogTemp, Error, TEXT("RoomWidget is null!"));
 		}
 	}
-<<<<<<< Updated upstream
+
 	if (MutationWidgetClass)
 	{
 		MutationWidget = CreateWidget<UMutationWidget>(GetWorld(), MutationWidgetClass);
@@ -58,8 +58,7 @@ void AMainHUD::BeginPlay()
 			MutationWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
-=======
->>>>>>> Stashed changes
+
 	
 }
 
