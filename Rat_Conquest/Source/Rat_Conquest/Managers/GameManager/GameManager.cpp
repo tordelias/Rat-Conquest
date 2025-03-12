@@ -9,6 +9,7 @@
 #include "Rat_Conquest/GridTile/GridTile.h"
 #include "EngineUtils.h"
 #include "Rat_Conquest/Widgets/MainHUD.h"
+#include "Rat_Conquest/Items/Item.h"
 #include "Rat_Conquest/Widgets/MainWidget.h"
 #include "Rat_Conquest/Widgets/TurnIndicatorWidget.h"
 #include "Rat_Conquest/AI/EnemyAIController.h"
@@ -548,6 +549,34 @@ void AGameManager::ResumeGame()
     }
 }
 
+void AGameManager::SpawnLoot()
+{
+    if (!GridManager || ItemPool.Num() == 0)
+        return; // Ensure GridManager and ItemPool exist
+
+    FVector SpawnLocation = GridManager->GetRandomPositionInGrid();
+    if (SpawnLocation == FVector())
+        return; // No valid unoccupied positions available
+
+    int RandomIndex = FMath::RandRange(0, ItemPool.Num() - 1);
+
+    FRotator SpawnRotation = FRotator::ZeroRotator;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.Owner = this;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+
+    AItem* NewItem = GetWorld()->SpawnActor<AItem>(
+        ItemPool[RandomIndex],
+        SpawnLocation,
+        SpawnRotation,
+        SpawnParams
+    );
+   
+    GridManager->ScanWorldForObjects();
+}
+
 
 void AGameManager::HighlightUnitAndTiles(APlayerUnit* NewUnit)
 {
@@ -592,10 +621,7 @@ void AGameManager::Tick(float DeltaTime)
 		}
         UE_LOG(LogTemp, Warning, TEXT("Size of TurnQueue: %d"), TurnQueue.Num());
         UE_LOG(LogTemp, Display, TEXT("Current Turn Queue:"));
-        if (!hasSpawned) {
-            StartEncounter();
-			hasSpawned = true;
-        }
+        SpawnLoot();
        
        
     }

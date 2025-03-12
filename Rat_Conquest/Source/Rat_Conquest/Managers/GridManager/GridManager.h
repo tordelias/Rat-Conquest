@@ -39,6 +39,8 @@ public:
 
 	TArray<AGridTile*> GetMovableTiles(int32 Row, int32 Column, int32 MovementRange);
 
+	FVector GetRandomPositionInGrid();
+
 	bool bIsGridFinished() { return GridTiles.Num() > 0; };
 
 	bool bIsGridScanned = false;

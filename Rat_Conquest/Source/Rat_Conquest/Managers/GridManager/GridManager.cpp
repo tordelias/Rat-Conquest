@@ -426,6 +426,36 @@ TArray<AGridTile*> AGridManager::GetMovableTiles(int32 Row, int32 Column, int32 
     return VisitedTiles.Array();
 }
 
+FVector AGridManager::GetRandomPositionInGrid()
+{
+    if (GridTiles.Num() == 0)
+    {
+        return FVector(); // Return default if no tiles exist
+    }
+
+    // Collect all unoccupied tiles
+    TArray<AActor*> AvailableTiles;
+    for (const auto& TilePair : GridTiles)
+    {
+      
+        AGridTile* CurrentTile = Cast<AGridTile>(TilePair.Value);
+        if (CurrentTile && !CurrentTile->bIsOccupied)  // Ensure the tile exists and is not occupied
+        {
+            AvailableTiles.Add(CurrentTile);
+        }
+    }
+
+    if (AvailableTiles.Num() == 0)
+    {
+        return FVector(); // No unoccupied tiles available
+    }
+
+    // Pick a random unoccupied tile
+    int32 RandomIndex = FMath::RandRange(0, AvailableTiles.Num() - 1);
+    return AvailableTiles[RandomIndex]->GetActorLocation();
+}
+
+
 
 // Called when the game starts or when spawned
 void AGridManager::BeginPlay()

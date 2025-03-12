@@ -11,6 +11,8 @@ class APlayerUnit;
 class AMainHUD;
 class AGridManager;
 class ALevelGenerator;
+class AItem;
+
 UCLASS()
 class RAT_CONQUEST_API AGameManager : public AActor
 {
@@ -52,6 +54,8 @@ public:
 	void PauseGame();
 	void ResumeGame();
 
+	void SpawnLoot();
+
 	TArray<APlayerUnit*> MasterTurnQueue;
 	const int32 TurnBufferSize = 10;
 
@@ -80,6 +84,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category = "Enemies")
 	TArray<TSubclassOf<APlayerUnit>> EnemyList;
+
+	UPROPERTY(EditAnywhere, Category = "Items")
+	TArray<TSubclassOf<AItem>> ItemPool;
 
 	UPROPERTY()
 	APlayerUnit* CurrentUnit;
