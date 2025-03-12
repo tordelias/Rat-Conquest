@@ -390,7 +390,7 @@ void ALevelGenerator::MoveToRoom(int32 DirectionIndex)
             }
             else
             {
-                UE_LOG(LogTemp, Error, TEXT("HUD is null |Mutate_PlayerUnit.cpp|"));
+                UE_LOG(LogTemp, Error, TEXT("HUD is null |level gen.cpp|"));
             }
 			OnPlayerEnterRoom(CurrentRoom);
            

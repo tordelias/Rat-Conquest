@@ -83,6 +83,8 @@ void AGameManager::TogglePlayerTurn()
 void AGameManager::InitalizeUnits()
 {
   
+    PlayerUnits.Empty();
+    EnemyUnits.Empty();
     for (TActorIterator<APlayerUnit> It(GetWorld()); It; ++It)
     {
         APlayerUnit* Unit = *It;
@@ -201,6 +203,12 @@ void AGameManager::ExecuteTurn()
             false
         );
     }
+    if (EnemyUnits.Num() == 0) {
+        bEncounterComplete = true;
+        if (LevelGenerator) {
+            LevelGenerator->SetupRoomSelectUI();
+        }
+    }
 }
 
 
@@ -306,6 +314,10 @@ void AGameManager::EndEncounter()
 	TurnQueue.Empty();
 
 	// Clear the player and enemy units
+    for (APlayerUnit* Unit : EnemyUnits)
+    {
+        if (Unit) Unit->Destroy();
+    }
 	PlayerUnits.Empty();
 	EnemyUnits.Empty();
 
@@ -346,8 +358,9 @@ void AGameManager::LoadNextEncounter()
 
 void AGameManager::StartEncounter()
 {
-
+    if (MainHUD) MainHUD->ClearTurnImages();
     if (!GridManager) return;
+    bisPlayersturn = true;
     GridManager->ScanWorldForObjects();
     //Spawn new enemies
 	for (int i = 0; i < 1; ++i)
@@ -407,28 +420,20 @@ void AGameManager::StartEncounter()
 	}
 
   
-    GetWorldTimerManager().SetTimerForNextTick(this, &AGameManager::InitalizeUnits);
-    float InitialDelay = 0.0f; // Starting delay in seconds
-    float DelayIncrement = 1.0f; // Delay between each unit
+   
+   
 
     for (APlayerUnit* P_unit : PlayerUnits)
     {
-        //P_unit->GridStartPosition = FVector2D(0, 0);
+        P_unit->GridStartPosition = FVector2D(0, 0);
 
         // Incremental delay for each unit
         FTimerHandle AIUnitTurnTimerHandle;
-        if (P_unit->GridManager && P_unit->GridManager->bIsGridScanned) {
-            GetWorld()->GetTimerManager().SetTimer(
-                AIUnitTurnTimerHandle,
-                FTimerDelegate::CreateLambda([P_unit]()
-                    {
-                        P_unit->DelayedInitalPosition();
-                    }),
-                InitialDelay,
-                false
-            );
+        if (P_unit->GridManager && GridManager->bIsGridScanned) {
+           
+            P_unit->DelayedInitalPosition();
             // Increase the delay for the next unit
-            InitialDelay += DelayIncrement;
+            UE_LOG(LogTemp, Warning, TEXT("MOVE PLAYER!"))
         }
         else {
             UE_LOG(LogTemp, Warning, TEXT("COULD NOT MOVE PLAYER!"));
@@ -437,7 +442,7 @@ void AGameManager::StartEncounter()
 
        
     }
-   
+    GetWorldTimerManager().SetTimerForNextTick(this, &AGameManager::InitalizeUnits);
     //// Initialize the player and enemy units
    
 
@@ -563,7 +568,7 @@ void AGameManager::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
     if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::F))
     {
-	
+	  
        // UE_LOG(LogTemp, Warning, "current TurnQueue size: %d", TurnQueue.Num());
 		for (APlayerUnit* unit : TurnQueue)
 		{
@@ -572,6 +577,7 @@ void AGameManager::Tick(float DeltaTime)
 		for (APlayerUnit* unit : PlayerUnits)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Player Unit: %s"), *unit->GetName());
+            
 		}
         UE_LOG(LogTemp, Warning, TEXT("Size of TurnQueue: %d"), TurnQueue.Num());
         UE_LOG(LogTemp, Display, TEXT("Current Turn Queue:"));
