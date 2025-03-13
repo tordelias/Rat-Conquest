@@ -34,6 +34,14 @@ protected:
 	class UTextBlock* DefenseC1;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
+	class UTextBlock* AttackC1;
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
+	class UTextBlock* InitativeC1;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
+	class UTextBlock* RangeC1;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
 	class UTextBlock* HealthC2;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
@@ -46,6 +54,15 @@ protected:
 	class UTextBlock* DefenseC2;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
+	class UTextBlock* AttackC2;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
+	class UTextBlock* InitativeC2;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
+	class UTextBlock* RangeC2;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
 	class UTextBlock* HealthC3;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
@@ -56,6 +73,15 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
 	class UTextBlock* DefenseC3;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
+	class UTextBlock* AttackC3;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
+	class UTextBlock* InitativeC3;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
+	class UTextBlock* RangeC3;
 
 	// Buttons
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")

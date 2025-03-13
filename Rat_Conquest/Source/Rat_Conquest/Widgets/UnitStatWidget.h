@@ -30,6 +30,14 @@ protected:
 	class UTextBlock* UnitDamage;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
+	class UTextBlock* UnitAttack;
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
+	class UTextBlock* UnitInitative;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
+	class UTextBlock* UnitRange;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")
 	class UTextBlock* UnitMovementSpeed;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Stat Widget")

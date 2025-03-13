@@ -28,7 +28,7 @@ void UMutationWidget::NativeConstruct()
 
 void UMutationWidget::SetData(TArray<int> statsC1, TArray<int> statsC2, TArray<int> statsC3, FName NewUnitName, APlayerUnit* currentUnit )
 {
-	//speed = 0, attack = 1, defense = 2, health = 3
+	//speed = 0, damage = 1, defense = 2, health = 3, attack = 4, range = 5, initiative = 6
 
 	unit = currentUnit;
 	C1 = statsC1;
@@ -68,22 +68,31 @@ void UMutationWidget::SetData(TArray<int> statsC1, TArray<int> statsC2, TArray<i
 				TextBlock->SetColorAndOpacity(FSlateColor(FLinearColor::Red));
 			}
 		};
-
+	//speed = 0, damage = 1, defense = 2, health = 3, attack = 4, range = 5, initiative = 6
 	// Set stats for each column
 	SetStatText(this->SpeedC1, statsC1[0]);
 	SetStatText(this->DamageC1, statsC1[1]);
 	SetStatText(this->DefenseC1, statsC1[2]);
 	SetStatText(this->HealthC1, statsC1[3]);
+	SetStatText(this->InitativeC1, statsC1[6]);
+	SetStatText(this->RangeC1, statsC1[5]);
+	SetStatText(this->AttackC1, statsC1[4]);
 
 	SetStatText(this->SpeedC2, statsC2[0]);
 	SetStatText(this->DamageC2, statsC2[1]);
 	SetStatText(this->DefenseC2, statsC2[2]);
 	SetStatText(this->HealthC2, statsC2[3]);
+	SetStatText(this->InitativeC2, statsC2[6]);
+	SetStatText(this->RangeC2, statsC2[5]);
+	SetStatText(this->AttackC2, statsC2[4]);
 
 	SetStatText(this->SpeedC3, statsC3[0]);
 	SetStatText(this->DamageC3, statsC3[1]);
 	SetStatText(this->DefenseC3, statsC3[2]);
 	SetStatText(this->HealthC3, statsC3[3]);
+	SetStatText(this->InitativeC3, statsC3[6]);
+	SetStatText(this->RangeC3, statsC3[5]);
+	SetStatText(this->AttackC3, statsC3[4]);
 
 }
 

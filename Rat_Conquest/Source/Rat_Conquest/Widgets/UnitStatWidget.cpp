@@ -9,11 +9,15 @@ void UUnitStatWidget::UpdateWidget(const FInteractableData* InteractableData) co
 {
     if (InteractableData)
     {
-        if (UnitName) UnitName->SetText(FText::Format(NSLOCTEXT("UnitStats", "UnitName", "Unit Name: {0}"), InteractableData->UnitName));
-        if (UnitHealth) UnitHealth->SetText(FText::FromString("Health: " + FString::FromInt(InteractableData->UnitHealth)));
+        if (UnitName) UnitName->SetText(FText::Format(NSLOCTEXT("UnitStats", "UnitName", "{0}"), InteractableData->UnitName));
+        //write health as health/maxHealth
+		if (UnitHealth) UnitHealth->SetText(FText::FromString("Health: " + FString::FromInt(InteractableData->UnitHealth) + "/" + FString::FromInt(InteractableData->maxHealth)));
         if (UnitDamage) UnitDamage->SetText(FText::FromString("Damage: " + FString::FromInt(InteractableData->UnitDamage)));
         if (UnitMovementSpeed) UnitMovementSpeed->SetText(FText::FromString("Speed: " + FString::FromInt(InteractableData->UnitMovementSpeed)));
         if (UnitDefense) UnitDefense->SetText(FText::FromString("Defense: " + FString::FromInt(InteractableData->Defense)));
+		if (UnitAttack) UnitAttack->SetText(FText::FromString("Attack: " + FString::FromInt(InteractableData->Attack)));
+		if (UnitInitative) UnitInitative->SetText(FText::FromString("Initiative: " + FString::FromInt(InteractableData->Initative)));
+		if (UnitRange) UnitRange->SetText(FText::FromString("Range: " + FString::FromInt(InteractableData->Range)));
         else UE_LOG(LogTemp, Error, TEXT("UnitDefense is nullptr!"));
     }
     else

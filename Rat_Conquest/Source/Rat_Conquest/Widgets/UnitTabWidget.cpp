@@ -54,7 +54,7 @@ void UUnitTabWidget::SetData(APlayerUnit* _Unit)
     if (Attack)     Attack->SetText(FText::AsNumber(Unit->Attack));
     if (Damage)     Damage->SetText(FText::AsNumber(Unit->Damage));
     if (Range)      Range->SetText(FText::AsNumber(Unit->AttackRange));
-    if (Health)     Health->SetText(FText::AsNumber(Unit->Health));
+	if (Health)     Health->SetText(FText::FromString(FString::FromInt(Unit->Health) + "/" + FString::FromInt(Unit->maxHealth)));
     if (Defense)    Defense->SetText(FText::AsNumber(Unit->Defence));
     if (Speed)      Speed->SetText(FText::AsNumber(Unit->MovementSpeed));
     if (initiativ)  initiativ->SetText(FText::AsNumber(Unit->Initiative));

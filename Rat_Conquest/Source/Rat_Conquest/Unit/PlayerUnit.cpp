@@ -67,6 +67,7 @@ APlayerUnit::APlayerUnit()
 	GridManager = nullptr;
 	combatManager = nullptr;
 	bIsRangedUnit = false;
+	Health = maxHealth; 
 
 	UE_LOG(LogTemp, Warning, TEXT("APlayerUnit Constructor - End"));
 }
@@ -1173,7 +1174,7 @@ float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
 
 void APlayerUnit::ApplyMutation(TArray<int> statsToAdd)
 {
-	//speed = 0, attack = 1, defense = 2, health = 3
+	//speed = 0, damage = 1, defense = 2, health = 3, attack = 4, range = 5, initiative = 6
 
 	if (AMainHUD* hud = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD()))
 	{
@@ -1185,12 +1186,21 @@ void APlayerUnit::ApplyMutation(TArray<int> statsToAdd)
 		this->MovementSpeed += statsToAdd[0];
 		this->Damage += statsToAdd[1];
 		this->Defence += statsToAdd[2];
+		this->maxHealth += statsToAdd[3];
 		this->Health += statsToAdd[3];
+		this->Attack += statsToAdd[4];
+		this->AttackRange += statsToAdd[5];
+		this->Initiative += statsToAdd[6];
+
 
 		this->MovementSpeed = (this->MovementSpeed > 0) ? this->MovementSpeed : 1;
 		this->Damage = (this->Damage > 0) ? this->Damage : 1;
 		this->Defence = (this->Defence > 0) ? this->Defence : 0;
-		this->Health = (this->Health > 0) ? this->Health : 1;
+		this->maxHealth = (this->maxHealth > 0) ? this->maxHealth : 1;
+		this->Attack = (this->Attack > 0) ? this->Attack : 1;
+		this->AttackRange = (this->AttackRange > 0) ? this->AttackRange : 0;
+		this->Initiative = (this->Initiative > 0) ? this->Initiative : 1;
+
 	}
 
 	UpdateInteractableData();
@@ -1222,6 +1232,9 @@ void APlayerUnit::UpdateInteractableData()
 	}
 
 	InstanceInteractableData.UnitHealth = Health;
+	InstanceInteractableData.maxHealth = maxHealth;
+	InstanceInteractableData.Range = AttackRange;
+	InstanceInteractableData.Attack = Attack;
 	InstanceInteractableData.UnitDamage = Damage;
 	InstanceInteractableData.UnitMovementSpeed = MovementSpeed;
 	InstanceInteractableData.Defense = Defence;

@@ -20,6 +20,9 @@ private:
 	int attack;
 	int defense;
 	int health;
+	int damage;
+	int range;
+	int initiative;
 	TArray<int> stats;
 
 	TArray<int> statsC1;

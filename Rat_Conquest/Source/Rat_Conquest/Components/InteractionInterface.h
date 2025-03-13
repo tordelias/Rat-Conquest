@@ -24,7 +24,7 @@ struct FInteractableData
 	GENERATED_USTRUCT_BODY()
 
 
-	FInteractableData() : InteractableType(EInteractionType::IT_Pickup), UnitName(FText::FromString("")), UnitHealth(0), UnitDamage(0), UnitMovementSpeed(0), Defense(0), InteractionDuration(0.0f)
+	FInteractableData() : InteractableType(EInteractionType::IT_Pickup), UnitName(FText::FromString("")), UnitHealth(0), UnitDamage(0), UnitMovementSpeed(0), Defense(0), Attack(0), Range(0), Initative(0), maxHealth(0), InteractionDuration(0.0f)
 	{
 	};
 	UPROPERTY(EditInstanceOnly)
@@ -43,7 +43,19 @@ struct FInteractableData
 	uint32 UnitMovementSpeed;
 
 	UPROPERTY(EditInstanceOnly)
-	uint32 Defense; 
+	uint32 Defense;
+
+	UPROPERTY(EditInstanceOnly)
+	uint32 Attack;
+
+	UPROPERTY(EditInstanceOnly)
+	uint32 Range;
+
+	UPROPERTY(EditInstanceOnly)
+	uint32 Initative;
+
+	UPROPERTY(EditInstanceOnly)
+	uint32 maxHealth;
 
 	UPROPERTY(EditInstanceOnly)
 	float InteractionDuration;

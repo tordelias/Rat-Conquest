@@ -9,6 +9,9 @@ MutationData::MutationData()
 	attack = 0;
 	defense = 0;
 	health = 0;
+	damage = 0;
+	range = 0;
+	initiative = 0;
 	maxExperience = 10;
 	maxChange = 5;
 	minChange = 1;
@@ -18,8 +21,11 @@ MutationData::MutationData()
 	stats.Add(attack);
 	stats.Add(defense);
 	stats.Add(health);
+	stats.Add(damage);
+	stats.Add(range);
+	stats.Add(initiative);
 
-	//speed = 0, attack = 1, defense = 2, health = 3
+	//speed = 0, damage = 1, defense = 2, health = 3, attack = 4, range = 5, initiative = 6
 }
 
 MutationData::~MutationData()
@@ -45,7 +51,7 @@ void MutationData::Mutate()
 
 TArray<int> MutationData::MutateArray()
 {
-	//speed = 0, attack = 1, defense = 2, health = 3
+	//speed = 0, damage = 1, defense = 2, health = 3, attack = 4, range = 5, initiative = 6
 	TArray<int> mutatedArray = stats; 
 
 		int positiveChange = FMath::RandRange(minChange, maxChange);
