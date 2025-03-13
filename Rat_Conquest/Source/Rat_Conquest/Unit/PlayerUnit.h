@@ -7,6 +7,8 @@
 #include "Rat_Conquest/Components/InteractionInterface.h"
 #include "PlayerUnit.generated.h"
 
+class UHealthBar;
+class UWidgetComponent;
 class AGridManager;
 class AGameManager;
 class ACombatManager;
@@ -59,6 +61,8 @@ public:
 	// Combat Attributes
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat Manager")
 	ACombatManager* combatManager;
+	UPROPERTY(EditAnywhere)
+	UWidgetComponent* HealthBarWidgetComponent;
 
 	UPROPERTY()
 	AItem* Weapon;
@@ -165,6 +169,9 @@ public:
 	virtual void BeginPlay() override;
 	void UpdateInteractableData();
 
+	void UpdateHealthBar();
+	void UpdateHealthBarRotation();
+
 	FVector2D GetCardinalDirection(FVector2D FromGridPos, FVector2D ToGridPos);
 	FVector2D GetMousePosition(FVector WorldLocation, FVector WorldDirection);
 
@@ -209,4 +216,7 @@ private:
 	// Tiles
 	TArray<AGridTile*> MovedTiles;
 	TArray<AGridTile*> HoverTiles;
+
+	UPROPERTY()
+	UHealthBar* HealthBarWidget;
 };

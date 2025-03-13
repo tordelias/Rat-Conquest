@@ -108,7 +108,7 @@ void ACombatManager::HandleUnitDamage(APlayerUnit* unit, int amount)
 	unit->Health -= TotalDamage;
 
     unit->OnHealthChanged.Broadcast();
-
+    unit->UpdateHealthBar();
 	UE_LOG(LogTemp, Warning, TEXT("took %d damage"),amount);
 
 	if (unit->Health <= 0)

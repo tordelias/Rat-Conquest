@@ -18,7 +18,9 @@
 #include "Rat_Conquest/Projectiles/GenericProjectile.h"
 #include "Rat_Conquest/Data/MutationData.h"
 #include "Rat_Conquest/Widgets/MainHUD.h"
+#include "Components/WidgetComponent.h"
 #include "Rat_Conquest/Items/ItemBase.h"
+#include "Rat_Conquest/Widgets/HealthBar.h"
 
 
 APlayerUnit::APlayerUnit()
@@ -57,6 +59,10 @@ APlayerUnit::APlayerUnit()
 	ArmorMesh->SetupAttachment(SkeletalMesh, TEXT("Hand_R"));
 
 	ArmorMesh->SetRelativeScale3D(FVector(1.0f));*/
+	HealthBarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidgetComponent"));
+	HealthBarWidgetComponent->SetupAttachment(RootComponent);
+	HealthBarWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	
 	
 
@@ -152,6 +158,26 @@ void APlayerUnit::BeginPlay()
 		ItemSlots.Add(nullptr);
 		ItemSlots.Add(nullptr);
 	}
+
+	if (!HealthBarWidgetComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("HealthBarWidgetComponent NOT found! Make sure it exists in the Blueprint."));
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("HealthBarWidgetComponent found!"));
+
+	if (HealthBarWidgetComponent->GetWidgetClass())
+	{
+		HealthBarWidget = Cast<UHealthBar>(HealthBarWidgetComponent->GetUserWidgetObject());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("HealthBarWidgetComponent has no WidgetClass! Make sure it's set in the Blueprint."));
+	}
+
+
+	UpdateHealthBar(); // Update UI initially
 }
 
 void APlayerUnit::Tick(float DeltaTime)
@@ -271,6 +297,8 @@ void APlayerUnit::Tick(float DeltaTime)
 			SetActorLocation(NewPosition);
 		}
 	}
+
+	UpdateHealthBarRotation();
 }
 
 
@@ -1279,4 +1307,39 @@ void APlayerUnit::UpdateInteractableData()
 	InstanceInteractableData.UnitMovementSpeed = MovementSpeed;
 	InstanceInteractableData.Defense = Defence;
 
+}
+
+void APlayerUnit::UpdateHealthBar()
+{
+	if (!HealthBarWidget)
+	{
+		UE_LOG(LogTemp, Error, TEXT("HealthBarWidget is NULL! Make sure it's properly set."));
+		return;
+	}
+
+	float HealthPercent = static_cast<float>(Health) / static_cast<float>(maxHealth);
+	HealthBarWidget->SetHealthBarPercentage(HealthPercent);
+
+}
+
+void APlayerUnit::UpdateHealthBarRotation()
+{
+
+	//set HealthBarWidgetComponent rotation to always face camera/palyerCamera
+	if (!HealthBarWidget)
+		return;
+
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (!PlayerController) return;
+
+	APlayerCameraManager* CameraManager = PlayerController->PlayerCameraManager;
+	if (!CameraManager) return;
+
+
+	FVector CameraLocation = CameraManager->GetCameraLocation();
+	FVector ToCamera = CameraLocation - HealthBarWidgetComponent->GetComponentLocation();
+	ToCamera.Normalize();
+
+	FRotator LookAtRotation = ToCamera.Rotation();
+	HealthBarWidgetComponent->SetWorldRotation(LookAtRotation);
 }
