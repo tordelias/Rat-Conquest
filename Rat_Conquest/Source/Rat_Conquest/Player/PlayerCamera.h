@@ -124,6 +124,8 @@ public:
 
 	APlayerUnit* GetCurrentUnit() const { return CurrentUnit; }
 
+	void SetCameraTopDown(float ZRotation, float height); 
+
 	FORCEINLINE bool bIsInteracting() const { return GetWorldTimerManager().IsTimerActive(TimerHandleInteraction); }
 
 	FVector GetMouseWorldLocation() const { return MouseWorldLocation; }

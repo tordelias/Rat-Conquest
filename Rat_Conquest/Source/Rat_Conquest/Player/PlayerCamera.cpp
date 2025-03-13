@@ -24,25 +24,29 @@
 // Sets default values
 APlayerCamera::APlayerCamera()
 {
-    // Set this character to call Tick() every frame. You can turn this off to improve performance if you don't need it.
     PrimaryActorTick.bCanEverTick = true;
 
     GetCapsuleComponent()->InitCapsuleSize(25.f, 50.0f);
 
     SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
     SpringArm->SetupAttachment(GetCapsuleComponent());
-    SpringArm->bUsePawnControlRotation = true;
+
+    // Fix: Disable Pawn Control Rotation
+    SpringArm->bUsePawnControlRotation = false;
+    SpringArm->bInheritPitch = false;
+    SpringArm->bInheritYaw = false;
+    SpringArm->bInheritRoll = false;
 
     ThirdPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
     ThirdPersonCameraComponent->SetupAttachment(SpringArm);
+
     bUseControllerRotationYaw = false;
 
     GetCharacterMovement()->bOrientRotationToMovement = false;
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Overlap);
 
-
-    MinZoom = 100.0f;
+    MinZoom = 500.0f;
     MaxZoom = 1200.0f;
     ZoomSpeed = 30.0f;
 }
@@ -52,13 +56,21 @@ void APlayerCamera::BeginPlay()
 {
     Super::BeginPlay();
 
-	mainHUD = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+    mainHUD = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 
-    InteractionCheckDistance = 1750.f; 
+    InteractionCheckDistance = 1750.f;
     InteractionCheckFrequency = 0.05f;
 
-   
+    // Set Camera to Top-Down View
+    SetCameraTopDown(0.0f, 1000.0f);
+
+    if (SpringArm)
+    {
+        SpringArm->bInheritYaw = true;  // Allow mouse rotation
+    }
 }
+
+
 
 // Called every frame
 void APlayerCamera::Tick(float DeltaTime)
@@ -341,19 +353,29 @@ void APlayerCamera::SwitchMouseCursor(TObjectPtr<APlayerUnit> Enemy)
 
 void APlayerCamera::Look(const FInputActionValue& Value)
 {
+    FVector2D LookAxis = Value.Get<FVector2D>();
+
     if (APlayerController* PC = Cast<APlayerController>(GetController()))
     {
-        if (PC->IsInputKeyDown(EKeys::RightMouseButton))
+        if (PC->IsInputKeyDown(EKeys::RightMouseButton)) // Rotate only when RMB is held
         {
-            FVector2D LookAxis = Value.Get<FVector2D>();
-            if (Controller != nullptr)
+            if (SpringArm)
             {
-                AddControllerYawInput(-LookAxis.X);
-                AddControllerPitchInput(LookAxis.Y);
+                // Get current rotation
+                FRotator CurrentRotation = SpringArm->GetRelativeRotation();
+
+                // Apply yaw rotation freely (left/right movement)
+                SpringArm->AddLocalRotation(FRotator(0.0f, -LookAxis.X, 0.0f));
+
+                // Apply pitch rotation, but clamp it to avoid flipping
+                float NewPitch = FMath::Clamp(CurrentRotation.Pitch + LookAxis.Y, -89.0f, -30.0f);
+                SpringArm->SetRelativeRotation(FRotator(NewPitch, SpringArm->GetRelativeRotation().Yaw, 0.0f));
             }
         }
     }
 }
+
+
 
 void APlayerCamera::Zoom(const FInputActionValue& Value)
 {
@@ -363,6 +385,7 @@ void APlayerCamera::Zoom(const FInputActionValue& Value)
 
     SpringArm->TargetArmLength = FMath::Clamp(NewLength, MinZoom, MaxZoom);
 }
+
 
 // Called to bind functionality to input
 void APlayerCamera::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -376,3 +399,16 @@ void APlayerCamera::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
         EnhancedInputComponent->BindAction(IA_Interact, ETriggerEvent::Started, this, &APlayerCamera::BeginInteract);
     }
 }
+void APlayerCamera::SetCameraTopDown(float ZRotation, float Height)
+{
+    if (SpringArm)
+    {
+        // Fix: Use SetWorldRotation to ensure the camera rotates
+        FRotator NewRotation = FRotator(-60.0f, ZRotation, 0.0f);
+        SpringArm->SetWorldRotation(NewRotation);
+
+        // Adjust height correctly
+        SpringArm->TargetArmLength = FMath::Clamp(Height, MinZoom, MaxZoom);
+    }
+}
+
