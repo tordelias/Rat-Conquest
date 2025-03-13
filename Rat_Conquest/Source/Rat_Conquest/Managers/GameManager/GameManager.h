@@ -54,6 +54,8 @@ public:
 	void PauseGame();
 	void ResumeGame();
 
+	bool isUnitAlive(); 
+
 	void SpawnLoot();
 
 	TArray<APlayerUnit*> MasterTurnQueue;

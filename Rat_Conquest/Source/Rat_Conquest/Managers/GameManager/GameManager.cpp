@@ -556,6 +556,19 @@ void AGameManager::ResumeGame()
     }
 }
 
+bool AGameManager::isUnitAlive()
+{
+    if (!MainHUD)
+        return false;
+
+	if (PlayerUnits.Num() > 0)
+	{
+		return true;
+	}
+	MainHUD->ShowGameOverWidget();
+    return false;
+}
+
 void AGameManager::SpawnLoot()
 {
     if (!GridManager || ItemPool.Num() == 0)
@@ -632,4 +645,5 @@ void AGameManager::Tick(float DeltaTime)
        
        
     }
+	isUnitAlive();
 }

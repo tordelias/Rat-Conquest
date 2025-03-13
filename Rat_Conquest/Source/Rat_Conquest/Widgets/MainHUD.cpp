@@ -59,6 +59,15 @@ void AMainHUD::BeginPlay()
 		}
 	}
 
+	if (GameOverWidgetClass)
+	{
+		GameOverWidget = CreateWidget<UUserWidget>(GetWorld(), GameOverWidgetClass);
+		if (GameOverWidget)
+		{
+			GameOverWidget->AddToViewport();
+			GameOverWidget->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	}
 	
 }
 
@@ -295,5 +304,32 @@ void AMainHUD::GetRoomSelectDoors(TArray<bool> _DoorDirections)
 		}
 
 
+	}
+}
+
+void AMainHUD::ShowGameOverWidget()
+{
+	if (!GameOverWidget)
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameOverWidget is NULL! Make sure it's created before calling ShowGameOverWidget."));
+		return;
+	}
+
+	if (GameOverWidget->GetVisibility() == ESlateVisibility::Collapsed)
+	{
+		GameOverWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+
+void AMainHUD::CloseGameOverWidget()
+{
+	if (GameOverWidget)
+	{
+		GameOverWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameOverWidget is null!"));
 	}
 }

@@ -35,6 +35,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget", meta = (AllowPrivate = "true"))
 	TSubclassOf<USelectRoomWidget> RoomSelectWidgetClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget", meta = (AllowPrivate = "true"))
+	TSubclassOf<UUserWidget> GameOverWidgetClass;
 
 	UPROPERTY()
 	UUnitStatWidget* StatWidget;
@@ -47,6 +49,9 @@ protected:
 
 	UPROPERTY()
 	USelectRoomWidget* RoomWidget;
+
+	UPROPERTY()
+	UUserWidget* GameOverWidget;
 
 
 public:
@@ -75,5 +80,8 @@ public:
 	void CloseRoomSelectWidget();
 	void SetupRoomSelectWidget(ALevelGenerator* _Levelgen);
 	void GetRoomSelectDoors(TArray<bool> _DoorDirections);
+
+	void ShowGameOverWidget();
+	void CloseGameOverWidget();
 	
 };
