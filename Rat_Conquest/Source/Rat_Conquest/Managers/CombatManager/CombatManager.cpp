@@ -103,8 +103,11 @@ void ACombatManager::HandleUnitDamage(APlayerUnit* unit, int amount)
 		UE_LOG(LogTemp, Error, TEXT("TakeDamage failed: Unit is null!"));
 		return;
 	}
+
 	int TotalDamage = FMath::Max(amount - unit->Defence, 1);
 	unit->Health -= TotalDamage;
+
+    unit->OnHealthChanged.Broadcast();
 
 	UE_LOG(LogTemp, Warning, TEXT("took %d damage"),amount);
 

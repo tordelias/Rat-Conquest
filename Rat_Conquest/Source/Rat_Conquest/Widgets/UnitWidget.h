@@ -4,6 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "UnitWidget.generated.h"
 
+class UProgressBar;
 class UUnitTabWidget;
 class UUnitImageWidget;
 class APlayerUnit;
@@ -39,6 +40,18 @@ public:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Widget")
 	UUnitTabWidget* UnitTabWidget1;
 
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Widget")
+	UProgressBar* HealthBar1;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Widget")
+	UProgressBar* HealthBar2;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Widget")
+	UProgressBar* HealthBar3;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Widget")
+	UProgressBar* HealthBar4;
+
 	// Buttons inside the UnitImageWidgets for handling clicks
 	UPROPERTY(meta = (BindWidget))
 	UButton* UnitImageButton1;
@@ -54,6 +67,8 @@ public:
 
 	// Tracks the currently active unit in the UnitTabWidget
 	APlayerUnit* ActiveUnit;
+
+	TArray<APlayerUnit*> Units;
 
 	virtual void NativeConstruct() override;
 
@@ -73,6 +88,9 @@ public:
 
 	UFUNCTION()
 	void OnUnitImage4Clicked();
+
+	UFUNCTION()
+	void OnUnitHealthChanged();
 
 
 };

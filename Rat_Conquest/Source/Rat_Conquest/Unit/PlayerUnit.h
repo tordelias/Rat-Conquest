@@ -17,6 +17,8 @@ class MutationData;
 class AWeapon;
 
 DECLARE_DELEGATE(FOnMovementCompleteSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHealthChanged);
+
 
 UCLASS()
 class RAT_CONQUEST_API APlayerUnit : public APawn, public IInteractionInterface
@@ -118,6 +120,9 @@ public:
 
 	// Delegates
 	FOnMovementCompleteSignature OnMovementComplete;
+
+	UPROPERTY(BlueprintAssignable, Category = "Health")
+	FOnHealthChanged OnHealthChanged;
 
 	// Public Functions
 	void MoveToTile(FVector2D NewGridPosition);

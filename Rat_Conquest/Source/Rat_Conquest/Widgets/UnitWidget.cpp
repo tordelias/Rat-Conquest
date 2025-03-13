@@ -3,6 +3,7 @@
 #include "Components/Button.h"
 #include "Rat_Conquest/Widgets/UnitImageWidget.h"
 #include "Rat_Conquest/Widgets/UnitTabWidget.h"
+#include "Components/ProgressBar.h"
 
 
 void UUnitWidget::NativeConstruct()
@@ -38,6 +39,12 @@ void UUnitWidget::NativeConstruct()
 	{
 		UnitTabWidget1->SetVisibility(ESlateVisibility::Collapsed);
 	}
+	HealthBar1->SetVisibility(ESlateVisibility::Collapsed);
+	HealthBar2->SetVisibility(ESlateVisibility::Collapsed);
+	HealthBar3->SetVisibility(ESlateVisibility::Collapsed);
+	HealthBar4->SetVisibility(ESlateVisibility::Collapsed);
+
+	Units.SetNum(4); 
 }
 
 void UUnitWidget::OnUnitImage1Clicked()
@@ -61,30 +68,93 @@ void UUnitWidget::OnUnitImage4Clicked()
 	OnUnitImageClicked(UnitImageWidget4);
 }
 
+void UUnitWidget::OnUnitHealthChanged()
+{
+	for (auto Unit : Units)
+	{
+		if (!Unit) continue;
+		// Find the corresponding health bar
+		UProgressBar* CorrespondingHealthBar = nullptr;
+		if (Unit == UnitImageWidget1->Unit)
+		{
+			CorrespondingHealthBar = HealthBar1;
+		}
+		else if (Unit == UnitImageWidget2->Unit)
+		{
+			CorrespondingHealthBar = HealthBar2;
+		}
+		else if (Unit == UnitImageWidget3->Unit)
+		{
+			CorrespondingHealthBar = HealthBar3;
+		}
+		else if (Unit == UnitImageWidget4->Unit)
+		{
+			CorrespondingHealthBar = HealthBar4;
+		}
+		// Update the health bar
+		if (CorrespondingHealthBar)
+		{
+			float HealthPercentage = static_cast<float>(Unit->Health) / static_cast<float>(Unit->maxHealth);
+			CorrespondingHealthBar->SetPercent(HealthPercentage);
+		}
+	}
+}
+
 void UUnitWidget::SetData(APlayerUnit* _Unit)
 {
 	if (!_Unit) return;
 
 	// Assign the unit to the first available UnitImageWidget
 	UUnitImageWidget* AvailableWidget = nullptr;
+	UProgressBar* CorrespondingHealthBar = nullptr;
 
-	if (!UnitImageWidget1->Unit) AvailableWidget = UnitImageWidget1;
-	else if (!UnitImageWidget2->Unit) AvailableWidget = UnitImageWidget2;
-	else if (!UnitImageWidget3->Unit) AvailableWidget = UnitImageWidget3;
-	else if (!UnitImageWidget4->Unit) AvailableWidget = UnitImageWidget4;
+	if (!UnitImageWidget1->Unit)
+	{
+		AvailableWidget = UnitImageWidget1;
+		CorrespondingHealthBar = HealthBar1;
+		Units[0] = _Unit;
+	}
+	else if (!UnitImageWidget2->Unit)
+	{
+		AvailableWidget = UnitImageWidget2;
+		CorrespondingHealthBar = HealthBar2;
+		Units[1] = _Unit;
+	}
+	else if (!UnitImageWidget3->Unit)
+	{
+		AvailableWidget = UnitImageWidget3;
+		CorrespondingHealthBar = HealthBar3;
+		Units[2] = _Unit;
+	}
+	else if (!UnitImageWidget4->Unit)
+	{
+		AvailableWidget = UnitImageWidget4;
+		CorrespondingHealthBar = HealthBar4;
+		Units[3] = _Unit;
+	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("No more room for units in the unit widget!"));
 		return;
 	}
 
-	UnitTabWidget1->SetData(_Unit);
-
 	// Assign unit and allow items to be shown
 	AvailableWidget->ShowUnitItems = true;
 	AvailableWidget->SetData(_Unit);
 	PlayerUnits.Add(_Unit);
+
+	// Show health bar if the unit is valid
+	if (CorrespondingHealthBar)
+	{
+		CorrespondingHealthBar->SetVisibility(ESlateVisibility::Visible);
+		float HealthPercentage = static_cast<float>(_Unit->Health) / static_cast<float>(_Unit->maxHealth);
+
+		CorrespondingHealthBar->SetPercent(HealthPercentage);
+
+		_Unit->OnHealthChanged.AddDynamic(this, &UUnitWidget::OnUnitHealthChanged);
+	}
 }
+
 
 void UUnitWidget::OnUnitImageClicked(UUnitImageWidget* ClickedWidget)
 {
