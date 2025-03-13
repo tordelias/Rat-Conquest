@@ -61,6 +61,8 @@ public:
 	TArray<APlayerUnit*> MasterTurnQueue;
 	const int32 TurnBufferSize = 10;
 
+	int RoomsExplored = 0;
+
 	bool hasSpawned = false;
 	bool bLevelFinishedGenerating = false;
 	bool bEncounterComplete = false;

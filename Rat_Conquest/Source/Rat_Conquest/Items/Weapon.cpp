@@ -49,6 +49,7 @@ void AWeapon::UseArrowShot()
 		{
 			// Initialize the projectile with a curve
 			Projectile->InitializeProjectileWithCurve(SpawnLocation, EnemyLocation);
+			ProjectileTime = Projectile->TimeToTarget;
 		}
 	}
 }

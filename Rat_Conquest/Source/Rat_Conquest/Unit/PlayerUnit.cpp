@@ -867,9 +867,19 @@ void APlayerUnit::UseCurrentItem()
 		if (currentWeapon && EnemyToAttack) {
 			currentWeapon->SetEnemyLocation(EnemyToAttack->GetActorLocation());
 			currentWeapon->UseItem();
-			combatManager->DealDamageToUnit(this,EnemyToAttack);
+			if (bIsRangedUnit) {
+				float CurrentDelay = currentWeapon->ProjectileTime;
+				
+				if (combatManager && EnemyToAttack) {
+					combatManager->DealDamageToUnit(this, EnemyToAttack);
+				}
+			}
+			else {
+				combatManager->DealDamageToUnit(this, EnemyToAttack);
+			}
+
 			EnemyToAttack = nullptr;
-			UE_LOG(LogTemp, Error, TEXT("RANGED ATTACK"));
+			UE_LOG(LogTemp, Error, TEXT("RANGED ATTACK"))
 		}
 		
 

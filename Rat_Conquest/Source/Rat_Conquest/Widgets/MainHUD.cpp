@@ -68,6 +68,14 @@ void AMainHUD::BeginPlay()
 			GameOverWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
+	if (VictoryWidgetClass) {
+
+		VictoryWidget = CreateWidget<UUserWidget>(GetWorld(), VictoryWidgetClass);
+		if (VictoryWidget) {
+			VictoryWidget->AddToViewport();
+			VictoryWidget->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	}
 	
 }
 
@@ -332,4 +340,32 @@ void AMainHUD::CloseGameOverWidget()
 	{
 		UE_LOG(LogTemp, Error, TEXT("GameOverWidget is null!"));
 	}
+}
+
+void AMainHUD::ShowVictoryWidget()
+{
+	if (!VictoryWidget)
+	{
+		UE_LOG(LogTemp, Error, TEXT("VictoryWidget is NULL! Make sure it's created before calling ShowVictoryWidget."));
+		return;
+	}
+
+	if (VictoryWidget->GetVisibility() == ESlateVisibility::Collapsed)
+	{
+		VictoryWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void AMainHUD::CloseVictoryWidget()
+{
+	if (VictoryWidget)
+	{
+		VictoryWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("VictoryWidget is NULL! Make sure it's created before calling ShowVictoryWidget."));
+		return;
+	}
+
+	
 }

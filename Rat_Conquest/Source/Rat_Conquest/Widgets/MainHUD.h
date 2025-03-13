@@ -38,6 +38,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget", meta = (AllowPrivate = "true"))
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget", meta = (AllowPrivate = "true"))
+	TSubclassOf<UUserWidget> VictoryWidgetClass;
+
 	UPROPERTY()
 	UUnitStatWidget* StatWidget;
 
@@ -53,7 +56,8 @@ protected:
 	UPROPERTY()
 	UUserWidget* GameOverWidget;
 
-
+	UPROPERTY()
+	UUserWidget* VictoryWidget;
 public:
 	//MainWidget functions
 	UFUNCTION(BlueprintCallable)
@@ -81,7 +85,12 @@ public:
 	void SetupRoomSelectWidget(ALevelGenerator* _Levelgen);
 	void GetRoomSelectDoors(TArray<bool> _DoorDirections);
 
+	//Game over widget
 	void ShowGameOverWidget();
 	void CloseGameOverWidget();
+
+	//Victory widget
+	void ShowVictoryWidget();
+	void CloseVictoryWidget();
 	
 };

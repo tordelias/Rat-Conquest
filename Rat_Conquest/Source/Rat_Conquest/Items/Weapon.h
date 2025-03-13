@@ -45,4 +45,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Properties")
 	EWeaponAbility WeaponAbility;
 	
+	float ProjectileTime = 1.0f;
 };

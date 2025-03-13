@@ -404,6 +404,7 @@ void ALevelGenerator::MoveToRoom(int32 DirectionIndex)
                 return;
             }
             TargetRoom->bIsExplored = true;
+            GameManager->RoomsExplored += 1;
             GameManager->LoadNextEncounter();
         }
         else

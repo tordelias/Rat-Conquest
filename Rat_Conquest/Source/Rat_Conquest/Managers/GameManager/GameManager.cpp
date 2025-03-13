@@ -231,8 +231,19 @@ void AGameManager::EndUnitTurn()
 
     if (EnemyUnits.Num() == 0) {
         bEncounterComplete = true;
-        if (LevelGenerator) {
+        APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+        if (PlayerCharacter) {
+            PlayerCharacter->SetCameraTopDown(0, 100);
+
+        }
+        if (LevelGenerator && RoomsExplored < 3) {
             LevelGenerator->SetupRoomSelectUI();
+        }
+        else if (RoomsExplored <= 3) {
+            //Show victory screen
+            if (MainHUD) {
+                MainHUD->ShowVictoryWidget();
+            }
         }
     }
 
