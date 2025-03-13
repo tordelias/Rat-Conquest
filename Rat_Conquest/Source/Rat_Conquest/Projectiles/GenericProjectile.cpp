@@ -47,9 +47,31 @@ void AGenericProjectile::InitializeProjectileWithCurve(const FVector& _StartLoca
     StartLocation = _StartLocation;
 }
 
+void AGenericProjectile::InitializeProjectileWithStraightPath(const FVector& _StartLocation, const FVector& Target)
+{
+    SetActorLocation(_StartLocation);
+    TargetLocation = Target;
+
+    // Calculate the straight-line direction to the target
+    Direction = (TargetLocation - _StartLocation).GetSafeNormal();
+
+    // Calculate time needed to reach the target
+    float DistanceToTarget = FVector::Dist(_StartLocation, TargetLocation);
+    TimeToTarget = DistanceToTarget / Speed;
+
+    // Initialize elapsed time
+    ElapsedTime = 0.0f;
+    StartLocation = _StartLocation;
+}
+
 void AGenericProjectile::InitializeProjectile(const FVector& ShootDirection)
 {
     Direction = ShootDirection.GetSafeNormal();
+}
+
+void AGenericProjectile::StraightShot()
+{
+
 }
 
 void AGenericProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -77,7 +99,7 @@ void AGenericProjectile::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
     // Move the projectile
-    if (ElapsedTime < TimeToTarget)
+    if (ElapsedTime < TimeToTarget && !bUseStraightPath)
     {
         ElapsedTime += DeltaTime;
         FVector PreviousPosition = GetActorLocation();
@@ -119,6 +141,23 @@ void AGenericProjectile::Tick(float DeltaTime)
         if (Alpha >= 1.0f)
         {
             Destroy();
+        }
+    }
+    if (bUseStraightPath) // Add a boolean flag to choose the path type
+    {
+        if (ElapsedTime < TimeToTarget)
+        {
+            ElapsedTime += DeltaTime;
+
+            // Move in a straight line
+            FVector NewLocation = StartLocation + (Direction * Speed * ElapsedTime);
+            SetActorLocation(NewLocation);
+
+            // Destroy projectile when reaching target
+            if (ElapsedTime >= TimeToTarget)
+            {
+                Destroy();
+            }
         }
     }
 }

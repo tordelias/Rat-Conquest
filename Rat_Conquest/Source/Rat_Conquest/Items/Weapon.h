@@ -35,6 +35,10 @@ public:
 
 	void UseArrowShot();
 
+	void UseCrossBowShot();
+
+	void UseMusketShot();
+
 	void SetEnemyLocation(FVector CurrentLocation);
 	FVector _EnemyLocation;
 

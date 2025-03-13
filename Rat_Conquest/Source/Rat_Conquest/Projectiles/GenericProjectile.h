@@ -41,8 +41,18 @@ public:
 	// Internal timer to control the curve
 	float ElapsedTime = 0.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+	bool bUseStraightPath = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+	bool bUseCurvePath = true;
+
 	void InitializeProjectileWithCurve(const FVector& _StartLocation, const FVector& Target);
+	void InitializeProjectileWithStraightPath(const FVector& _StartLocation, const FVector& Target);
 	void InitializeProjectile(const FVector& ShootDirection);
+	void StraightShot();
+
+
 
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);

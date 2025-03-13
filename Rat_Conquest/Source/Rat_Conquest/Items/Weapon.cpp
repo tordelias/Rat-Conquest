@@ -19,6 +19,11 @@ void AWeapon::UseItem()
     case EWeaponAbility::ArrowShot:
         UseArrowShot();
         break;
+	case EWeaponAbility::CrossBowShot:
+		UseCrossBowShot();
+		break;
+	case EWeaponAbility::MusketShot:
+		break;
     default:
         UE_LOG(LogTemp, Warning, TEXT("No ability defined for this weapon."));
         break;
@@ -52,6 +57,32 @@ void AWeapon::UseArrowShot()
 			ProjectileTime = Projectile->TimeToTarget;
 		}
 	}
+}
+
+void AWeapon::UseCrossBowShot()
+{
+	if (ProjectileClass && this != nullptr)
+	{
+		// Spawn the arrows
+		FVector SpawnLocation = GetActorLocation(); // Start at the unit's location
+		FVector EnemyLocation = _EnemyLocation; // Target location (e.g., enemy position)
+
+		FRotator SpawnRotation = (EnemyLocation - SpawnLocation).Rotation();
+
+		AGenericProjectile* Projectile = GetWorld()->SpawnActor<AGenericProjectile>(
+			ProjectileClass, SpawnLocation, SpawnRotation);
+
+		if (Projectile)
+		{
+			// Initialize the projectile with a curve
+			Projectile->InitializeProjectileWithStraightPath(SpawnLocation, EnemyLocation);
+			ProjectileTime = Projectile->TimeToTarget;
+		}
+	}
+}
+
+void AWeapon::UseMusketShot()
+{
 }
 
 void AWeapon::SetEnemyLocation(FVector CurrentLocation)
