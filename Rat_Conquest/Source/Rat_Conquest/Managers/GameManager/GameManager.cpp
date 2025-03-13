@@ -131,8 +131,9 @@ void AGameManager::StartTurnOrder()
     }
     else
     {
-        AllUnits.Append(EnemyUnits);
         AllUnits.Append(PlayerUnits);
+        AllUnits.Append(EnemyUnits);
+       
     }
 
     // Filter out null units
@@ -481,8 +482,9 @@ void AGameManager::UpdateTurnQueue()
         ValidUnits.Append(EnemyUnits);
     }
     else {
-        ValidUnits.Append(EnemyUnits);
         ValidUnits.Append(PlayerUnits);
+        ValidUnits.Append(EnemyUnits);
+       
     }
 
     // Remove invalid units (this is important to ensure we don’t display dead units)

@@ -34,7 +34,7 @@ void AWeapon::UseSlash()
 void AWeapon::UseArrowShot()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Arrow Shot Used"));
-	if (ProjectileClass)
+	if (ProjectileClass && this != nullptr)
 	{
 		// Spawn the arrows
 		FVector SpawnLocation = GetActorLocation(); // Start at the unit's location

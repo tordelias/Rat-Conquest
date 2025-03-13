@@ -15,7 +15,10 @@ enum class EWeaponAbility : uint8
 {
     None,
     Slash,
-    ArrowShot
+    ArrowShot,
+	HammerSlam,
+	CrossBowShot,
+	MusketShot
   
 };
 

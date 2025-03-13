@@ -13,6 +13,7 @@
 #include "Rat_Conquest/GridTile/GridTile.h"
 #include "Rat_Conquest/Managers/CombatManager/CombatManager.h"
 #include "Rat_Conquest/Items/Item.h"
+#include "Rat_Conquest/Items/Weapon.h"
 #include "Rat_Conquest/AI/EnemyAIController.h"
 #include "Rat_Conquest/Projectiles/GenericProjectile.h"
 #include "Rat_Conquest/Data/MutationData.h"
@@ -580,20 +581,32 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 
 	float DistanceToEnemy = ChebyshevDistance(EnemyPosition, PlayerPosition);
 
-	if (PlayerUnit->bIsRangedUnit)
+	if (PlayerUnit && PlayerUnit->bIsRangedUnit && PlayerCharacter && PlayerCharacter->GetCurrentUnit())
 	{
-		if (DistanceToEnemy <= AttackRange)
+		if (PlayerUnit->bIsRangedUnit)
 		{
-			UE_LOG(LogTemp, Log, TEXT("Ranged unit attacking from a distance"));
-			PlayerUnit->ShootProjectile(this->GetActorLocation());
-			combatManager->DealDamageToUnit(PlayerUnit, this);
-			PlayerCharacter->GetCurrentUnit()->FinishTurn();
+			if (DistanceToEnemy <= AttackRange)
+			{
+				UE_LOG(LogTemp, Log, TEXT("Ranged unit attacking from a distance"));
 
-			return;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Enemy is out of range for ranged attack"));
+				// Ensure PlayerUnit and PlayerCharacter->GetCurrentUnit() are valid before calling
+				if (this != nullptr && PlayerUnit != nullptr && PlayerCharacter)
+				{
+					PlayerUnit->EnemyToAttack = this;
+					PlayerUnit->UseCurrentItem();
+					if (PlayerCharacter->GetCurrentUnit()) {
+						PlayerCharacter->GetCurrentUnit()->FinishTurn();
+					}
+					
+					
+				}
+
+				return;
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Enemy is out of range for ranged attack"));
+			}
 		}
 	}
 	else if (!PlayerUnit->bIsRangedUnit)
@@ -844,6 +857,23 @@ void APlayerUnit::EquipStartWeapon(AItem* ItemToAdd)
 		UE_LOG(LogTemp, Error, TEXT("Player is a Ranged unit"));
 	}
 
+}
+
+void APlayerUnit::UseCurrentItem()
+{
+
+	if (ItemSlots[0]) { // use weapon to attack
+		AWeapon* currentWeapon = Cast<AWeapon>(ItemSlots[0]);
+		if (currentWeapon && EnemyToAttack) {
+			currentWeapon->SetEnemyLocation(EnemyToAttack->GetActorLocation());
+			currentWeapon->UseItem();
+			combatManager->DealDamageToUnit(this,EnemyToAttack);
+			EnemyToAttack = nullptr;
+			UE_LOG(LogTemp, Error, TEXT("RANGED ATTACK"));
+		}
+		
+
+	}
 }
 
 void APlayerUnit::CheckForItems()

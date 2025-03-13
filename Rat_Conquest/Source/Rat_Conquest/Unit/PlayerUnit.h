@@ -14,6 +14,7 @@ class AGridTile;
 class AItem;
 class AGenericProjectile;
 class MutationData;
+class AWeapon;
 
 DECLARE_DELEGATE(FOnMovementCompleteSignature);
 
@@ -140,6 +141,7 @@ public:
 	void CalculateStats();
 	void DropItem(AItem* OldItem, FVector2D CurrentPosition);
 	void EquipStartWeapon(AItem* ItemToAdd);
+	void UseCurrentItem();
 
 	void Mutate();
 	TArray<int> GetMutationC1();
