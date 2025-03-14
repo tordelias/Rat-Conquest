@@ -104,28 +104,28 @@ void ALevelGenerator::Tick(float DeltaTime)
 
     }
     //if (GameManager && !GameManager->bEncounterComplete) return;
-    if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Q)) {
+    //if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Q)) {
 
-        DebugConnectedRooms();
-       
-    }
-    if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Up))
-    {
-        MoveToRoom(0); // North
+    //    DebugConnectedRooms();
+    //   
+    //}
+    //if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Up))
+    //{
+    //    MoveToRoom(0); // North
 
-    }
-    else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Right))
-    {
-        MoveToRoom(1); // East
-    }
-    else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Down))
-    {
-        MoveToRoom(2); // South
-    }
-    else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Left))
-    {
-        MoveToRoom(3); // West
-    }
+    //}
+    //else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Right))
+    //{
+    //    MoveToRoom(1); // East
+    //}
+    //else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Down))
+    //{
+    //    MoveToRoom(2); // South
+    //}
+    //else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Left))
+    //{
+    //    MoveToRoom(3); // West
+    //}
    
 }
 

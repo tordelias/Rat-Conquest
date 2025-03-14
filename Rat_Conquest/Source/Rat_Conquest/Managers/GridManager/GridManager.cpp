@@ -477,7 +477,7 @@ void AGridManager::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
     if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::T))
     {
-        ScanWorldForObjects();
+        //ScanWorldForObjects();
 		UE_LOG(LogTemp, Display, TEXT("Scanning for objects!"));
 
     }
