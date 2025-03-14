@@ -249,34 +249,34 @@ void AGameManager::EndUnitTurn()
 
     if (TurnQueue.Num() > 0)
     {
-        // Remove the front unit (current) and get next
         TurnQueue.RemoveAt(0);
 
         if (MainHUD)
         {
-            MainHUD->RemoveTurnImage();  // Remove the image for the unit that just finished its turn
+            MainHUD->RemoveTurnImage();
         }
 
-        CurrentUnit = TurnQueue[0];
-        if (IsValid(CurrentUnit))
+        if (TurnQueue.Num() > 0) // Ensure the queue is not empty before accessing index 0
         {
-            HighlightUnitAndTiles(CurrentUnit);
-            ExecuteTurn();
+            CurrentUnit = TurnQueue[0];
+            if (IsValid(CurrentUnit))
+            {
+                HighlightUnitAndTiles(CurrentUnit);
+                ExecuteTurn();
+            }
         }
         else
         {
             bisPlayersturn = !bisPlayersturn;
             StartTurnOrder();  // Restart the turn order if queue is empty
         }
-
-        // Update turn queue UI after removing a unit
-        //MainHUD->RemoveTurnImage(); 
     }
     else
     {
         bisPlayersturn = !bisPlayersturn;
-        StartTurnOrder();  // Restart the turn order if queue is empty
+        StartTurnOrder();
     }
+
 }
 
 

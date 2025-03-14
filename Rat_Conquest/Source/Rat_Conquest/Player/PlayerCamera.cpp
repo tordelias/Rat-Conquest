@@ -40,7 +40,7 @@ APlayerCamera::APlayerCamera()
     ThirdPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
     ThirdPersonCameraComponent->SetupAttachment(SpringArm);
 
-    bUseControllerRotationYaw = false;
+    bUseControllerRotationYaw = false; 
 
     GetCharacterMovement()->bOrientRotationToMovement = false;
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -58,7 +58,7 @@ void APlayerCamera::BeginPlay()
 
     mainHUD = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 
-    InteractionCheckDistance = 1750.f;
+    InteractionCheckDistance = 2050.f;
     InteractionCheckFrequency = 0.05f;
 
     // Set Camera to Top-Down View
@@ -169,8 +169,9 @@ void APlayerCamera::FoundInteractable(AActor* NewInteractable)
         {
             if (mainHUD)
             {
-                mainHUD->ShowStatWidget();
-				mainHUD->UpdateStatWidget(&PlayerUnit->InstanceInteractableData);
+                //add back when StatWidget is fixed
+    //            mainHUD->ShowStatWidget();
+				//mainHUD->UpdateStatWidget(&PlayerUnit->InstanceInteractableData);
             }
             if (!PlayerUnit->bIsPlayerUnit)
             {
