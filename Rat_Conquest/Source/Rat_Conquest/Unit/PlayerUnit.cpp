@@ -320,6 +320,14 @@ FVector2D APlayerUnit::GetMousePosition(FVector WorldLocation, FVector WorldDire
 }
 
 
+void APlayerUnit::NotifyBlendSpaceChange()
+{
+	if (this->OnBlendSpaceChange.IsBound())
+	{
+		this->OnBlendSpaceChange.Broadcast();
+	}
+}
+
 void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 {
 	if (!bIsCurrentUnit && bIsPlayerUnit)
@@ -959,6 +967,10 @@ void APlayerUnit::CheckForItems()
 		ItemSlots[SlotIndex] = NewItem;
 		NewItem->EquipItem(this);
 		WeaponMesh->SetStaticMesh(NewItem->ItemMesh->GetStaticMesh());
+
+		//SetBlendSpaceFromItem
+		this->NotifyBlendSpaceChange();
+
 		//if (NewItem->ItemDataB->ItemType == EItemType::Weapon)
 		//{
 		//	// Equip the new item

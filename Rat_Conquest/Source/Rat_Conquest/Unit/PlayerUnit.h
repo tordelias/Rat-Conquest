@@ -20,6 +20,7 @@ class AWeapon;
 
 DECLARE_DELEGATE(FOnMovementCompleteSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHealthChanged);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBlendSpaceChange);
 
 
 UCLASS()
@@ -32,7 +33,7 @@ public:
 	APlayerUnit();
 
 	// Mesh & Visuals
-	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	USkeletalMeshComponent* SkeletalMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Mesh")
@@ -127,6 +128,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Health")
 	FOnHealthChanged OnHealthChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Animation")
+	FOnBlendSpaceChange OnBlendSpaceChange;
+
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	void NotifyBlendSpaceChange();
 
 	// Public Functions
 	void MoveToTile(FVector2D NewGridPosition);
