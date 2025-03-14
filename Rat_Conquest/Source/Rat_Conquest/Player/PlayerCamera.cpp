@@ -368,7 +368,7 @@ void APlayerCamera::Look(const FInputActionValue& Value)
                 SpringArm->AddLocalRotation(FRotator(0.0f, -LookAxis.X, 0.0f));
 
                 // Apply pitch rotation, but clamp it to avoid flipping
-                float NewPitch = FMath::Clamp(CurrentRotation.Pitch + LookAxis.Y, -89.0f, -30.0f);
+                float NewPitch = FMath::Clamp(CurrentRotation.Pitch + -LookAxis.Y, -89.0f, -30.0f);
                 SpringArm->SetRelativeRotation(FRotator(NewPitch, SpringArm->GetRelativeRotation().Yaw, 0.0f));
             }
         }
