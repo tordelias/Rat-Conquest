@@ -134,6 +134,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 	void NotifyBlendSpaceChange();
+	//current blend space
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlendSpace")
+	UAnimBlueprint* CurrentAnimInstance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlendSpace")
+	UAnimBlueprint* AnimBlueprint;
 
 	// Public Functions
 	void MoveToTile(FVector2D NewGridPosition);

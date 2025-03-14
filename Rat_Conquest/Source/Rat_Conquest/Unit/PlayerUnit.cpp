@@ -322,10 +322,8 @@ FVector2D APlayerUnit::GetMousePosition(FVector WorldLocation, FVector WorldDire
 
 void APlayerUnit::NotifyBlendSpaceChange()
 {
-	if (this->OnBlendSpaceChange.IsBound())
-	{
+ 
 		this->OnBlendSpaceChange.Broadcast();
-	}
 }
 
 void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
@@ -968,8 +966,12 @@ void APlayerUnit::CheckForItems()
 		NewItem->EquipItem(this);
 		WeaponMesh->SetStaticMesh(NewItem->ItemMesh->GetStaticMesh());
 
-		//SetBlendSpaceFromItem
-		this->NotifyBlendSpaceChange();
+
+		if(NewItem->ItemDataB->ItemAssetData.AnimBlueprint)
+		{
+			CurrentAnimInstance = NewItem->ItemDataB->ItemAssetData.AnimBlueprint;
+			this->NotifyBlendSpaceChange();
+		}
 
 		//if (NewItem->ItemDataB->ItemType == EItemType::Weapon)
 		//{
@@ -1052,6 +1054,11 @@ void APlayerUnit::DropItem(AItem* OldItem, FVector2D CurrentPosition)
 		}
 	}
 
+	if (AnimBlueprint)
+	{
+		CurrentAnimInstance = AnimBlueprint; 
+		this->NotifyBlendSpaceChange();
+	}
 	UE_LOG(LogTemp, Log, TEXT("Player dropped item at location (%s)"), *DropLocation.ToString());
 
 }
