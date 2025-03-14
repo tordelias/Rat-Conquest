@@ -204,6 +204,11 @@ void AGameManager::ExecuteTurn()
     }
     if (EnemyUnits.Num() == 0) {
         bEncounterComplete = true;
+        if (bTestEncounter) {
+            if (MainHUD) {
+                MainHUD->ShowVictoryWidget();
+            }
+        }
         if (LevelGenerator) {
             LevelGenerator->SetupRoomSelectUI();
         }
@@ -223,13 +228,18 @@ void AGameManager::EndUnitTurn()
         bEncounterComplete = true;
         APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
         if (PlayerCharacter) {
-            PlayerCharacter->SetCameraTopDown(0, 100);
+            PlayerCharacter->SetCameraTopDown(-90, 1000);
 
         }
-        if (LevelGenerator && RoomsExplored < 3) {
+        if (bTestEncounter) {
+            if (MainHUD) {
+                MainHUD->ShowVictoryWidget();
+            }
+        }
+        if (LevelGenerator && RoomsExplored < 3 && !bTestEncounter) {
             LevelGenerator->SetupRoomSelectUI();
         }
-        else if (RoomsExplored <= 3) {
+        else if (RoomsExplored >= 3 && !bTestEncounter) {
             //Show victory screen
             if (MainHUD) {
                 MainHUD->ShowVictoryWidget();
@@ -247,9 +257,9 @@ void AGameManager::EndUnitTurn()
             MainHUD->RemoveTurnImage();  // Remove the image for the unit that just finished its turn
         }
 
-        if (TurnQueue.Num() > 0)
+        CurrentUnit = TurnQueue[0];
+        if (IsValid(CurrentUnit))
         {
-            CurrentUnit = TurnQueue[0];
             HighlightUnitAndTiles(CurrentUnit);
             ExecuteTurn();
         }
@@ -300,7 +310,7 @@ void AGameManager::RemoveUnitFromQueue(APlayerUnit* Unit)
     }
 
     // Update the turn queue after removing a unit
-    UpdateTurnQueue();
+    //UpdateTurnQueue();
 }
 
 
@@ -384,7 +394,7 @@ void AGameManager::StartEncounter()
     bisPlayersturn = true;
     GridManager->ScanWorldForObjects();
     //Spawn new enemies
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < 2; ++i)
 	{
 		if (EnemyList.Num() > 0)
 		{
@@ -463,6 +473,7 @@ void AGameManager::StartEncounter()
 
        
     }
+    SpawnLoot();
     GetWorldTimerManager().SetTimerForNextTick(this, &AGameManager::InitalizeUnits);
     //// Initialize the player and enemy units
    
@@ -510,7 +521,14 @@ void AGameManager::UpdateTurnQueue()
     // Set the new current unit
     if (TurnQueue.Num() > 0) {
         CurrentUnit = TurnQueue[0];
+
         HighlightUnitAndTiles(CurrentUnit);
+    }
+    APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+    if (PlayerController && CurrentUnit)
+    {
+       
+        
     }
 }
 
@@ -645,8 +663,13 @@ void AGameManager::Tick(float DeltaTime)
 		}
         UE_LOG(LogTemp, Warning, TEXT("Size of TurnQueue: %d"), TurnQueue.Num());
         UE_LOG(LogTemp, Display, TEXT("Current Turn Queue:"));
-        SpawnLoot();
-       
+        //SpawnLoot();
+        APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+        if (PlayerCharacter) {
+            PlayerCharacter->SetCameraTopDown(-90, 1000);
+
+        }
+      
        
     }
 	isUnitAlive();
