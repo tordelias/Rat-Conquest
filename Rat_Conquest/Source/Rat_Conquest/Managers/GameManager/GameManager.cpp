@@ -66,7 +66,7 @@ void AGameManager::BeginPlay()
     else {
         CheckForEncounter();
     }
-   
+  
     
  
 
@@ -588,9 +588,10 @@ void AGameManager::SpawnLoot()
         return; // Ensure GridManager and ItemPool exist
 
     FVector SpawnLocation = GridManager->GetRandomPositionInGrid();
+    
     if (SpawnLocation == FVector())
         return; // No valid unoccupied positions available
-
+    SpawnLocation.Z += 25;
     int RandomIndex = FMath::RandRange(0, ItemPool.Num() - 1);
 
     FRotator SpawnRotation = FRotator::ZeroRotator;

@@ -89,7 +89,7 @@ void ALevelGenerator::Tick(float DeltaTime)
     if (CurrentRoom)
     {
         // Draw persistent debug sphere over current room
-        const FVector RoomLocation = CurrentRoom->GetActorLocation() + FVector(0, 0, 200);
+       /* const FVector RoomLocation = CurrentRoom->GetActorLocation() + FVector(0, 0, 200);
         DrawDebugSphere(
             GetWorld(),
             RoomLocation,
@@ -100,7 +100,7 @@ void ALevelGenerator::Tick(float DeltaTime)
             -1.0f,
             0,
             5.0f
-        );
+        );*/
 
     }
     //if (GameManager && !GameManager->bEncounterComplete) return;
@@ -155,7 +155,7 @@ void ALevelGenerator::BeginPlay()
         UE_LOG(LogTemp, Error, TEXT("No GAMEdManager found in the level!"));
     }
     GenerateInitialRooms();
-    DrawDebugGrid();
+    //DrawDebugGrid();
    
     
 }
@@ -403,6 +403,10 @@ void ALevelGenerator::MoveToRoom(int32 DirectionIndex)
                 GameManager->LoadExploredEncounter();
                 return;
             }
+            int RandAmountOfItems = FMath::RandRange(1, 2);
+            for (int i = 0; i < RandAmountOfItems; ++i) {
+                GameManager->SpawnLoot();
+            }
             TargetRoom->bIsExplored = true;
             GameManager->RoomsExplored += 1;
             GameManager->LoadNextEncounter();
@@ -513,7 +517,10 @@ void ALevelGenerator::CheckOpenDoors()
     for (ARoom* Room : RoomInstances)
     {
         if (!Room)
+        {
+            UE_LOG(LogTemp, Error, TEXT("Null Room detected in CheckOpenDoors!"));
             continue;
+        }
         TArray<bool> Directions;
         Directions = Room->GetDoorDirections(Directions);
 
