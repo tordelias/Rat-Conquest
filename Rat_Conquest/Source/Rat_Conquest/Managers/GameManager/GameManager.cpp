@@ -122,45 +122,34 @@ void AGameManager::StartTurnOrder()
     MainHUD = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
     TurnQueue.Empty();
 
-    // Create fresh turn order
+    // Create a list of all units
     TArray<APlayerUnit*> AllUnits;
-    if (bisPlayersturn)
-    {
-        AllUnits.Append(PlayerUnits);
-        AllUnits.Append(EnemyUnits);
-    }
-    else
-    {
-        AllUnits.Append(PlayerUnits);
-        AllUnits.Append(EnemyUnits);
-       
-    }
+    AllUnits.Append(PlayerUnits);
+    AllUnits.Append(EnemyUnits);
 
     // Filter out null units
     AllUnits.RemoveAll([](APlayerUnit* Unit) { return !IsValid(Unit); });
 
-    // Create turn queue for multiple rounds
-    for (int32 i = 0; i < VisibleTurnsAhead; i++)
-    {
-        for (APlayerUnit* Unit : AllUnits)
-        {
-            if (IsValid(Unit))
-            {
-                TurnQueue.Add(Unit);
-            }
+    // Sort by Initiative, with PlayerUnits going first in case of ties
+    AllUnits.Sort([](const APlayerUnit& A, const APlayerUnit& B) {
+        if (A.Initiative == B.Initiative) {
+            return A.bIsPlayerUnit && !B.bIsPlayerUnit; // Player goes first in tie
         }
-    }
-    
-    // Trim to visible limit
-    if (TurnQueue.Num() > VisibleTurnsAhead)
+        return A.Initiative > B.Initiative; // Higher Initiative goes first
+        });
+
+    // Fill turn queue ensuring all units go before any repeat turns
+    for (int32 i = 0; i < VisibleTurnsAhead / AllUnits.Num(); i++)
     {
-        TurnQueue.SetNum(VisibleTurnsAhead);
+        TurnQueue.Append(AllUnits);
     }
+
+    // Trim to visible limit
+    TurnQueue.SetNum(FMath::Min(VisibleTurnsAhead, TurnQueue.Num()));
 
     // Update UI
     if (MainHUD)
     {
-       
         for (APlayerUnit* Unit : TurnQueue)
         {
             if (IsValid(Unit))
@@ -177,6 +166,7 @@ void AGameManager::StartTurnOrder()
         ExecuteTurn();
     }
 }
+
 
 void AGameManager::ExecuteTurn()
 {
