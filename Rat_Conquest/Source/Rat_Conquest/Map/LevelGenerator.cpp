@@ -514,6 +514,7 @@ void ALevelGenerator::GenerateRooms(ARoom* _CurrentRoom)
 
 void ALevelGenerator::CheckOpenDoors()
 {
+    if(RoomInstances.Num() > 0) return;
     for (ARoom* Room : RoomInstances)
     {
         if (!Room)
