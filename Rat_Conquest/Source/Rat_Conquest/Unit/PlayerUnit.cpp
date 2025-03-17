@@ -920,6 +920,27 @@ void APlayerUnit::UseCurrentItem()
 	}
 }
 
+void APlayerUnit::CheckForGridObjects()
+{
+	if (!GridManager) {
+		UE_LOG(LogTemp, Error, TEXT("NO MANAGER"));
+		return;
+	}
+	GridManager->ScanWorldForObjects();
+	// Retrieve the target tile based on the current grid position
+	AActor* TargetTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
+
+	if (!TargetTile) {
+		UE_LOG(LogTemp, Warning, TEXT("No item at tile (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);
+		return;
+	}
+	AGridTile* Tile = Cast<AGridTile>(TargetTile);
+	if (Tile /* && Tile->Gridobj*/) {
+		UE_LOG(LogTemp, Error, TEXT("Found Grid object"));
+
+	}
+}
+
 void APlayerUnit::CheckForItems()
 {
 	// Ensure the GridManager is valid
@@ -995,7 +1016,7 @@ void APlayerUnit::CheckForItems()
 
 		UE_LOG(LogTemp, Log, TEXT("Player picked up item at tile (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);
 	}
-
+	UpdateInteractableData();
 
 }
 
@@ -1325,6 +1346,8 @@ void APlayerUnit::UpdateInteractableData()
 	InstanceInteractableData.UnitDamage = Damage;
 	InstanceInteractableData.UnitMovementSpeed = MovementSpeed;
 	InstanceInteractableData.Defense = Defence;
+	InstanceInteractableData.MinDamage = FMath::Max(1, Damage - 2);
+	InstanceInteractableData.MaxDamage = Damage + 2;
 
 }
 

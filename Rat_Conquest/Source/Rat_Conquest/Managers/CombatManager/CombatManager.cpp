@@ -30,10 +30,11 @@ void ACombatManager::DealDamageToUnit(APlayerUnit* Attackerunit, APlayerUnit* De
         AItem* item = Cast<AItem>(Attackerunit->ItemSlots[0]);
         if (item)
         {
-            weaponDamage = item->Damage;
+            weaponDamage = item->Damage + FMath::RandRange(-2, 2);
         }
     }
-    int TotalDamage = Attackerunit->Damage + weaponDamage;
+    int TotalDamage = Attackerunit->Damage + weaponDamage * Attackerunit->Attack;
+    TotalDamage = FMath::Max(1, TotalDamage);
 
     if (TotalDamage >= Defenderunit->Health && Attackerunit->bIsPlayerUnit)
     {

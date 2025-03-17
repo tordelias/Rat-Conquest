@@ -85,6 +85,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	int Damage = 1;
 
+	int MinDamage = 1;
+	int MaxDamage = 1;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	int Defence = 0;
 
@@ -158,6 +161,7 @@ public:
 	void ExecuteAITurn();
 	void FinishTurn();
 
+	void CheckForGridObjects();
 	void CheckForItems();
 	void CalculateStats();
 	void DropItem(AItem* OldItem, FVector2D CurrentPosition);

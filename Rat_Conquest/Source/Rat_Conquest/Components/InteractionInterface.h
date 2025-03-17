@@ -58,6 +58,12 @@ struct FInteractableData
 	uint32 maxHealth;
 
 	UPROPERTY(EditInstanceOnly)
+	uint32 MaxDamage;
+
+	UPROPERTY(EditInstanceOnly)
+	uint32 MinDamage;
+
+	UPROPERTY(EditInstanceOnly)
 	float InteractionDuration;
 };
 
