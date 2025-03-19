@@ -60,6 +60,9 @@ public:
 	int Difficulty = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	int MaxEnemies = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	int bridgeLength = 10;
 
 	UPROPERTY(EditAnywhere, Category = "Grid Settings")

@@ -148,10 +148,14 @@ void AGridManager::ScanWorldForObjects()
             }
             if (StaticMeshComp && Actor->ActorHasTag(TEXT("EnemyPos"))) {
                 EnemyPositions.Add(FVector2D(Tile->GridPosition.X, Tile->GridPosition.Y));
-
+ 
                 UE_LOG(LogTemp, Error, TEXT("FOUND ENEMY POS at Row:"));
 
             }
+			if (StaticMeshComp && Actor->ActorHasTag(TEXT("InteractObj")))
+			{
+				UE_LOG(LogTemp, Display, TEXT("Found interactable object at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
+			}
 
         }
     }
