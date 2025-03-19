@@ -196,7 +196,12 @@ public:
 	// Getters
 	USkeletalMeshComponent* GetMesh() { return SkeletalMesh; }
 
+
+
 	// Public Variables
+	UPROPERTY()
+	bool bHasFinishedTurn = false;
+
 	bool bFirstMove = true;
 	bool bHasWeapon = false;
 	bool bIsCurrentUnit = false;

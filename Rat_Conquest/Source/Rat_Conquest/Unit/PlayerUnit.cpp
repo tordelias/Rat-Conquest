@@ -597,11 +597,13 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		UE_LOG(LogTemp, Error, TEXT("PlayerCharacter or GridManager is null"));
 		return;
 	}
+
 	if (!PlayerCharacter->GetCurrentUnit())
 	{
 		UE_LOG(LogTemp, Error, TEXT("PlayerCharacter->GetCurrentUnit() is null"));
 		return;
 	}
+
 	auto PlayerUnit = PlayerCharacter->GetCurrentUnit();
 	if (!PlayerUnit)
 	{
@@ -615,37 +617,35 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 
 	float DistanceToEnemy = ChebyshevDistance(EnemyPosition, PlayerPosition);
 
-	if (PlayerUnit && PlayerUnit->bIsRangedUnit && PlayerCharacter && PlayerCharacter->GetCurrentUnit())
+	// Handle ranged attack
+	if (PlayerUnit->bIsRangedUnit)
 	{
-		if (PlayerUnit->bIsRangedUnit)
+		if (DistanceToEnemy <= AttackRange)
 		{
-			if (DistanceToEnemy <= AttackRange)
-			{
-				UE_LOG(LogTemp, Log, TEXT("Ranged unit attacking from a distance"));
+			UE_LOG(LogTemp, Log, TEXT("Ranged unit attacking from a distance"));
 
-				// Ensure PlayerUnit and PlayerCharacter->GetCurrentUnit() are valid before calling
-				if (this != nullptr && PlayerUnit != nullptr && PlayerCharacter)
+			if (this != nullptr && PlayerUnit != nullptr && PlayerCharacter)
+			{
+				PlayerUnit->EnemyToAttack = this;
+				PlayerUnit->UseCurrentItem();
+
+				// Ensure FinishTurn() is only called once
+				if (PlayerCharacter->GetCurrentUnit() && !PlayerCharacter->GetCurrentUnit()->bHasFinishedTurn)
 				{
-					PlayerUnit->EnemyToAttack = this;
-					PlayerUnit->UseCurrentItem();
-					if (PlayerCharacter->GetCurrentUnit()) {
-						PlayerCharacter->GetCurrentUnit()->FinishTurn();
-					}
-					
-					
+					PlayerCharacter->GetCurrentUnit()->FinishTurn();
 				}
-
-				return;
 			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Enemy is out of range for ranged attack"));
-			}
+			return;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Enemy is out of range for ranged attack"));
 		}
 	}
-	else if (!PlayerUnit->bIsRangedUnit)
+	// Handle melee attack
+	else
 	{
-		if (ChebyshevDistance(PlayerPosition, EnemyPosition) > PlayerUnit->MovementSpeed + 1)
+		if (DistanceToEnemy > PlayerUnit->MovementSpeed + 1)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Enemy out of movement range |PlayerAttack_PlayerUnit.cpp|"));
 			return;
@@ -654,14 +654,12 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		MouseGridPos = GetMousePosition(PlayerCharacter->GetMouseWorldLocation(), PlayerCharacter->GetMouseWorldDirection());
 		UE_LOG(LogTemp, Display, TEXT("Mouse pos X=%f, Y=%f, Enemy pos X=%f, Y=%f"), MouseGridPos.X, MouseGridPos.Y, TargetEnemyLocation.X, TargetEnemyLocation.Y);
 
-		FVector2D AttackDirection = GetCardinalDirection(FVector2D(this->GetTargetLocation().X,this->GetTargetLocation().Y), MouseGridPos);
-
+		FVector2D AttackDirection = GetCardinalDirection(FVector2D(this->GetTargetLocation().X, this->GetTargetLocation().Y), MouseGridPos);
 		UE_LOG(LogTemp, Display, TEXT("Cardinal Direction when attacking: %s"), *AttackDirection.ToString());
 
 		FVector2D AttackTileGridPos = EnemyPosition + AttackDirection;
 		UE_LOG(LogTemp, Display, TEXT("Attack tile pos X=%f, Y=%f"), AttackTileGridPos.X, AttackTileGridPos.Y);
 
-		// Ensure GridManager is valid before accessing it
 		if (!GridManager)
 		{
 			UE_LOG(LogTemp, Error, TEXT("GridManager is null before fetching attack tile"));
@@ -680,7 +678,9 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 			UE_LOG(LogTemp, Warning, TEXT("Attack tile is the same as player position |PlayerAttack_PlayerUnit.cpp|"));
 			PlayerUnit->EnemyToAttack = this;
 			PlayerUnit->AttackAfterMovement();
-			if (PlayerCharacter->GetCurrentUnit())
+
+			// Ensure FinishTurn() is only called once
+			if (PlayerCharacter->GetCurrentUnit() && !PlayerCharacter->GetCurrentUnit()->bHasFinishedTurn)
 			{
 				PlayerCharacter->GetCurrentUnit()->FinishTurn();
 			}
@@ -708,6 +708,7 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		}
 	}
 }
+
 
 FVector2D APlayerUnit::GetCardinalDirection(FVector2D EnemyPos, FVector2D MousePos)
 {
@@ -812,16 +813,17 @@ void APlayerUnit::FinishTurn()
 		UE_LOG(LogTemp, Error, TEXT("GameManager is null"));
 		return;
 	}
-	else {
-		CheckForItems();
-		GameManager->EndUnitTurn();
 
+	if (bHasFinishedTurn)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("FinishTurn() already called this turn!"));
+		return;
 	}
 
-	//animationToPlay = FVector2D(0, 0);
+	CheckForItems();
+	GameManager->EndUnitTurn();
 
-
-	
+	bHasFinishedTurn = true; // Prevent duplicate turn endings
 }
 
 
@@ -1123,6 +1125,7 @@ void APlayerUnit::EndFocus()
 	// Process MovementTiles instead of MovedTiles
 	for (auto tile : MovedTiles)
 	{
+		if (tile)
 		tile->EndFocus();
 	}
 	MovedTiles.Empty();
@@ -1248,6 +1251,11 @@ TArray<int> APlayerUnit::GetMutationC3()
 
 float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
 {
+	if (!Camera)
+	{
+		UE_LOG(LogTemp, Error, TEXT("GetMouseRotationToEnemy: Camera is null!"));
+		return 0.0f;
+	}
 	// Get the mouse position on the world grid
 	MouseGridPos = GetMousePosition(Camera->GetMouseWorldLocation(), Camera->GetMouseWorldDirection());
 	FVector2D AttackDirection = GetCardinalDirection(FVector2D(this->GetTargetLocation().X, this->GetTargetLocation().Y), MouseGridPos);

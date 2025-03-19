@@ -178,12 +178,16 @@ void AGameManager::ExecuteTurn()
 
     if (!CurrentUnit) return;
 
+    // Reset turn state for the unit
+    CurrentUnit->bHasFinishedTurn = false;
+
+    APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
     if (CurrentUnit->bIsPlayerUnit)
     {
-        APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
         if (PlayerCharacter)
         {
-            PlayerCharacter->SetCurrentUnit(CurrentUnit);
+            PlayerCharacter->SetCurrentUnit(CurrentUnit); // Allow player control
             CurrentUnit->bIsCurrentUnit = true;
         }
         CurrentUnit->ExecutePlayerTurn();
@@ -191,7 +195,11 @@ void AGameManager::ExecuteTurn()
     }
     else
     {
-        //Adds a random delay to the AI unit's turn 
+        if (PlayerCharacter && PlayerCharacter->GetCurrentUnit() && !PlayerCharacter->GetCurrentUnit()->bIsPlayerUnit)
+        {
+            PlayerCharacter->SetCurrentUnit(nullptr);
+        }
+
         float RandomDelay = FMath::RandRange(0.90f, 1.9f);
         FTimerHandle AIUnitTurnTimerHandle;
         GetWorld()->GetTimerManager().SetTimer(
@@ -202,18 +210,21 @@ void AGameManager::ExecuteTurn()
             false
         );
     }
-    if (EnemyUnits.Num() == 0) {
+
+    if (EnemyUnits.Num() == 0)
+    {
         bEncounterComplete = true;
-        if (bTestEncounter) {
-            if (MainHUD) {
-                MainHUD->ShowVictoryWidget();
-            }
+        if (bTestEncounter && MainHUD)
+        {
+            MainHUD->ShowVictoryWidget();
         }
-        if (LevelGenerator) {
+        if (LevelGenerator)
+        {
             LevelGenerator->SetupRoomSelectUI();
         }
     }
 }
+
 
 
 void AGameManager::EndUnitTurn()
