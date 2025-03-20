@@ -1281,11 +1281,11 @@ float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
 	FVector TargetLocation = this->GetTargetLocation();
 
 	// Ensure target location is valid
-	if (!FMath::IsFinite(TargetLocation.X) || !FMath::IsFinite(TargetLocation.Y))
-	{
-		UE_LOG(LogTemp, Error, TEXT("GetMouseRotationToEnemy: TargetLocation contains invalid values!"));
-		return 0.0f;
-	}
+	//if (!FMath::IsFinite(TargetLocation.X) || !FMath::IsFinite(TargetLocation.Y))
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("GetMouseRotationToEnemy: TargetLocation contains invalid values!"));
+	//	return 0.0f;
+	//}
 
 	FVector2D AttackDirection = GetCardinalDirection(
 		FVector2D(TargetLocation.X, TargetLocation.Y),
