@@ -13,8 +13,14 @@ ARoom::ARoom()
 }
 bool& ARoom::GetDoorDirection(int32 dirIndex)
 {
-	bool& direction = DoorDirections[dirIndex];
-	return direction;
+    static bool defaultFalse = false; 
+
+    if (dirIndex < 0 || dirIndex >= DoorDirections.Num()) 
+    {
+        return defaultFalse; 
+    }
+
+    return DoorDirections[dirIndex]; 
 }
 
 TArray<bool> ARoom::GetDoorDirections(TArray<bool>)
