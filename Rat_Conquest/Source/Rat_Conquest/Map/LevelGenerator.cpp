@@ -523,6 +523,7 @@ void ALevelGenerator::CheckOpenDoors()
             continue;
         }
         TArray<bool> Directions;
+		Directions.Init(false, 4);
         Directions = Room->GetDoorDirections(Directions);
 
         for (int32 DirIndex = 0; DirIndex < 4; DirIndex++)
