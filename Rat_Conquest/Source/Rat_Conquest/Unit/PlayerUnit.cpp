@@ -1256,9 +1256,49 @@ float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
 		UE_LOG(LogTemp, Error, TEXT("GetMouseRotationToEnemy: Camera is null!"));
 		return 0.0f;
 	}
+
 	// Get the mouse position on the world grid
-	MouseGridPos = GetMousePosition(Camera->GetMouseWorldLocation(), Camera->GetMouseWorldDirection());
-	FVector2D AttackDirection = GetCardinalDirection(FVector2D(this->GetTargetLocation().X, this->GetTargetLocation().Y), MouseGridPos);
+	FVector MouseWorldLocation = Camera->GetMouseWorldLocation();
+	FVector MouseWorldDirection = Camera->GetMouseWorldDirection();
+
+	// Ensure valid world location and direction
+	if (MouseWorldLocation.ContainsNaN() || MouseWorldDirection.ContainsNaN())
+	{
+		UE_LOG(LogTemp, Error, TEXT("GetMouseRotationToEnemy: Invalid mouse world location or direction!"));
+		return 0.0f;
+	}
+
+	MouseGridPos = GetMousePosition(MouseWorldLocation, MouseWorldDirection);
+
+	// Validate MouseGridPos values
+	if (!FMath::IsFinite(MouseGridPos.X) || !FMath::IsFinite(MouseGridPos.Y))
+	{
+		UE_LOG(LogTemp, Error, TEXT("GetMouseRotationToEnemy: MouseGridPos contains invalid values!"));
+		return 0.0f;
+	}
+
+	// Get target location
+	FVector TargetLocation = this->GetTargetLocation();
+
+	// Ensure target location is valid
+	if (!FMath::IsFinite(TargetLocation.X) || !FMath::IsFinite(TargetLocation.Y))
+	{
+		UE_LOG(LogTemp, Error, TEXT("GetMouseRotationToEnemy: TargetLocation contains invalid values!"));
+		return 0.0f;
+	}
+
+	FVector2D AttackDirection = GetCardinalDirection(
+		FVector2D(TargetLocation.X, TargetLocation.Y),
+		MouseGridPos
+	);
+
+	// Validate AttackDirection values
+	if (!FMath::IsFinite(AttackDirection.X) || !FMath::IsFinite(AttackDirection.Y))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GetMouseRotationToEnemy: AttackDirection contains invalid values!"));
+		return 0.0f;
+	}
+
 	float Angle = 0.0f;
 
 	// Check if the mouse is to the left, right, up, or down of the enemy
@@ -1269,7 +1309,6 @@ float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
 	else if (AttackDirection.X == -1 && AttackDirection.Y == 0) // Up
 	{
 		Angle = 180.0f;
-
 	}
 	else if (AttackDirection.Y == 1 && AttackDirection.X == 0) // Left
 	{
@@ -1279,13 +1318,15 @@ float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
 	{
 		Angle = 90.0f;
 	}
-
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GetMouseRotationToEnemy: Unexpected AttackDirection (%f, %f)"),
+			AttackDirection.X, AttackDirection.Y);
+	}
 
 	// Return the angle
 	return Angle;
 }
-
-
 
 
 void APlayerUnit::ApplyMutation(TArray<int> statsToAdd)
