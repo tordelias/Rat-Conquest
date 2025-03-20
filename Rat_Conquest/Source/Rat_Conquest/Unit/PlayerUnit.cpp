@@ -55,10 +55,10 @@ APlayerUnit::APlayerUnit()
 	WeaponMesh->SetupAttachment(SkeletalMesh, TEXT("Hand_R")); 
 	WeaponMesh->SetRelativeScale3D(FVector(1.0f));
 
-	/*ArmorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ArmorMesh"));
-	ArmorMesh->SetupAttachment(SkeletalMesh, TEXT("Hand_R"));
+	ArmorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ArmorMesh"));
+	ArmorMesh->SetupAttachment(SkeletalMesh, TEXT("Chest"));
 
-	ArmorMesh->SetRelativeScale3D(FVector(1.0f));*/
+	ArmorMesh->SetRelativeScale3D(FVector(1.0f));
 	HealthBarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidgetComponent"));
 	HealthBarWidgetComponent->SetupAttachment(RootComponent);
 	HealthBarWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
