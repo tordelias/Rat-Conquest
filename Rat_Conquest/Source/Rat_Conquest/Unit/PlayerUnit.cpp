@@ -21,6 +21,7 @@
 #include "Components/WidgetComponent.h"
 #include "Rat_Conquest/Items/ItemBase.h"
 #include "Rat_Conquest/Widgets/HealthBar.h"
+#include "Sound/SoundBase.h"
 
 
 APlayerUnit::APlayerUnit()
@@ -393,7 +394,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	// Mark the new tile as occupied
 	GridTile->bIsOccupied = true;
 	GridTile->SetUnitRefrence(this);
-
+	//UGameplayStatics::PlaySoundAtLocation(GetWorld(), SB_Walk, GetActorLocation(), GetActorRotation());
 	// Set up movement to the first tile in the path
 	if (PathToTake.Num() > 0)
 	{

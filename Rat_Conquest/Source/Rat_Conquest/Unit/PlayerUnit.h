@@ -143,6 +143,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlendSpace")
 	UAnimBlueprint* AnimBlueprint;
 
+	//Sound & Effects
+
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+	USoundBase* SB_Walk;*/
+
 	// Public Functions
 	void MoveToTile(FVector2D NewGridPosition);
 	bool CalculatePathToTile(FVector2D InTargetGridPosition);
