@@ -394,7 +394,10 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	// Mark the new tile as occupied
 	GridTile->bIsOccupied = true;
 	GridTile->SetUnitRefrence(this);
-	//UGameplayStatics::PlaySoundAtLocation(GetWorld(), SB_Walk, GetActorLocation(), GetActorRotation());
+	if (SB_Walk) {
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SB_Walk, GetActorLocation(), GetActorRotation());
+	}
+	
 	// Set up movement to the first tile in the path
 	if (PathToTake.Num() > 0)
 	{
@@ -740,6 +743,9 @@ void APlayerUnit::AttackAfterMovement()
 	}
 	if (EnemyToAttack)
 	{
+		if (SB_Attack) {
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), SB_Attack, GetActorLocation(), GetActorRotation());
+		}
 		animationToPlay = FVector2D(50, 0);
 		combatManager->DealDamageToUnit(this, EnemyToAttack);
 		EnemyToAttack = nullptr;
@@ -987,6 +993,9 @@ void APlayerUnit::CheckForItems()
 
 		// Equip the new item
 		ItemSlots[SlotIndex] = NewItem;
+		if (SB_PickupItem) {
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), SB_PickupItem, GetActorLocation(), GetActorRotation());
+		}
 		NewItem->EquipItem(this);
 		WeaponMesh->SetStaticMesh(NewItem->ItemMesh->GetStaticMesh());
 
@@ -1333,7 +1342,9 @@ float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
 void APlayerUnit::ApplyMutation(TArray<int> statsToAdd)
 {
 	//speed = 0, damage = 1, defense = 2, health = 3, attack = 4, range = 5, initiative = 6
-
+	if (SB_Mutate) {
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(),SB_Mutate, GetActorLocation(), GetActorRotation());
+	}
 	if (AMainHUD* hud = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD()))
 	{
 		hud->CloseMutationWidget();

@@ -8,7 +8,7 @@
 #include "Rat_Conquest/Managers/GameManager/GameManager.h"
 #include "Rat_Conquest/Items/Item.h"
 #include "Rat_Conquest/Data/MutationData.h"
-
+#include "Sound/SoundBase.h"
 // Sets default values
 ACombatManager::ACombatManager()
 {
@@ -108,6 +108,19 @@ void ACombatManager::HandleUnitDamage(APlayerUnit* unit, int amount)
 	int TotalDamage = FMath::Max(amount - unit->Defence, 1);
 	unit->Health -= TotalDamage;
 
+    if (unit->bIsPlayerUnit) {
+        if (SB_PlayerHurt) {
+			UGameplayStatics::PlaySound2D(GetWorld(), SB_PlayerHurt);
+		}
+	}
+	else {
+		if (SB_EnemyHurt) {
+			UGameplayStatics::PlaySound2D(GetWorld(), SB_EnemyHurt);
+		}
+	}
+    if (SB_Impact) {
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SB_Impact, unit->GetActorLocation());
+    }
     unit->OnHealthChanged.Broadcast();
     unit->UpdateHealthBar();
 	UE_LOG(LogTemp, Warning, TEXT("took %d damage"),amount);

@@ -22,6 +22,15 @@ public:
 	void HandleUnitDamage(APlayerUnit* unit, int amount);
 	void KillUnit(APlayerUnit* unit);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+	USoundBase* SB_PlayerHurt;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+	USoundBase* SB_EnemyHurt;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+	USoundBase* SB_Impact;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

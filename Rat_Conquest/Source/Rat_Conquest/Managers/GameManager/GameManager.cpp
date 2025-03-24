@@ -13,6 +13,7 @@
 #include "Rat_Conquest/Widgets/MainWidget.h"
 #include "Rat_Conquest/Widgets/TurnIndicatorWidget.h"
 #include "Rat_Conquest/AI/EnemyAIController.h"
+#include "Sound/SoundBase.h"
 // Sets default values
 AGameManager::AGameManager()
 {
@@ -192,6 +193,10 @@ void AGameManager::ExecuteTurn()
         }
         CurrentUnit->ExecutePlayerTurn();
         UE_LOG(LogTemp, Warning, TEXT("Player unit turn executed"));
+		if (SB_PlayerTurn)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), SB_PlayerTurn);
+		}
     }
     else
     {
@@ -209,6 +214,10 @@ void AGameManager::ExecuteTurn()
             RandomDelay,
             false
         );
+		if (SB_EnemyTurn)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), SB_EnemyTurn);
+		}
     }
 
     if (EnemyUnits.Num() == 0)

@@ -98,6 +98,16 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Test")
 	bool bTestEncounter = true;
 
+
+	//sound
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+	USoundBase* SB_PlayerTurn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+	USoundBase* SB_EnemyTurn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+	USoundBase* SB_TurnExecuted;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

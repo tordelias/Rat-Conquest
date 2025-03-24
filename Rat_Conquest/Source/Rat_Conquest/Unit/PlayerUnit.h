@@ -145,8 +145,17 @@ public:
 
 	//Sound & Effects
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
-	USoundBase* SB_Walk;*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+	USoundBase* SB_Walk;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+	USoundBase* SB_Attack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+	USoundBase* SB_PickupItem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+	USoundBase* SB_Mutate;
 
 	// Public Functions
 	void MoveToTile(FVector2D NewGridPosition);
