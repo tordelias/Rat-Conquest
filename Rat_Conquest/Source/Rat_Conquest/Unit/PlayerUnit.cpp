@@ -251,10 +251,8 @@ void APlayerUnit::Tick(float DeltaTime)
 				}
 
 				// Finish turn if player-controlled
-				if (bIsPlayerUnit)
-				{
-					FinishTurn();
-				}
+
+				this->FinishTurn();
 			}
 		}
 		else
@@ -381,6 +379,10 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	if (distance > MovementSpeed)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Target tile is out of movement range |MoveToTile_PlayerUnit.cpp|"));
+		if (!bIsPlayerUnit)
+		{
+			this->FinishTurn();
+		}
 		return;
 	}
 
@@ -630,16 +632,10 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 
 			if (this != nullptr && PlayerUnit != nullptr && PlayerCharacter)
 			{
+				this->FinishTurn();
 				PlayerUnit->EnemyToAttack = this;
 				PlayerUnit->UseCurrentItem();
-
-				// Ensure FinishTurn() is only called once
-				if (PlayerCharacter->GetCurrentUnit() && !PlayerCharacter->GetCurrentUnit()->bHasFinishedTurn)
-				{
-					PlayerCharacter->GetCurrentUnit()->FinishTurn();
-				}
 			}
-			return;
 		}
 		else
 		{
@@ -680,14 +676,10 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		if (AttackTile->GridPosition == PlayerPosition)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Attack tile is the same as player position |PlayerAttack_PlayerUnit.cpp|"));
+			this->FinishTurn();
 			PlayerUnit->EnemyToAttack = this;
 			PlayerUnit->AttackAfterMovement();
 
-			// Ensure FinishTurn() is only called once
-			if (PlayerCharacter->GetCurrentUnit() && !PlayerCharacter->GetCurrentUnit()->bHasFinishedTurn)
-			{
-				PlayerCharacter->GetCurrentUnit()->FinishTurn();
-			}
 
 			return;
 		}
@@ -810,7 +802,7 @@ void APlayerUnit::ExecuteAITurn()
 	UE_LOG(LogTemp, Error, TEXT("AI did something"));
 
 	// End the turn
-	FinishTurn();
+	//this->FinishTurn();
 }
 
 void APlayerUnit::FinishTurn()

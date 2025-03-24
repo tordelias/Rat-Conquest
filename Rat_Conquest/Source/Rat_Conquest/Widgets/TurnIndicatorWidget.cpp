@@ -33,7 +33,6 @@ void UTurnIndicatorWidget::AddTurnImage(APlayerUnit* unit)
             }
         }
     }
-    UE_LOG(LogTemp, Error, TEXT("Unit added to turn indicator"));
 }
 
 void UTurnIndicatorWidget::RemoveTurnImage(APlayerUnit* unit)

@@ -157,6 +157,7 @@ void AEnemyAIController::MoveToClosestPossibleTile(APlayerUnit* Enemy)
 		}
 		else
 		{
+			AI->FinishTurn();
 			UE_LOG(LogTemp, Warning, TEXT("No valid tile found within range"));
 
 		}

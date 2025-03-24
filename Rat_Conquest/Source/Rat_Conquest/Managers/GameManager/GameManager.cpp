@@ -243,10 +243,21 @@ void AGameManager::EndUnitTurn()
     // Clear current unit state
     CurrentUnit->bIsCurrentUnit = false;
     CurrentUnit = nullptr;
+	APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (PlayerCharacter)
+	{
+		PlayerCharacter->SetCurrentUnit(nullptr);
+	}
+	for (APlayerUnit* enemy : EnemyUnits)
+	{
+		if (enemy)
+		{
+			enemy->bHasFinishedTurn = false;
+		}
+	}
 
     if (EnemyUnits.Num() == 0) {
         bEncounterComplete = true;
-        APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
         if (PlayerCharacter) {
             PlayerCharacter->SetCameraTopDown(-90, 1000);
 
