@@ -14,12 +14,15 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "TimerManager.h"
+#include "EngineUtils.h"
+
 
 // Includes
 #include "Rat_Conquest/Components/InteractionInterface.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
 #include "Rat_Conquest/Widgets/MainHUD.h"
 #include "Rat_Conquest/GridTile/GridTile.h"
+#include "Rat_Conquest/Items/ItemBase.h"
 
 // Sets default values
 APlayerCamera::APlayerCamera()
@@ -103,6 +106,14 @@ void APlayerCamera::PerformInteractionCheck()
     FHitResult MouseHit;
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(this);
+    for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+    {
+        AActor* Actor = *ActorItr;
+        if (Actor->IsA(APlayerUnit::StaticClass()) || Actor->IsA(UItemBase::StaticClass()))
+        {
+            QueryParams.AddIgnoredActor(Actor);
+        }
+    }
 
     bool bHitSomething = GetWorld()->LineTraceSingleByChannel(MouseHit, MouseWorldLocation, TraceEnd, ECC_Visibility, QueryParams);
 
@@ -116,6 +127,24 @@ void APlayerCamera::PerformInteractionCheck()
     {
         if (InteractionData.CurrentInteractable && HitActor == InteractionData.CurrentInteractable)
         {
+            //Cast to GridTIle
+            if (AGridTile* GridTile = Cast<AGridTile>(InteractionData.CurrentInteractable))
+            {
+                if (GridTile->unitRefrence)
+                {
+                    if (!GridTile->unitRefrence->bIsPlayerUnit)
+                    {
+                        SwitchMouseCursor(GridTile->unitRefrence);
+                    }
+                    else
+                    {
+                        if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController()))
+                        {
+                            PC->UseMouseDefaultPointer();
+                        }
+                    }
+                }
+            }
             InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
             return;
         }

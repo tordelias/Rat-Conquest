@@ -133,11 +133,14 @@ void AGridTile::BeginMouseHoverFocus()
     {
 		this->YellowHighlight();
     }
+    if (unitRefrence)
+    {
+		unitRefrence->BeginMouseHoverFocus();
+    }
 }
 
 void AGridTile::EndMouseHoverFocus()
 {
-
     if (bIsBridgeTile) {
         return;
     }
@@ -148,9 +151,9 @@ void AGridTile::EndMouseHoverFocus()
         TileMesh->SetVisibility(false);
         TileMesh->SetCustomDepthStencilValue(0);
         bIsRedHighlighted = false;
-        bIsGreenHighlighted = false; 
-
+        bIsGreenHighlighted = false;
     }
+
     if (bIsGreenHighlighted)
     {
         TileMesh->SetCustomDepthStencilValue(1);
@@ -158,6 +161,11 @@ void AGridTile::EndMouseHoverFocus()
     else if (bIsRedHighlighted)
     {
         TileMesh->SetCustomDepthStencilValue(2);
+    }
+
+    if (unitRefrence && unitRefrence->bIsCurrentUnit == false)
+    {
+        unitRefrence->EndMouseHoverFocus();
     }
 }
 

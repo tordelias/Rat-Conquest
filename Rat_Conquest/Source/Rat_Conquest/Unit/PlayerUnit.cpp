@@ -359,6 +359,10 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	if (!CalculatePathToTile(NewGridPosition))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No valid path found to target tile |MoveToTile_PlayerUnit.cpp|"));
+		if (!bIsPlayerUnit)
+		{
+			this->FinishTurn();
+		}
 		return;
 	}
 
@@ -1173,19 +1177,22 @@ void APlayerUnit::BeginMouseHoverFocus()
 
 void APlayerUnit::EndMouseHoverFocus()
 {
-	if(!this->bIsCurrentUnit)
+	if (!this->bIsCurrentUnit)
 	{
 		SkeletalMesh->SetRenderCustomDepth(false);
+
 		for (AGridTile* Tile : HoverTiles)
 		{
-			if (Tile)
+			if (Tile && Tile->unitRefrence != this)
 			{
 				Tile->EndMouseHoverFocus();
 			}
 		}
+
 		HoverTiles.Empty();
 	}
 }
+
 
 
 void APlayerUnit::Interact(APlayerCamera* PlayerCharacter)
