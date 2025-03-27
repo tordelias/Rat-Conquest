@@ -235,9 +235,9 @@ void APlayerUnit::Tick(float DeltaTime)
 				{
 					// Face forward (default)
 					if (!bIsPlayerUnit)
-					SetActorRotation(FRotator(0, 0, 0));
-					else
 						SetActorRotation(FRotator(0, 180, 0));
+					else
+						SetActorRotation(FRotator(0, 0, 0));
 				}
 
 				// Trigger animation reset
