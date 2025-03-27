@@ -114,19 +114,19 @@ void UUnitWidget::SetData(APlayerUnit* _Unit)
 		CorrespondingHealthBar = HealthBar1;
 		Units[0] = _Unit;
 	}
-	else if (!UnitImageWidget2->Unit)
+	else if (!UnitImageWidget2->Unit && _Unit != Units[0])
 	{
 		AvailableWidget = UnitImageWidget2;
 		CorrespondingHealthBar = HealthBar2;
 		Units[1] = _Unit;
 	}
-	else if (!UnitImageWidget3->Unit)
+	else if (!UnitImageWidget3->Unit && _Unit != Units[1])
 	{
 		AvailableWidget = UnitImageWidget3;
 		CorrespondingHealthBar = HealthBar3;
 		Units[2] = _Unit;
 	}
-	else if (!UnitImageWidget4->Unit)
+	else if (!UnitImageWidget4->Unit && _Unit != Units[2])
 	{
 		AvailableWidget = UnitImageWidget4;
 		CorrespondingHealthBar = HealthBar4;

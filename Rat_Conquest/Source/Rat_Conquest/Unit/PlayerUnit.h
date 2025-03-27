@@ -202,7 +202,7 @@ public:
 	void UpdateHealthBar();
 	void UpdateHealthBarRotation();
 
-	void RandomizeStats();
+	virtual void RandomizeStats();
 
 	FVector2D GetCardinalDirection(FVector2D FromGridPos, FVector2D ToGridPos);
 	FVector2D GetMousePosition(FVector WorldLocation, FVector WorldDirection);

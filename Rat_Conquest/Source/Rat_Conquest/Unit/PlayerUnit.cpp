@@ -1146,7 +1146,7 @@ void APlayerUnit::EndFocus()
 
 void APlayerUnit::BeginMouseHoverFocus()
 {
-	if(!this->bIsCurrentUnit)
+	if(!this->bIsCurrentUnit && this)
 	{
 		SkeletalMesh->SetRenderCustomDepth(true);
 		if (GridManager && !bIsCurrentUnit)
@@ -1461,13 +1461,13 @@ void APlayerUnit::UpdateHealthBarRotation()
 void APlayerUnit::RandomizeStats()
 {
 	// Randomize the unit's stats
-	MovementSpeed = FMath::RandRange(1, 5);
+	MovementSpeed = FMath::RandRange(2, 5);
 	Damage = FMath::RandRange(1, 5);
 	Defence = FMath::RandRange(0, 5);
 	maxHealth = FMath::RandRange(5, 15);
 	Health = maxHealth;
 	Attack = FMath::RandRange(1, 5);
-	AttackRange = FMath::RandRange(1, 5);
+	AttackRange = FMath::RandRange(4, 8);
 	Initiative = FMath::RandRange(1, 5);
 
 	// Update the interactable data

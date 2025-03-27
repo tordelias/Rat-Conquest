@@ -16,6 +16,6 @@ class RAT_CONQUEST_API AGeneralAIUnit : public APlayerUnit
 
 	AGeneralAIUnit();
 
-
+	void RandomizeStats() override;
 	
 };
