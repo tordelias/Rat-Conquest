@@ -680,7 +680,6 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		if (AttackTile->GridPosition == PlayerPosition)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Attack tile is the same as player position |PlayerAttack_PlayerUnit.cpp|"));
-			this->FinishTurn();
 			PlayerUnit->EnemyToAttack = this;
 			PlayerUnit->AttackAfterMovement();
 
@@ -715,18 +714,25 @@ FVector2D APlayerUnit::GetCardinalDirection(FVector2D EnemyPos, FVector2D MouseP
 	FVector2D Delta = MousePos - EnemyPos; // Get difference vector
 	FVector2D Direction = FVector2D::ZeroVector;
 
-	// Prioritize the dominant axis
 	if (FMath::Abs(Delta.X) > FMath::Abs(Delta.Y))
 	{
 		Direction.X = (Delta.X > 0) ? -1 : 1;
 	}
-	else
+	else if (FMath::Abs(Delta.Y) > 0)  // Ensure non-zero
 	{
 		Direction.Y = (Delta.Y > 0) ? 1 : -1;
 	}
 
+	// If both X and Y are zero, set a default direction (e.g., Up)
+	if (Direction.IsZero())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GetCardinalDirection: Delta is zero! Defaulting to Up (0, -1)"));
+		Direction = FVector2D(0, -1);  // Default to 'Up' to prevent errors
+	}
+
 	return Direction;
 }
+
 
 
 void APlayerUnit::AttackAfterMovement()
@@ -744,6 +750,7 @@ void APlayerUnit::AttackAfterMovement()
 		}
 		animationToPlay = FVector2D(50, 0);
 		combatManager->DealDamageToUnit(this, EnemyToAttack);
+		this->FinishTurn();
 		EnemyToAttack = nullptr;
 	}
 	else
@@ -1260,6 +1267,12 @@ TArray<int> APlayerUnit::GetMutationC3()
 
 float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
 {
+	if (!this)
+	{
+		UE_LOG(LogTemp, Error, TEXT("GetMouseRotationToEnemy: this (APlayerUnit) is null!"));
+		return 0.0f;
+	}
+
 	if (!Camera)
 	{
 		UE_LOG(LogTemp, Error, TEXT("GetMouseRotationToEnemy: Camera is null!"));
@@ -1288,13 +1301,12 @@ float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
 
 	// Get target location
 	FVector TargetLocation = this->GetTargetLocation();
+	if (TargetLocation.ContainsNaN())
+	{
+		UE_LOG(LogTemp, Error, TEXT("GetMouseRotationToEnemy: TargetLocation contains NaN values!"));
+		return 0.0f;
+	}
 
-	// Ensure target location is valid
-	//if (!FMath::IsFinite(TargetLocation.X) || !FMath::IsFinite(TargetLocation.Y))
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("GetMouseRotationToEnemy: TargetLocation contains invalid values!"));
-	//	return 0.0f;
-	//}
 
 	FVector2D AttackDirection = GetCardinalDirection(
 		FVector2D(TargetLocation.X, TargetLocation.Y),
