@@ -104,33 +104,44 @@ void UUnitWidget::SetData(APlayerUnit* _Unit)
 {
 	if (!_Unit) return;
 
+	// Check if the unit is already in the list
+	for (APlayerUnit* ExistingUnit : Units)
+	{
+		if (ExistingUnit == _Unit)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Unit is already added!"));
+			return;
+		}
+	}
+
 	// Assign the unit to the first available UnitImageWidget
 	UUnitImageWidget* AvailableWidget = nullptr;
 	UProgressBar* CorrespondingHealthBar = nullptr;
+	int32 AvailableIndex = -1;
 
 	if (!UnitImageWidget1->Unit)
 	{
 		AvailableWidget = UnitImageWidget1;
 		CorrespondingHealthBar = HealthBar1;
-		Units[0] = _Unit;
+		AvailableIndex = 0;
 	}
-	else if (!UnitImageWidget2->Unit && _Unit != Units[0])
+	else if (!UnitImageWidget2->Unit)
 	{
 		AvailableWidget = UnitImageWidget2;
 		CorrespondingHealthBar = HealthBar2;
-		Units[1] = _Unit;
+		AvailableIndex = 1;
 	}
-	else if (!UnitImageWidget3->Unit && _Unit != Units[1])
+	else if (!UnitImageWidget3->Unit)
 	{
 		AvailableWidget = UnitImageWidget3;
 		CorrespondingHealthBar = HealthBar3;
-		Units[2] = _Unit;
+		AvailableIndex = 2;
 	}
-	else if (!UnitImageWidget4->Unit && _Unit != Units[2])
+	else if (!UnitImageWidget4->Unit)
 	{
 		AvailableWidget = UnitImageWidget4;
 		CorrespondingHealthBar = HealthBar4;
-		Units[3] = _Unit;
+		AvailableIndex = 3;
 	}
 	else
 	{
@@ -141,6 +152,7 @@ void UUnitWidget::SetData(APlayerUnit* _Unit)
 	// Assign unit and allow items to be shown
 	AvailableWidget->ShowUnitItems = true;
 	AvailableWidget->SetData(_Unit);
+	Units[AvailableIndex] = _Unit;
 	PlayerUnits.Add(_Unit);
 
 	// Show health bar if the unit is valid
@@ -148,12 +160,11 @@ void UUnitWidget::SetData(APlayerUnit* _Unit)
 	{
 		CorrespondingHealthBar->SetVisibility(ESlateVisibility::Visible);
 		float HealthPercentage = static_cast<float>(_Unit->Health) / static_cast<float>(_Unit->maxHealth);
-
 		CorrespondingHealthBar->SetPercent(HealthPercentage);
-
 		_Unit->OnHealthChanged.AddDynamic(this, &UUnitWidget::OnUnitHealthChanged);
 	}
 }
+
 
 
 void UUnitWidget::OnUnitImageClicked(UUnitImageWidget* ClickedWidget)

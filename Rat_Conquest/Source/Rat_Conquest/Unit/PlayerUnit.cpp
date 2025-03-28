@@ -1300,12 +1300,12 @@ float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
 	}
 
 	// Get target location
-	FVector TargetLocation = this->GetTargetLocation();
-	if (TargetLocation.ContainsNaN())
-	{
-		UE_LOG(LogTemp, Error, TEXT("GetMouseRotationToEnemy: TargetLocation contains NaN values!"));
-		return 0.0f;
-	}
+	FVector TargetLocation = this->GetActorLocation();
+	//if (TargetLocation.ContainsNaN())
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("GetMouseRotationToEnemy: TargetLocation contains NaN values!"));
+	//	return 0.0f;
+	//}
 
 
 	FVector2D AttackDirection = GetCardinalDirection(
@@ -1313,12 +1313,6 @@ float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
 		MouseGridPos
 	);
 
-	// Validate AttackDirection values
-	if (!FMath::IsFinite(AttackDirection.X) || !FMath::IsFinite(AttackDirection.Y))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("GetMouseRotationToEnemy: AttackDirection contains invalid values!"));
-		return 0.0f;
-	}
 
 	float Angle = 0.0f;
 
@@ -1464,7 +1458,7 @@ void APlayerUnit::RandomizeStats()
 	MovementSpeed = FMath::RandRange(2, 5);
 	Damage = FMath::RandRange(1, 5);
 	Defence = FMath::RandRange(0, 5);
-	maxHealth = FMath::RandRange(5, 15);
+	maxHealth = FMath::RandRange(8, 15);
 	Health = maxHealth;
 	Attack = FMath::RandRange(1, 5);
 	AttackRange = FMath::RandRange(4, 8);
