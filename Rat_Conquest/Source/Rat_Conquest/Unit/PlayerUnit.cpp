@@ -608,14 +608,14 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		return;
 	}
 
-	if (!PlayerCharacter->GetCurrentUnit())
+	if (!IsValid(PlayerCharacter->GetCurrentUnit().Get()))
 	{
 		UE_LOG(LogTemp, Error, TEXT("PlayerCharacter->GetCurrentUnit() is null"));
 		return;
 	}
 
 	auto PlayerUnit = PlayerCharacter->GetCurrentUnit();
-	if (!PlayerUnit)
+	if (!IsValid(PlayerUnit.Get()))
 	{
 		UE_LOG(LogTemp, Error, TEXT("PlayerUnit is null"));
 		return;
@@ -702,7 +702,8 @@ void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
 		if (AttackTile)
 		{
 			PlayerUnit->EnemyToAttack = this;
-			PlayerUnit->OnMovementComplete.BindUObject(PlayerUnit, &APlayerUnit::AttackAfterMovement);
+			// In PlayerAttack function:
+			PlayerUnit->OnMovementComplete.BindUObject(PlayerUnit.Get(), &APlayerUnit::AttackAfterMovement);
 			PlayerUnit->MoveToTile(AttackTile->GridPosition);
 		}
 	}

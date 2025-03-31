@@ -200,7 +200,7 @@ void AGameManager::ExecuteTurn()
     }
     else
     {
-        if (PlayerCharacter && PlayerCharacter->GetCurrentUnit() && !PlayerCharacter->GetCurrentUnit()->bIsPlayerUnit)
+        if (PlayerCharacter && IsValid(PlayerCharacter->GetCurrentUnit().Get()) && !PlayerCharacter->GetCurrentUnit()->bIsPlayerUnit)
         {
             PlayerCharacter->SetCurrentUnit(nullptr);
         }

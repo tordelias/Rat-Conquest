@@ -1,30 +1,21 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "PlayerCamera.h"
+// Fill out your copyright notice in the Description page of Project Settings.
 
-// Engine
+#include "PlayerCamera.h"
 #include "Camera/CameraComponent.h"
 #include "MyPlayerController.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
-#include "Engine/LocalPlayer.h"
-#include "Engine/World.h"
-#include "GameFramework/PlayerController.h"
-#include "TimerManager.h"
-#include "EngineUtils.h"
-
-
-// Includes
+#include "EnhancedInputSubsystems.h"
 #include "Rat_Conquest/Components/InteractionInterface.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
 #include "Rat_Conquest/Widgets/MainHUD.h"
 #include "Rat_Conquest/GridTile/GridTile.h"
 #include "Rat_Conquest/Items/ItemBase.h"
 
-// Sets default values
 APlayerCamera::APlayerCamera()
 {
     PrimaryActorTick.bCanEverTick = true;
@@ -33,18 +24,15 @@ APlayerCamera::APlayerCamera()
 
     SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
     SpringArm->SetupAttachment(GetCapsuleComponent());
-
-    // Fix: Disable Pawn Control Rotation
     SpringArm->bUsePawnControlRotation = false;
     SpringArm->bInheritPitch = false;
     SpringArm->bInheritYaw = false;
     SpringArm->bInheritRoll = false;
 
     ThirdPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
-    ThirdPersonCameraComponent->SetupAttachment(SpringArm);
+    ThirdPersonCameraComponent->SetupAttachment(SpringArm.Get());
 
-    bUseControllerRotationYaw = false; 
-
+    bUseControllerRotationYaw = false;
     GetCharacterMovement()->bOrientRotationToMovement = false;
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Overlap);
@@ -54,28 +42,21 @@ APlayerCamera::APlayerCamera()
     ZoomSpeed = 30.0f;
 }
 
-// Called when the game starts or when spawned
 void APlayerCamera::BeginPlay()
 {
     Super::BeginPlay();
 
     mainHUD = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-
     InteractionCheckDistance = 2050.f;
     InteractionCheckFrequency = 0.05f;
-
-    // Set Camera to Top-Down View
     SetCameraTopDown(0.0f, 1000.0f);
 
-    if (SpringArm)
+    if (IsValid(SpringArm.Get()))
     {
-        SpringArm->bInheritYaw = true;  // Allow mouse rotation
+        SpringArm->bInheritYaw = true;
     }
 }
 
-
-
-// Called every frame
 void APlayerCamera::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
@@ -84,13 +65,10 @@ void APlayerCamera::Tick(float DeltaTime)
     {
         PerformInteractionCheck();
     }
-    
 }
 
 void APlayerCamera::PerformInteractionCheck()
 {
-   
-
     if (APlayerController* PC = Cast<APlayerController>(GetController()))
     {
         PC->DeprojectMousePositionToWorld(MouseWorldLocation, MouseWorldDirection);
@@ -102,46 +80,28 @@ void APlayerCamera::PerformInteractionCheck()
     }
 
     FVector TraceEnd = MouseWorldLocation + (MouseWorldDirection * InteractionCheckDistance);
-
     FHitResult MouseHit;
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(this);
-    for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-    {
-        AActor* Actor = *ActorItr;
-        if (Actor->IsA(APlayerUnit::StaticClass()) || Actor->IsA(UItemBase::StaticClass()))
-        {
-            QueryParams.AddIgnoredActor(Actor);
-        }
-    }
 
     bool bHitSomething = GetWorld()->LineTraceSingleByChannel(MouseHit, MouseWorldLocation, TraceEnd, ECC_Visibility, QueryParams);
-
-    AActor* HitActor = nullptr;
-    if (bHitSomething)
-    {
-        HitActor = MouseHit.GetActor();
-    }
+    AActor* HitActor = bHitSomething ? MouseHit.GetActor() : nullptr;
 
     if (HitActor && HitActor->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
     {
-        if (InteractionData.CurrentInteractable && HitActor == InteractionData.CurrentInteractable)
+        if (InteractionData.CurrentInteractable.IsValid() && HitActor == InteractionData.CurrentInteractable)
         {
-            //Cast to GridTIle
             if (AGridTile* GridTile = Cast<AGridTile>(InteractionData.CurrentInteractable))
             {
-                if (GridTile->unitRefrence)
+                if (GridTile->unitRefrence.Get())
                 {
                     if (!GridTile->unitRefrence->bIsPlayerUnit)
                     {
                         SwitchMouseCursor(GridTile->unitRefrence);
                     }
-                    else
+                    else if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController()))
                     {
-                        if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController()))
-                        {
-                            PC->UseMouseDefaultPointer();
-                        }
+                        PC->UseMouseDefaultPointer();
                     }
                 }
             }
@@ -149,102 +109,120 @@ void APlayerCamera::PerformInteractionCheck()
             return;
         }
 
-
-        if (GetWorld()->GetTimeSeconds() - InteractionData.LastInteractionCheckTime > InteractionCheckFrequency) 
+        if (GetWorld()->GetTimeSeconds() - InteractionData.LastInteractionCheckTime > InteractionCheckFrequency)
         {
             FoundInteractable(HitActor);
         }
     }
-    else
+    else if (GetWorld()->GetTimeSeconds() - InteractionData.LastInteractionCheckTime > InteractionCheckFrequency)
     {
-
-        if (GetWorld()->GetTimeSeconds() - InteractionData.LastInteractionCheckTime > InteractionCheckFrequency)
-        {
-            NoInteractableFound();
-        }
+        NoInteractableFound();
     }
 }
 
-void APlayerCamera::FoundInteractable(AActor* NewInteractable)
+void APlayerCamera::FoundInteractable(TWeakObjectPtr<AActor> NewInteractable)
 {
-    if (InteractionData.CurrentInteractable == NewInteractable)
+    // Level 1: Basic null check
+    if (!IsValid(NewInteractable.Get()))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("FoundInteractable: Invalid actor"));
+        return;
+    }
+
+    // Level 2: Check if this is the same interactable
+    if (InteractionData.CurrentInteractable.Get() == NewInteractable)
     {
         return;
     }
 
+    // Level 3: Thread-safe world check
+    UWorld* World = GetWorld();
+    if (!IsValid(World))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("FoundInteractable: Invalid world"));
+        return;
+    }
+
+    // Clean up previous interaction
     if (bIsInteracting())
     {
         EndInteract();
     }
 
-    if (InteractionData.CurrentInteractable)
+    // Handle previous interactable with full validation
+    if (AActor* OldInteractable = InteractionData.CurrentInteractable.Get())
     {
-        TargetInteractable = InteractionData.CurrentInteractable;
-        TargetInteractable->EndMouseHoverFocus();
+        if (IsValid(OldInteractable)) // Double-check validity
+        {
+            if (auto OldInterface = TScriptInterface<IInteractionInterface>(OldInteractable))
+            {
+                OldInterface->EndMouseHoverFocus();
+            }
+        }
     }
 
+    // Update current interactable
     InteractionData.CurrentInteractable = NewInteractable;
-    TargetInteractable = NewInteractable;
-    TargetInteractable->BeginMouseHoverFocus();
-    InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
+        TargetInteractable = NewInteractable.Get();
 
-    if (TargetInteractable)
+    // Begin new interaction with validation
+    if (IsValid(NewInteractable.Get()))
     {
-        APlayerUnit* PlayerUnit = Cast<APlayerUnit>(TargetInteractable.GetObject());
-        //cast to gridTile
-		AGridTile* GridTile = Cast<AGridTile>(TargetInteractable.GetObject());
-
-        if (PlayerUnit)
+        if (auto Interface = TScriptInterface<IInteractionInterface>(NewInteractable.Get()))
         {
-            if (mainHUD)
-            {
-                //add back when StatWidget is fixed
-    //            mainHUD->ShowStatWidget();
-				//mainHUD->UpdateStatWidget(&PlayerUnit->InstanceInteractableData);
-            }
-            if (!PlayerUnit->bIsPlayerUnit)
-            {
-                UE_LOG(LogTemp, Error, TEXT("Successfully found Enemy"));
-				SwitchMouseCursor(PlayerUnit);
-            }
+            Interface->BeginMouseHoverFocus();
         }
-		else if (GridTile)
+    }
+
+    InteractionData.LastInteractionCheckTime = World->GetTimeSeconds();
+
+    // Handle PlayerUnit case
+    if (APlayerUnit* PlayerUnit = Cast<APlayerUnit>(NewInteractable))
+    {
+        if (IsValid(PlayerUnit) && IsValid(mainHUD.Get()) && !PlayerUnit->bIsPlayerUnit)
         {
-            if (GridTile->unitRefrence)
+            SwitchMouseCursor(PlayerUnit);
+        }
+    }
+    // Handle GridTile case with extreme caution
+    else if (AGridTile* GridTile = Cast<AGridTile>(NewInteractable))
+    {
+        if (IsValid(GridTile))
+        {
+            // Create local weak reference copy
+            const TWeakObjectPtr<APlayerUnit> UnitRef = GridTile->unitRefrence;
+
+            // Validate before any access
+            if (APlayerUnit* Unit = UnitRef.Get())
             {
-	            if (!GridTile->unitRefrence->bIsPlayerUnit)
-				{
-					SwitchMouseCursor(GridTile->unitRefrence);
-				}
-                else
-				{
-					if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController()))
-					{
-						PC->UseMouseDefaultPointer();
-					}
-				}
-            }
-            else
-            {
-                if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController()))
+                if (IsValid(Unit)) // Double validation
                 {
-                    PC->UseMouseDefaultPointer();
+                    if (!Unit->bIsPlayerUnit)
+                    {
+                        SwitchMouseCursor(Unit);
+                    }
+                    else if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController()))
+                    {
+                        if (IsValid(PC)) PC->UseMouseDefaultPointer();
+                    }
                 }
             }
-        }
-        else
-        {
-            if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController()))
+            else if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController()))
             {
-                PC->UseMouseDefaultPointer();
+                if (IsValid(PC)) PC->UseMouseDefaultPointer();
             }
         }
+    }
+    // Default case
+    else if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController()))
+    {
+        if (IsValid(PC)) PC->UseMouseDefaultPointer();
     }
 }
 
 void APlayerCamera::NoInteractableFound()
 {
-    if (!InteractionData.CurrentInteractable)
+    if (!InteractionData.CurrentInteractable.IsValid())
     {
         return;
     }
@@ -254,16 +232,15 @@ void APlayerCamera::NoInteractableFound()
         GetWorldTimerManager().ClearTimer(TimerHandleInteraction);
     }
 
-    if (InteractionData.CurrentInteractable)
+    if (InteractionData.CurrentInteractable.IsValid())
     {
-        if (IsValid(TargetInteractable.GetObject()))
+        if (TargetInteractable)
         {
             TargetInteractable->EndMouseHoverFocus();
         }
 
         // Close widget
-
-        if (mainHUD)
+        if (mainHUD.IsValid())
         {
             mainHUD->CloseStatWidget();
         }
@@ -274,14 +251,13 @@ void APlayerCamera::NoInteractableFound()
     InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
 }
 
-
 void APlayerCamera::BeginInteract()
 {
     PerformInteractionCheck();
 
-    if (InteractionData.CurrentInteractable)
+    if (InteractionData.CurrentInteractable.IsValid())
     {
-        if (IsValid(TargetInteractable.GetObject()))
+        if (TargetInteractable)
         {
             TargetInteractable->BeginMouseHoverFocus();
 
@@ -302,15 +278,13 @@ void APlayerCamera::BeginInteract()
             }
         }
     }
-
 }
-
 
 void APlayerCamera::EndInteract()
 {
     GetWorldTimerManager().ClearTimer(TimerHandleInteraction);
 
-    if (IsValid(TargetInteractable.GetObject()))
+    if (TargetInteractable)
     {
         TargetInteractable->EndInteract();
     }
@@ -322,7 +296,7 @@ void APlayerCamera::Interact()
     {
         if (!PC->IsInputKeyDown(EKeys::RightMouseButton))
         {
-            if (IsValid(TargetInteractable.GetObject()))
+            if (TargetInteractable)
             {
                 TargetInteractable->Interact(this);
             }
@@ -330,11 +304,11 @@ void APlayerCamera::Interact()
     }
 }
 
-void APlayerCamera::SwitchMouseCursor(TObjectPtr<APlayerUnit> Enemy)
+void APlayerCamera::SwitchMouseCursor(TWeakObjectPtr<APlayerUnit> Enemy)
 {
     if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController())) // Cast to your custom controller
     {
-        if (Enemy && CurrentUnit)
+        if (Enemy.IsValid() && CurrentUnit.IsValid())
         {
             float Range = CurrentUnit->MovementSpeed;
             FVector2D PlayerLocation = CurrentUnit->CurrentGridPosition;
@@ -349,9 +323,7 @@ void APlayerCamera::SwitchMouseCursor(TObjectPtr<APlayerUnit> Enemy)
                 float RotationAngle = Enemy->GetMouseRotationToEnemy(this);
 
                 // Adjust the rotation angle based on the camera's yaw
-                // Get the camera's yaw (only horizontal rotation)
-                FRotator CameraRotation = ThirdPersonCameraComponent->GetComponentRotation(); // Get the camera's rotation
-                
+                FRotator CameraRotation = ThirdPersonCameraComponent->GetComponentRotation();
                 float CameraYaw = CameraRotation.Yaw;
 
                 // Adjust the mouse rotation by subtracting the camera's yaw to make it relative to the camera
@@ -379,8 +351,6 @@ void APlayerCamera::SwitchMouseCursor(TObjectPtr<APlayerUnit> Enemy)
     }
 }
 
-
-
 void APlayerCamera::Look(const FInputActionValue& Value)
 {
     FVector2D LookAxis = Value.Get<FVector2D>();
@@ -389,7 +359,7 @@ void APlayerCamera::Look(const FInputActionValue& Value)
     {
         if (PC->IsInputKeyDown(EKeys::RightMouseButton)) // Rotate only when RMB is held
         {
-            if (SpringArm)
+            if (IsValid(SpringArm.Get()))
             {
                 // Get current rotation
                 FRotator CurrentRotation = SpringArm->GetRelativeRotation();
@@ -405,8 +375,6 @@ void APlayerCamera::Look(const FInputActionValue& Value)
     }
 }
 
-
-
 void APlayerCamera::Zoom(const FInputActionValue& Value)
 {
     float ZoomAxis = Value.Get<float>();
@@ -415,7 +383,6 @@ void APlayerCamera::Zoom(const FInputActionValue& Value)
 
     SpringArm->TargetArmLength = FMath::Clamp(NewLength, MinZoom, MaxZoom);
 }
-
 
 // Called to bind functionality to input
 void APlayerCamera::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -427,11 +394,13 @@ void APlayerCamera::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
         EnhancedInputComponent->BindAction(IA_Look, ETriggerEvent::Triggered, this, &APlayerCamera::Look);
         EnhancedInputComponent->BindAction(IA_Zoom, ETriggerEvent::Triggered, this, &APlayerCamera::Zoom);
         EnhancedInputComponent->BindAction(IA_Interact, ETriggerEvent::Started, this, &APlayerCamera::BeginInteract);
+
     }
 }
+
 void APlayerCamera::SetCameraTopDown(float ZRotation, float Height)
 {
-    if (SpringArm)
+    if (IsValid(SpringArm.Get()))
     {
         // Fix: Use SetWorldRotation to ensure the camera rotates
         FRotator NewRotation = FRotator(-60.0f, ZRotation, 0.0f);
@@ -441,4 +410,3 @@ void APlayerCamera::SetCameraTopDown(float ZRotation, float Height)
         SpringArm->TargetArmLength = FMath::Clamp(Height, MinZoom, MaxZoom);
     }
 }
-

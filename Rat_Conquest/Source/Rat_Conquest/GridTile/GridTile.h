@@ -44,7 +44,8 @@ public:
     UPROPERTY(VisibleInstanceOnly, Category = "Pickup")
     FInteractableData InstanceInteractableData;
 
-    APlayerUnit* unitRefrence;
+    UPROPERTY()
+    TWeakObjectPtr<APlayerUnit> unitRefrence;
 
     void UpdateInteractableData();
     void SetUnitRefrence(APlayerUnit* unit);

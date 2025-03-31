@@ -80,7 +80,7 @@ APlayerUnit* AEnemyAIController::FindEnemyunit()
 			UE_LOG(LogTemp, Warning, TEXT("Invalid tile found in GridTiles"));
 			continue;
 		}
-		APlayerUnit* Unit = Tile->unitRefrence;
+		APlayerUnit* Unit = Tile->unitRefrence.Get();
 
 		if (!Unit)
 		{

@@ -133,7 +133,7 @@ void AGridTile::BeginMouseHoverFocus()
     {
 		this->YellowHighlight();
     }
-    if (unitRefrence)
+    if (IsValid(unitRefrence.Get()))
     {
 		unitRefrence->BeginMouseHoverFocus();
     }
@@ -163,7 +163,7 @@ void AGridTile::EndMouseHoverFocus()
         TileMesh->SetCustomDepthStencilValue(2);
     }
 
-    if (unitRefrence && unitRefrence->bIsCurrentUnit == false)
+    if (IsValid(unitRefrence.Get()) && unitRefrence->bIsCurrentUnit == false)
     {
         unitRefrence->EndMouseHoverFocus();
     }
@@ -175,7 +175,7 @@ void AGridTile::Interact(APlayerCamera* PlayerCharacter)
     if (PlayerCharacter)
     {
         UpdateInteractableData();
-        if (PlayerCharacter->GetCurrentUnit() && !bIsOccupied)
+        if (PlayerCharacter->GetCurrentUnit().Get() && !bIsOccupied)
         {
             PlayerCharacter->GetCurrentUnit()->MoveToTile(GridPosition);
             
