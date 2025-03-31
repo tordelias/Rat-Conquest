@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "memory"
 #include "LevelGenerator.generated.h"
 
 
@@ -46,12 +47,14 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	TArray<FVector2D> GridPositions;
-	TArray<ARoom*> RoomInstances;
+	UPROPERTY()
+	TArray<TObjectPtr<ARoom>> RoomInstances;
 	FVector2D StartPosition = FVector2D::ZeroVector;
 	int32 CurrentRooms = 0;
 	FRandomStream RandomStream;
 
-	ARoom* CurrentRoom = nullptr;
+	UPROPERTY()
+	TObjectPtr<ARoom> CurrentRoom = nullptr;
 	APlayerCamera* PlayerCamera = nullptr;
 	AGridManager* GridManager = nullptr;
 	AGameManager* GameManager = nullptr;
@@ -60,7 +63,7 @@ public:
 	void GenerateRooms(ARoom* CurrentRoom);
 	void CheckOpenDoors();
 	bool IsPositionValid(const FVector2D& Position) const;
-	ARoom* SpawnRoom(const FVector2D& GridPosition, TSubclassOf<ARoom> RoomClass);
+	TObjectPtr<ARoom> SpawnRoom(const FVector2D& GridPosition, TSubclassOf<ARoom> RoomClass);
 	bool CheckValidPositionForBigRooms(const FVector2D& GridPosition, int32 RoomTemplateIndex, const TArray<bool>& RequiredDirections);
 	void PlaceEndRooms();
 	void EnsureAllDoorsFilled();
@@ -77,7 +80,7 @@ public:
 	void ShuffleRoomTemplates();
 
 	void DrawDebugGrid();
-	ARoom* GetRoomAtPosition(const FVector2D& GridPosition);
+	TObjectPtr<ARoom> GetRoomAtPosition(const FVector2D& GridPosition);
 
 	void OnPlayerEnterRoom(ARoom* _NewRoom);
 	void SetupRoomSelectUI();

@@ -21,7 +21,7 @@ void ALevelGenerator::DrawDebugGrid()
             FColor::Green, true, -1, 0, 5);
     }
 }
-ARoom* ALevelGenerator::GetRoomAtPosition(const FVector2D& GridPosition)
+TObjectPtr<ARoom> ALevelGenerator::GetRoomAtPosition(const FVector2D& GridPosition)
 {
 	for (ARoom* Room : RoomInstances)
 	{
@@ -195,6 +195,7 @@ void ALevelGenerator::GenerateInitialRooms()
                 {
                     UE_LOG(LogTemp, Warning, TEXT("Invalid starting room - not enough doors"));
                     GridPositions.Remove(StartPosition); // Critical: Remove invalid position
+                    RoomInstances.RemoveSingle(StartRoom);
                     StartRoom->Destroy();
                 }
             }
@@ -206,7 +207,7 @@ void ALevelGenerator::GenerateInitialRooms()
   
 }
 
-ARoom* ALevelGenerator::SpawnRoom(const FVector2D& GridPosition, TSubclassOf<ARoom> RoomClass)
+TObjectPtr<ARoom> ALevelGenerator::SpawnRoom(const FVector2D& GridPosition, TSubclassOf<ARoom> RoomClass)
 {
     if (!IsPositionValid(GridPosition)) return nullptr;
 
@@ -514,14 +515,11 @@ void ALevelGenerator::GenerateRooms(ARoom* _CurrentRoom)
 
 void ALevelGenerator::CheckOpenDoors()
 {
-    if(RoomInstances.Num() > MaxRooms) return;
+   /* if(RoomInstances.Num() > MaxRooms) return;*/
     for (ARoom* Room : RoomInstances)
     {
-        if (!Room)
-        {
-            UE_LOG(LogTemp, Error, TEXT("Null Room detected in CheckOpenDoors!"));
-            continue;
-        }
+        if (!IsValid(Room) || !Room) continue;
+       
         TArray<bool> Directions;
 		Directions.Init(false, 4);
         Directions = Room->GetDoorDirections(Directions);
