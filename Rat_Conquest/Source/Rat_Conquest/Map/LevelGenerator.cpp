@@ -282,8 +282,9 @@ TArray<bool> ALevelGenerator::CheckNeighbors(const FVector2D& GridPosition, int3
 
         if (!IsPositionValid(CheckPos))
         {
-            for (ARoom* ExistingRoom : RoomInstances)
+            for (const TObjectPtr<ARoom>& ExistingRoom : RoomInstances)
             {
+				if (!IsValid(ExistingRoom)) continue;
                 if (ExistingRoom->GetGridPosition() == CheckPos)
                 {
                     
@@ -345,10 +346,10 @@ void ALevelGenerator::DebugConnectedRooms()
     }
 }
 
-TArray<ARoom*> ALevelGenerator::FindConnectedRooms(ARoom* TargetRoom)
+TArray<ARoom*> ALevelGenerator::FindConnectedRooms(TObjectPtr<ARoom> TargetRoom)
 {
-    TArray<ARoom*> ConnectedRooms;
-    if (!TargetRoom) return ConnectedRooms;
+    TArray<TObjectPtr<ARoom>> ConnectedRooms;
+    if (!IsValid(TargetRoom)) return ConnectedRooms;
 
     const FVector2D CurrentPos = TargetRoom->GetGridPosition();
 
@@ -480,7 +481,7 @@ void ALevelGenerator::RegenerateRooms()
     GenerateInitialRooms();
 }
 
-void ALevelGenerator::GenerateRooms(ARoom* _CurrentRoom)
+void ALevelGenerator::GenerateRooms(TObjectPtr<ARoom> _CurrentRoom)
 {
     TArray<bool> Directions;
     _CurrentRoom->GetDoorDirections(Directions);
@@ -494,7 +495,7 @@ void ALevelGenerator::GenerateRooms(ARoom* _CurrentRoom)
             if (IsPositionValid(NewPosition))
             {
                 int32 RandomIndex = RandomStream.RandRange(0, RoomTemplates.Num() - 1);
-                ARoom* NewRoom = SpawnRoom(NewPosition, RoomTemplates[RandomIndex]);
+                TObjectPtr<ARoom> NewRoom = SpawnRoom(NewPosition, RoomTemplates[RandomIndex]);
                 if (NewRoom) GenerateRooms(NewRoom);
             }
         }
@@ -516,7 +517,8 @@ void ALevelGenerator::GenerateRooms(ARoom* _CurrentRoom)
 void ALevelGenerator::CheckOpenDoors()
 {
    /* if(RoomInstances.Num() > MaxRooms) return;*/
-    for (ARoom* Room : RoomInstances)
+    TArray<TObjectPtr<ARoom>> RoomsToProcess = RoomInstances;
+    for (const TObjectPtr<ARoom>& Room : RoomsToProcess)
     {
         if (!IsValid(Room) || !Room) continue;
        

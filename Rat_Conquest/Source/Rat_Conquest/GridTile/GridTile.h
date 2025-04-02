@@ -55,10 +55,10 @@ public:
     TArray<AActor*> tileObjects;
 
 	AItem* ItemSlot;
-
     void AddOccupant(AActor* tileObj);
     void RemoveOccupant(AActor* tileObj);
     bool IsTileOccupied();
+    bool CheckIfTileOccupied();
 
     // GameManager highlight management
     void SetGameManagerHighlight();

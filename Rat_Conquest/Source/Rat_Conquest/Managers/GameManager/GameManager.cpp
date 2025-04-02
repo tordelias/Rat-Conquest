@@ -205,7 +205,7 @@ void AGameManager::ExecuteTurn()
             PlayerCharacter->SetCurrentUnit(nullptr);
         }
 
-        float RandomDelay = FMath::RandRange(0.90f, 1.9f);
+        float RandomDelay = FMath::RandRange(0.90f, 1.4f);
         FTimerHandle AIUnitTurnTimerHandle;
         GetWorld()->GetTimerManager().SetTimer(
             AIUnitTurnTimerHandle,

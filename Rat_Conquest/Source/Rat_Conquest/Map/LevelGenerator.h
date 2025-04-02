@@ -60,7 +60,7 @@ public:
 	AGameManager* GameManager = nullptr;
 
 	void GenerateInitialRooms();
-	void GenerateRooms(ARoom* CurrentRoom);
+	void GenerateRooms(TObjectPtr<ARoom> CurrentRoom);
 	void CheckOpenDoors();
 	bool IsPositionValid(const FVector2D& Position) const;
 	TObjectPtr<ARoom> SpawnRoom(const FVector2D& GridPosition, TSubclassOf<ARoom> RoomClass);
@@ -75,7 +75,7 @@ public:
 	int32 GetOppositeDirection(int32 DirectionIndex);
 	TArray<bool> CheckNeighbors(const FVector2D& GridPosition, int32 DirectionIndex);
 	void DebugConnectedRooms();
-	TArray<ARoom*> FindConnectedRooms(ARoom* TargetRoom);
+	TArray<ARoom*> FindConnectedRooms(TObjectPtr<ARoom> TargetRoom);
 	void MoveToRoom(int32 DirectionIndex);
 	void ShuffleRoomTemplates();
 

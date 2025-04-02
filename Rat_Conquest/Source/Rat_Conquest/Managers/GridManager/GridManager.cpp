@@ -110,6 +110,22 @@ void AGridManager::ScanWorldForObjects()
     for (auto& TilePair : GridTiles)
     {
         AGridTile* Tile = Cast<AGridTile>(TilePair.Value);
+        if (Tile) {
+			if (!Tile->CheckIfTileOccupied())
+			{
+				Tile->bIsOccupied = false;
+            }
+            else {
+				Tile->bIsOccupied = true;
+            }
+
+        }
+			
+       
+    }
+    for (auto& TilePair : GridTiles)
+    {
+        AGridTile* Tile = Cast<AGridTile>(TilePair.Value);
         if (!Tile)
             continue;
         if (Tile->bIsOccupied)

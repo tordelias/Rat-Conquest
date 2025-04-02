@@ -230,7 +230,21 @@ void AGridTile::RemoveOccupant(AActor* tileObj)
 
 bool AGridTile::IsTileOccupied()
 {
+	
+    
     return bIsOccupied;
+}
+
+bool AGridTile::CheckIfTileOccupied()
+{
+    if (tileObjects.Num() == 0 && unitRefrence == nullptr)
+    {
+		return false;
+    }
+    else
+    {
+	    return true;
+    }
 }
 
 // Called when the game starts or when spawned
