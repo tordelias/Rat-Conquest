@@ -17,8 +17,8 @@ UCLASS()
 class RAT_CONQUEST_API AGameManager : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AGameManager();
 
@@ -33,7 +33,7 @@ public:
 
 	void EndUnitTurn();
 
-	void RemoveUnitFromQueue(APlayerUnit* unit);
+	void RemoveUnitFromQueue(TObjectPtr<APlayerUnit> unit);
 
 	void HandleAITurnAfterDelay();
 
@@ -54,11 +54,11 @@ public:
 	void PauseGame();
 	void ResumeGame();
 
-	bool isUnitAlive(); 
+	bool isUnitAlive();
 
 	void SpawnLoot();
 
-	TArray<APlayerUnit*> MasterTurnQueue;
+	TArray<TObjectPtr<APlayerUnit>> MasterTurnQueue;
 	const int32 TurnBufferSize = 10;
 
 	int RoomsExplored = 0;
@@ -66,26 +66,25 @@ public:
 	bool hasSpawned = false;
 	bool bLevelFinishedGenerating = false;
 	bool bEncounterComplete = false;
-	
-	UPROPERTY()
-	TArray<APlayerUnit*> PlayerUnits;
 
 	UPROPERTY()
-	TArray<APlayerUnit*> EnemyUnits;
+	TArray<TObjectPtr<APlayerUnit>> PlayerUnits;
+
+	UPROPERTY()
+	TArray<TObjectPtr<APlayerUnit>> EnemyUnits;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
-	AGridManager* GridManager;
+	TObjectPtr<AGridManager> GridManager;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level")
-	ALevelGenerator* LevelGenerator;
-
+	TObjectPtr<ALevelGenerator> LevelGenerator;
 
 	UPROPERTY()
-	TArray<APlayerUnit*> TurnQueue;
+	TArray<TObjectPtr<APlayerUnit>> TurnQueue;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	int32 VisibleTurnsAhead = 15;
-	
+
 	UPROPERTY(EditAnywhere, Category = "Enemies")
 	TArray<TSubclassOf<APlayerUnit>> EnemyList;
 
@@ -93,41 +92,36 @@ public:
 	TArray<TSubclassOf<AItem>> ItemPool;
 
 	UPROPERTY()
-	APlayerUnit* CurrentUnit;
+	TObjectPtr<APlayerUnit> CurrentUnit;
 
 	UPROPERTY(EditAnywhere, Category = "Test")
 	bool bTestEncounter = true;
 
-
 	//sound
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
-	USoundBase* SB_PlayerTurn;
+	TObjectPtr<USoundBase> SB_PlayerTurn;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
-	USoundBase* SB_EnemyTurn;
+	TObjectPtr<USoundBase> SB_EnemyTurn;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
-	USoundBase* SB_TurnExecuted;
+	TObjectPtr<USoundBase> SB_TurnExecuted;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 private:
 	bool bisPlayersturn = true;
 
-	TArray<class AGridTile*> CurrentlyFocusedTiles;
-	APlayerUnit* CurrentlyFocusedUnit = nullptr;
-	void HighlightUnitAndTiles(APlayerUnit* NewUnit); 
+	TArray<TObjectPtr<class AGridTile>> CurrentlyFocusedTiles;
+	TObjectPtr<APlayerUnit> CurrentlyFocusedUnit = nullptr;
+	void HighlightUnitAndTiles(APlayerUnit* NewUnit);
 
-	AMainHUD* MainHUD;
-
+	TObjectPtr<AMainHUD> MainHUD;
 
 	bool bIsGamePaused = false;
-
-
-
 };

@@ -33,7 +33,7 @@ void AGameManager::BeginPlay()
 
     if (FoundGridManagers.Num() > 0)
     {
-        GridManager = Cast<AGridManager>(FoundGridManagers[0]);
+        GridManager = TObjectPtr<AGridManager>(Cast<AGridManager>(FoundGridManagers[0]));
         if (FoundGridManagers.Num() > 1)
         {
             UE_LOG(LogTemp, Warning, TEXT("Multiple GridManagers found! Using first instance."));
@@ -124,12 +124,12 @@ void AGameManager::StartTurnOrder()
     TurnQueue.Empty();
 
     // Create a list of all units
-    TArray<APlayerUnit*> AllUnits;
+    TArray<TObjectPtr<APlayerUnit>> AllUnits;
     AllUnits.Append(PlayerUnits);
     AllUnits.Append(EnemyUnits);
 
     // Filter out null units
-    AllUnits.RemoveAll([](APlayerUnit* Unit) { return !IsValid(Unit); });
+    AllUnits.RemoveAll([](TObjectPtr<APlayerUnit> Unit) { return !IsValid(Unit); });
 
     // Sort by Initiative, with PlayerUnits going first in case of ties
     AllUnits.Sort([](const APlayerUnit& A, const APlayerUnit& B) {
@@ -151,7 +151,7 @@ void AGameManager::StartTurnOrder()
     // Update UI
     if (MainHUD)
     {
-        for (APlayerUnit* Unit : TurnQueue)
+        for (TObjectPtr<APlayerUnit> Unit : TurnQueue)
         {
             if (IsValid(Unit))
             {
@@ -248,7 +248,7 @@ void AGameManager::EndUnitTurn()
 	{
 		PlayerCharacter->SetCurrentUnit(nullptr);
 	}
-	for (APlayerUnit* enemy : EnemyUnits)
+	for (TObjectPtr<APlayerUnit> enemy : EnemyUnits)
 	{
 		if (enemy)
 		{
@@ -312,12 +312,12 @@ void AGameManager::EndUnitTurn()
 
 
 
-void AGameManager::RemoveUnitFromQueue(APlayerUnit* Unit)
+void AGameManager::RemoveUnitFromQueue(TObjectPtr<APlayerUnit> Unit)
 {
     if (!Unit) return;
 
     // Remove all instances of the unit from the turn queue
-    TurnQueue.RemoveAll([Unit](APlayerUnit* Entry) {
+    TurnQueue.RemoveAll([Unit](TObjectPtr<APlayerUnit> Entry) {
         return Entry == Unit;
         });
 
@@ -365,7 +365,7 @@ void AGameManager::EndEncounter()
 	TurnQueue.Empty();
 
 	// Clear the player and enemy units
-    for (APlayerUnit* Unit : EnemyUnits)
+    for (TObjectPtr<APlayerUnit> Unit : EnemyUnits)
     {
         if (Unit) Unit->Destroy();
     }
@@ -438,7 +438,7 @@ void AGameManager::StartEncounter()
             SpawnParams.Owner = this;
             SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-            APlayerUnit* NewEnemy = GetWorld()->SpawnActor<APlayerUnit>(
+            TObjectPtr<APlayerUnit> NewEnemy = GetWorld()->SpawnActor<APlayerUnit>(
                 EnemyList[RandomIndex],
                 SpawnLocation,
                 SpawnRotation,
@@ -519,7 +519,7 @@ void AGameManager::UpdateTurnQueue()
     }
 
     // Create a fresh list of valid units for the current turn order
-    TArray<APlayerUnit*> ValidUnits;
+    TArray<TObjectPtr<APlayerUnit>> ValidUnits;
     if (bisPlayersturn) {
         ValidUnits.Append(PlayerUnits);
         ValidUnits.Append(EnemyUnits);
@@ -531,7 +531,7 @@ void AGameManager::UpdateTurnQueue()
     }
 
     // Remove invalid units (this is important to ensure we don’t display dead units)
-    ValidUnits.RemoveAll([](APlayerUnit* Unit) { return !IsValid(Unit); });
+    ValidUnits.RemoveAll([](TObjectPtr<APlayerUnit> Unit) { return !IsValid(Unit); });
 
     // Clear previous queue and regenerate it
     TurnQueue.Empty();
@@ -542,7 +542,7 @@ void AGameManager::UpdateTurnQueue()
 
     // Now add the new valid turn images to the HUD
     if (MainHUD) {
-        for (APlayerUnit* Unit : TurnQueue) {
+        for (TObjectPtr<APlayerUnit> Unit : TurnQueue) {
             if (IsValid(Unit)) {
                 MainHUD->AddTurnImage(Unit); // Add turn indicator for each valid unit
             }
@@ -683,11 +683,11 @@ void AGameManager::Tick(float DeltaTime)
     {
 	  
        // UE_LOG(LogTemp, Warning, "current TurnQueue size: %d", TurnQueue.Num());
-		for (APlayerUnit* unit : TurnQueue)
+		for (TObjectPtr<APlayerUnit> unit : TurnQueue)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Unit: %s"), *unit->GetName());
 		}
-		for (APlayerUnit* unit : PlayerUnits)
+		for (TObjectPtr<APlayerUnit> unit : PlayerUnits)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Player Unit: %s"), *unit->GetName());
             
