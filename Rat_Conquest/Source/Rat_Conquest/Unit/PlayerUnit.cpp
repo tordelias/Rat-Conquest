@@ -209,7 +209,7 @@ void APlayerUnit::Tick(float DeltaTime)
 				FVector2D NextTilePosition = PathToTake[0];
 				PathToTake.RemoveAt(0);
 
-				AActor* NextTile = GridManager->GetTileAt(NextTilePosition.X, NextTilePosition.Y);
+				AActor* NextTile = GridManager->GetTileAt(NextTilePosition.X, NextTilePosition.Y).Get();
 				if (NextTile)
 				{
 					StartPosition = GetActorLocation();
@@ -335,7 +335,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 		return;
 	}
 
-	AActor* TargetTile = GridManager->GetTileAt(NewGridPosition.X, NewGridPosition.Y);
+	AActor* TargetTile = GridManager->GetTileAt(NewGridPosition.X, NewGridPosition.Y).Get();
 	if (!TargetTile)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Invalid target tile at (%f, %f) |MoveToTile_PlayerUnit.cpp|"), NewGridPosition.X, NewGridPosition.Y);
@@ -367,7 +367,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	}
 
 	// Free the current tile
-	AActor* OldTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
+	AActor* OldTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y).Get();
 	AGridTile* OldGridTile = Cast<AGridTile>(OldTile);
 	if (!OldGridTile)
 	{
@@ -376,7 +376,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 	}
 
 	OldGridTile->bIsOccupied = false;
-	OldGridTile->RemoveUnitRefrence();
+	OldGridTile->RemoveUnitReference();
 
 	// Check if the target tile is within movement range
 	float distance = ChebyshevDistance(GridTile->GridPosition, OldGridTile->GridPosition);
@@ -399,7 +399,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 
 	// Mark the new tile as occupied
 	GridTile->bIsOccupied = true;
-	GridTile->SetUnitRefrence(this);
+	GridTile->SetUnitReference(this);
 	if (SB_Walk) {
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SB_Walk, GetActorLocation(), GetActorRotation());
 	}
@@ -410,7 +410,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 		FVector2D NextTilePosition = PathToTake[0];
 		PathToTake.RemoveAt(0);
 
-		AActor* NextTile = GridManager->GetTileAt(NextTilePosition.X, NextTilePosition.Y);
+		AActor* NextTile = GridManager->GetTileAt(NextTilePosition.X, NextTilePosition.Y).Get();
 		if (NextTile)
 		{
 			StartPosition = GetActorLocation();
@@ -504,10 +504,10 @@ TArray<FVector2D> APlayerUnit::GetPathToTile(FVector2D InTargetGridPosition, FVe
 
 		// Get the neighboring tiles
 		TArray<AGridTile*> NeighbourTiles;
-		NeighbourTiles.Add(GridManager->GetTileAtPosition(CurrentTile->GridPosition.X + 1, CurrentTile->GridPosition.Y)); // Right
-		NeighbourTiles.Add(GridManager->GetTileAtPosition(CurrentTile->GridPosition.X - 1, CurrentTile->GridPosition.Y)); // Left
-		NeighbourTiles.Add(GridManager->GetTileAtPosition(CurrentTile->GridPosition.X, CurrentTile->GridPosition.Y + 1)); // Up
-		NeighbourTiles.Add(GridManager->GetTileAtPosition(CurrentTile->GridPosition.X, CurrentTile->GridPosition.Y - 1)); // Down
+		NeighbourTiles.Add(GridManager->GetTileAtPosition(CurrentTile->GridPosition.X + 1, CurrentTile->GridPosition.Y).Get()); // Right
+		NeighbourTiles.Add(GridManager->GetTileAtPosition(CurrentTile->GridPosition.X - 1, CurrentTile->GridPosition.Y).Get()); // Left
+		NeighbourTiles.Add(GridManager->GetTileAtPosition(CurrentTile->GridPosition.X, CurrentTile->GridPosition.Y + 1).Get()); // Up
+		NeighbourTiles.Add(GridManager->GetTileAtPosition(CurrentTile->GridPosition.X, CurrentTile->GridPosition.Y - 1).Get()); // Down
 
 
 		for (AGridTile* Neighbour : NeighbourTiles)
@@ -548,10 +548,10 @@ void APlayerUnit::SetInitalPosition(FVector2D position)
 		return;
 	}
 	AActor* TargetTile;
-	TargetTile = GridManager->SetStartingPositions(bIsPlayerUnit);
+	TargetTile = GridManager->SetStartingPositions(bIsPlayerUnit).Get();
 	if (!TargetTile) {
 		UE_LOG(LogTemp, Warning, TEXT("Invalid target tile at (%f, %f) |SetInitalPosition_PlayerUnit.cpp|"), position.X, position.Y);
-		TargetTile = GridManager->GetClosestAvailableTile(position);
+		TargetTile = GridManager->GetClosestAvailableTile(position).Get();
 		if (TargetTile) {
 			UE_LOG(LogTemp, Warning, TEXT("Target tile was set to default"));
 		}
@@ -573,7 +573,7 @@ void APlayerUnit::SetInitalPosition(FVector2D position)
 	//set the unit pointer on the grid tile
 	AGridTile* GridTile = Cast<AGridTile>(TargetTile);
 	if (GridTile) {
-		GridTile->SetUnitRefrence(this);
+		GridTile->SetUnitReference(this);
 		GridTile->bIsOccupied = true;
 	}
 	UE_LOG(LogTemp, Display, TEXT("Player unit set to grid position (%f, %f)"), position.X, position.Y);
@@ -585,7 +585,7 @@ void APlayerUnit::SetInitalPosition(FVector2D position)
 
 void APlayerUnit::DelayedInitalPosition()
 {
-	if (GridManager.IsValid() && GridManager->bIsGridFinished() && GridManager->bIsGridScanned)
+	if (GridManager.IsValid() && GridManager->IsGridFinished() && GridManager->IsGridScanned())
 	{
 		SetInitalPosition(GridStartPosition);
 	}
@@ -658,7 +658,7 @@ void APlayerUnit::PlayerAttack(TWeakObjectPtr<APlayerCamera> PlayerCharacter)
 	const FVector2D AttackTileGridPos = EnemyPosition + AttackDirection;
 	UE_LOG(LogTemp, Display, TEXT("Attack tile pos X=%f, Y=%f"), AttackTileGridPos.X, AttackTileGridPos.Y);
 
-	AGridTile* AttackTile = GridManager->GetTileAtPosition(AttackTileGridPos.X, AttackTileGridPos.Y);
+	AGridTile* AttackTile = GridManager->GetTileAtPosition(AttackTileGridPos.X, AttackTileGridPos.Y).Get();
 	if (!AttackTile)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No valid attack tile found"));
@@ -822,11 +822,11 @@ void APlayerUnit::DestoryUnit()
 {
 	if (GridManager.IsValid())
 	{
-		AActor* Tile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
+		AActor* Tile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y).Get();
 		AGridTile* GridTile = Cast<AGridTile>(Tile);
 		if (GridTile)
 		{
-			GridTile->RemoveUnitRefrence();
+			GridTile->RemoveUnitReference();
 			GridTile->bIsOccupied = false;
 			UE_LOG(LogTemp, Error, TEXT("AHH YOU KILLED ME!! from grid tile at (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);
 			
@@ -839,11 +839,11 @@ void APlayerUnit::ResetPosition()
 {
 	if (GridManager.IsValid())
 	{
-		AActor* Tile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
+		AActor* Tile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y).Get();
 		AGridTile* GridTile = Cast<AGridTile>(Tile);
 		if (GridTile)
 		{
-			GridTile->RemoveUnitRefrence();
+			GridTile->RemoveUnitReference();
 			GridTile->bIsOccupied = false;
 		}
 	}
@@ -925,7 +925,7 @@ void APlayerUnit::CheckForGridObjects()
 	}
 	GridManager->ScanWorldForObjects();
 	// Retrieve the target tile based on the current grid position
-	AActor* TargetTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
+	AActor* TargetTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y).Get();
 
 	if (!TargetTile) {
 		UE_LOG(LogTemp, Warning, TEXT("No item at tile (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);
@@ -948,7 +948,7 @@ void APlayerUnit::CheckForItems()
 
 	GridManager->ScanWorldForObjects();
 	// Retrieve the target tile based on the current grid position
-	AActor* TargetTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
+	AActor* TargetTile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y).Get();
 
 	if (!TargetTile) {
 		UE_LOG(LogTemp, Warning, TEXT("No item at tile (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);
@@ -957,8 +957,8 @@ void APlayerUnit::CheckForItems()
 
 	// Cast the target tile to AGridTile
 	AGridTile* Tile = Cast<AGridTile>(TargetTile);
-	if (Tile && Tile->ItemSlot) {
-		AItem* NewItem = Tile->ItemSlot;
+	if (Tile && Tile->ItemSlot.IsValid()) {
+		AItem* NewItem = Tile->ItemSlot.Get();
 		if (!NewItem) {
 			UE_LOG(LogTemp, Error, TEXT("Item is null"));
 			return;
@@ -1062,7 +1062,7 @@ void APlayerUnit::DropItem(TWeakObjectPtr<AItem> OldItem, FVector2D CurrentPosit
 	// If using a grid system, update the corresponding tile
 	if (IsValid(GridManager.Get()))
 	{
-		AActor* TargetTile = GridManager->GetTileAt(CurrentPosition.X, CurrentPosition.Y);
+		AActor* TargetTile = GridManager->GetTileAt(CurrentPosition.X, CurrentPosition.Y).Get();
 		AGridTile* Tile = Cast<AGridTile>(TargetTile);
 		if (Tile)
 		{

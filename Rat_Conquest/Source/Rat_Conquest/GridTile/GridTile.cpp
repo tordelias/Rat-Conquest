@@ -197,31 +197,31 @@ void AGridTile::UpdateInteractableData()
     InstanceInteractableData.InteractableType = EInteractionType::IT_GridCell;
 }
 
-void AGridTile::SetUnitRefrence(APlayerUnit* unit)
+void AGridTile::SetUnitReference(TWeakObjectPtr<APlayerUnit> Unit)
 {
-    unitRefrence = unit;
+    unitRefrence = Unit;
 }
 
-void AGridTile::RemoveUnitRefrence()
+void AGridTile::RemoveUnitReference()
 {
     unitRefrence = nullptr;
 }
 
-void AGridTile::AddOccupant(AActor* tileObj)
+void AGridTile::AddOccupant(TWeakObjectPtr<AActor> TileObj)
 {
-    if (tileObj && !tileObjects.Contains(tileObj))
+    if (TileObj.IsValid() && !TileObjects.Contains(TileObj))
     {
-        tileObjects.Add(tileObj);
+        TileObjects.Add(TileObj);
         bIsOccupied = true;
     }
 }
 
-void AGridTile::RemoveOccupant(AActor* tileObj)
+void AGridTile::RemoveOccupant(TWeakObjectPtr<AActor> TileObj)
 {
-    if (tileObj && tileObjects.Contains(tileObj))
+    if (TileObj.IsValid() && TileObjects.Contains(TileObj))
     {
-        tileObjects.Remove(tileObj);
-        if (tileObjects.Num() == 0)
+        TileObjects.Remove(TileObj);
+        if (TileObjects.Num() == 0)
         {
             bIsOccupied = false;
         }
@@ -237,7 +237,7 @@ bool AGridTile::IsTileOccupied()
 
 bool AGridTile::CheckIfTileOccupied()
 {
-    if (tileObjects.Num() == 0 && unitRefrence == nullptr)
+    if (TileObjects.Num() == 0 && unitRefrence == nullptr)
     {
 		return false;
     }

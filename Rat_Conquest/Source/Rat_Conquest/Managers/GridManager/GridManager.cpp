@@ -13,11 +13,11 @@ AGridManager::AGridManager()
 }
 
 // Generate the grid of tiles
-void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float TileSize)
+void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float Size)
 {
     GridTiles.Empty(); // Clear any existing tiles
 
-	this->Tilesize = TileSize;
+	this->Tsize = Size;
     // Check if the GridTileClass is set
     if (GridTileClass == nullptr)
     {
@@ -42,8 +42,8 @@ void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float TileSize)
         for (int32 j = 0; j < Columns; j++)
         {
             // Calculate world position (centered around actor's location)
-            float XPosition = StartingPosition.X + (i - RowOffset) * TileSize;
-            float YPosition = StartingPosition.Y + (j - ColumnOffset) * TileSize;
+            float XPosition = StartingPosition.X + (i - RowOffset) * Size;
+            float YPosition = StartingPosition.Y + (j - ColumnOffset) * Size;
             FVector Location(XPosition, YPosition, StartingPosition.Z);
 
             // Spawn the tile
@@ -131,7 +131,7 @@ void AGridManager::ScanWorldForObjects()
         if (Tile->bIsOccupied)
             num++;
         // Clear existing occupants
-        Tile->tileObjects.Empty();
+        Tile->TileObjects.Empty();
         
         // Check for overlapping actors
         TArray<AActor*> OverlappingActors;
@@ -192,7 +192,7 @@ void AGridManager::UpdateGridPosition()
 
     for (const auto& TilePair : GridTiles)
     {
-        AActor* Tile = TilePair.Value;
+        AActor* Tile = TilePair.Value.Get();
         if (!Tile) continue;
 
         // Get original logical position from map key
@@ -203,8 +203,8 @@ void AGridManager::UpdateGridPosition()
         int32 OriginalColumnIndex = LogicalPos.Y;
 
         // Calculate new world position
-        float XPos = NewOrigin.X + (OriginalRowIndex - RowOffset) * Tilesize;
-        float YPos = NewOrigin.Y + (OriginalColumnIndex - ColumnOffset) * Tilesize;
+        float XPos = NewOrigin.X + (OriginalRowIndex - RowOffset) * Tsize;
+        float YPos = NewOrigin.Y + (OriginalColumnIndex - ColumnOffset) * Tsize;
         FVector NewLocation(XPos, YPos, NewOrigin.Z);
 
         // Update tile position
@@ -216,7 +216,7 @@ void AGridManager::UpdateGridPosition()
             DrawDebugBox(
                 GetWorld(),
                 NewLocation,
-                FVector(Tilesize / 2, Tilesize / 2, 10),
+                FVector(Tsize / 2, Tsize / 2, 10),
                 FColor::Yellow,
                 true,
                 -1.0f,
@@ -229,14 +229,14 @@ void AGridManager::UpdateGridPosition()
     UE_LOG(LogTemp, Display, TEXT("Grid moved to new origin: %s"), *NewOrigin.ToString());
 }
 
-AActor* AGridManager::SetStartingPositions(bool _bPlayerUnit)
+TWeakObjectPtr<AActor> AGridManager::SetStartingPositions(bool _bPlayerUnit)
 {
     if (_bPlayerUnit) {
 
 		for (int i = 0; i < PlayerPositions.Num(); ++i)
 		{
 			FVector2D GridPosition = PlayerPositions[i];
-			AGridTile* Tile = GetTileAtPosition(GridPosition.X, GridPosition.Y);
+			AGridTile* Tile = GetTileAtPosition(GridPosition.X, GridPosition.Y).Get();
 			if (Tile && !Tile->bIsOccupied)
 			{
 				Tile->bIsOccupied = true;
@@ -253,7 +253,7 @@ AActor* AGridManager::SetStartingPositions(bool _bPlayerUnit)
         for (int i = 0; i < EnemyPositions.Num(); ++i)
         {
             FVector2D GridPosition = EnemyPositions[i];
-            AGridTile* Tile = GetTileAtPosition(GridPosition.X, GridPosition.Y);
+            AGridTile* Tile = GetTileAtPosition(GridPosition.X, GridPosition.Y).Get();
             if (Tile && !Tile->bIsOccupied)
             {
                 Tile->bIsOccupied = true;
@@ -266,7 +266,7 @@ AActor* AGridManager::SetStartingPositions(bool _bPlayerUnit)
 	
 }
 
-AActor* AGridManager::GetClosestAvailableTile(FVector2D Location)
+TWeakObjectPtr<AActor> AGridManager::GetClosestAvailableTile(FVector2D Location)
 {
     AActor* ClosestTile = nullptr;
     float MinDistance = FLT_MAX;
@@ -299,14 +299,9 @@ AActor* AGridManager::GetClosestAvailableTile(FVector2D Location)
     return nullptr;
 }
 
-FVector2D AGridManager::GetGridSize()
+float AGridManager::GetDistanceBetweenTiles(const TWeakObjectPtr<AActor>& Tile1, const TWeakObjectPtr<AActor>& Tile2)
 {
-    return GridSize;
-}
-
-float AGridManager::GetDistanceBetweenTiles(AActor* Tile1, AActor* Tile2)
-{
-    if (!Tile1 || !Tile2)
+    if (!Tile1.IsValid() || !Tile2.IsValid())
         return 9999;
 
     AGridTile* GridTile1 = Cast<AGridTile>(Tile1);
@@ -324,14 +319,14 @@ float AGridManager::GetDistanceBetweenTiles(AActor* Tile1, AActor* Tile2)
 
 
 // Get the tile at a specific grid coordinate
-AActor* AGridManager::GetTileAt(int32 Row, int32 Column)
+TWeakObjectPtr<AActor> AGridManager::GetTileAt(int32 Row, int32 Column)
 {
     FVector2D GridPosition(Row, Column);
 
     if (GridTiles.Num() < 0) return nullptr;
     if (GridTiles.Contains(GridPosition))
     {
-        AActor* Tile = GridTiles[GridPosition];
+        AActor* Tile = GridTiles[GridPosition].Get();
         //UE_LOG(LogTemp, Display, TEXT("Found tile at Row: %d, Column: %d"), Row, Column);
         return Tile;
     }
@@ -342,13 +337,13 @@ AActor* AGridManager::GetTileAt(int32 Row, int32 Column)
     }
 
 }
-AGridTile* AGridManager::GetTileAtPosition(int32 Row, int32 Column)
+TWeakObjectPtr<AGridTile> AGridManager::GetTileAtPosition(int32 Row, int32 Column)
 {
     FVector2D GridPosition(Row, Column);
 
     if (GridTiles.Contains(GridPosition))
     {
-        AActor* Tile = GridTiles[GridPosition];
+        AActor* Tile = GridTiles[GridPosition].Get();
 		//cast to GridTile
 		AGridTile* GridTile = Cast<AGridTile>(Tile);
         return GridTile;
@@ -361,9 +356,9 @@ AGridTile* AGridManager::GetTileAtPosition(int32 Row, int32 Column)
 
 }
 
-TArray<AGridTile*> AGridManager::GetNeighbourTiles(int32 Row, int32 Column)
+TArray<TWeakObjectPtr<AGridTile>> AGridManager::GetNeighbourTiles(int32 Row, int32 Column)
 {
-    TArray<AGridTile*> NeighbourTiles;
+    TArray<TWeakObjectPtr<AGridTile>> NeighbourTiles;
     if (Row < 0 || Column < 0 || GridSize == FVector2D::ZeroVector)
     {
         UE_LOG(LogTemp, Warning, TEXT("Invalid grid dimensions! Row: %d, Column: %d"), Row, Column);
@@ -400,7 +395,7 @@ TArray<TWeakObjectPtr<AGridTile>> AGridManager::GetMovableTiles(int32 Row, int32
     TQueue<FIntPoint> TilesToVisit; // Use a queue for breadth-first search (BFS)
 
     // Add the starting tile
-    AActor* StartingTileActor = GetTileAt(Row, Column);
+    AActor* StartingTileActor = GetTileAt(Row, Column).Get();
     AGridTile* StartingTile = Cast<AGridTile>(StartingTileActor);
     if (StartingTile)
     {
@@ -422,11 +417,11 @@ TArray<TWeakObjectPtr<AGridTile>> AGridManager::GetMovableTiles(int32 Row, int32
         int32 CurrentColumn = Current.Y;
 
         // Get neighbors of the current tile
-        TArray<AGridTile*> Neighbors = GetNeighbourTiles(CurrentRow, CurrentColumn);
+        TArray<TWeakObjectPtr<AGridTile>> Neighbors = GetNeighbourTiles(CurrentRow, CurrentColumn);
 
-        for (AGridTile* Neighbor : Neighbors)
+        for (auto Neighbor : Neighbors)
         {
-            if (!Neighbor || Neighbor->bIsOccupied) continue;
+            if (!Neighbor.IsValid() || Neighbor->bIsOccupied) continue;
             int32 NeighborRow = Neighbor->GridPosition.X;
             int32 NeighborColumn = Neighbor->GridPosition.Y;
 
@@ -518,15 +513,15 @@ void AGridManager::ResetAllTilesPathfindingData()
 FVector2D AGridManager::WorldToGridPosition(FVector WorldPosition) const
 {
     return FVector2D(
-        (WorldPosition.X - this->GetActorLocation().X) / Tilesize,
-        (WorldPosition.Y - this->GetActorLocation().Y) / Tilesize
+        (WorldPosition.X - this->GetActorLocation().X) / Tsize,
+        (WorldPosition.Y - this->GetActorLocation().Y) / Tsize
     );
 }
 FVector AGridManager::GridToWorldPosition(FVector2D GridPosition) const
 {
     return FVector(
-        GridPosition.X * Tilesize + this->GetActorLocation().X,
-        GridPosition.Y * Tilesize + this->GetActorLocation().Y,
+        GridPosition.X * Tsize + this->GetActorLocation().X,
+        GridPosition.Y * Tsize + this->GetActorLocation().Y,
         GridHeight
     );
 }

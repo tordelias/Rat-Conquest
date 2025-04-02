@@ -16,9 +16,9 @@ ACombatManager::ACombatManager()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-void ACombatManager::DealDamageToUnit(APlayerUnit* Attackerunit, APlayerUnit* Defenderunit)
+void ACombatManager::DealDamageToUnit(TWeakObjectPtr<APlayerUnit> Attackerunit, TWeakObjectPtr<APlayerUnit> Defenderunit)
 {
-    if (!Attackerunit || !Defenderunit)
+    if (!Attackerunit.IsValid() || !Defenderunit.IsValid())
     {
         UE_LOG(LogTemp, Error, TEXT("DealDamageToUnit failed: Attacker or Defender is null!"));
         return;
@@ -51,9 +51,9 @@ void ACombatManager::DealDamageToUnit(APlayerUnit* Attackerunit, APlayerUnit* De
     HandleUnitDamage(Defenderunit, TotalDamage);
 }
 
-void ACombatManager::ApplyKnockback(APlayerUnit* Attackerunit, APlayerUnit* Defenderunit)
+void ACombatManager::ApplyKnockback(TWeakObjectPtr<APlayerUnit> Attackerunit, TWeakObjectPtr<APlayerUnit> Defenderunit)
 {
-    if (!Attackerunit || !Defenderunit)
+    if (!Attackerunit.IsValid() || !Defenderunit.IsValid())
     {
         UE_LOG(LogTemp, Error, TEXT("ApplyKnockback failed: Attacker or Defender is null!"));
         return;
@@ -84,9 +84,9 @@ void ACombatManager::ApplyKnockback(APlayerUnit* Attackerunit, APlayerUnit* Defe
     GetWorld()->GetTimerManager().SetTimer(KnockbackResetTimer, ResetPositionDelegate, KnockbackDuration, false);
 }
 
-void ACombatManager::ResetKnockbackPosition(APlayerUnit* Defenderunit)
+void ACombatManager::ResetKnockbackPosition(TWeakObjectPtr<APlayerUnit> Defenderunit)
 {
-    if (!Defenderunit)
+    if (!Defenderunit.IsValid())
     {
         UE_LOG(LogTemp, Error, TEXT("ResetKnockbackPosition failed: Defender is null!"));
         return;
@@ -97,9 +97,9 @@ void ACombatManager::ResetKnockbackPosition(APlayerUnit* Defenderunit)
     Defenderunit->bIsKnockbackActive = false;
 }
 
-void ACombatManager::HandleUnitDamage(APlayerUnit* unit, int amount)
+void ACombatManager::HandleUnitDamage(TWeakObjectPtr<APlayerUnit> unit, int amount)
 {
-	if (!unit)
+	if (!unit.IsValid())
 	{
 		UE_LOG(LogTemp, Error, TEXT("TakeDamage failed: Unit is null!"));
 		return;
@@ -137,9 +137,9 @@ void ACombatManager::HandleUnitDamage(APlayerUnit* unit, int amount)
 	}
 }
 
-void ACombatManager::KillUnit(APlayerUnit* unit)
+void ACombatManager::KillUnit(TWeakObjectPtr<APlayerUnit> unit)
 {
-    if (!unit)
+    if (!unit.IsValid())
     {
         UE_LOG(LogTemp, Error, TEXT("KillUnit failed: Unit is null!"));
         return;
@@ -160,7 +160,7 @@ void ACombatManager::KillUnit(APlayerUnit* unit)
         bool bWasCurrentUnit = (GameManager->CurrentUnit == unit);
 
         // Remove unit from queue
-        GameManager->RemoveUnitFromQueue(unit);
+        GameManager->RemoveUnitFromQueue(unit.Get());
 
         // If the killed unit was the current turn unit, properly move to the next turn
         if (bWasCurrentUnit)

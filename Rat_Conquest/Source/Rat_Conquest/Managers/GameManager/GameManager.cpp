@@ -384,7 +384,7 @@ void AGameManager::EndEncounter()
 void AGameManager::CheckForEncounter()
 {
     
-    if (GridManager && GridManager->bIsGridFinished() && bLevelFinishedGenerating)
+    if (GridManager && GridManager->IsGridFinished() && bLevelFinishedGenerating)
     {
         
         StartEncounter();

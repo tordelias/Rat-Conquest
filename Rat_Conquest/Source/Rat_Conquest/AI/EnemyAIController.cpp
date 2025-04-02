@@ -128,13 +128,13 @@ void AEnemyAIController::MoveToClosestPossibleTile(TWeakObjectPtr<APlayerUnit> E
 		FVector2D CurrentPosition = AI->CurrentGridPosition;
 		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
 		 
-		TArray<AGridTile*> PossibleTiles;
+		TArray<TWeakObjectPtr<AGridTile>> PossibleTiles;
 		PossibleTiles = AI->GridManager->GetNeighbourTiles(AI->CurrentGridPosition.X, AI->CurrentGridPosition.Y);
 
 		AGridTile* BestTile = nullptr;
 		float BestScore = FLT_MAX;
 
-		for (AGridTile* Tile : PossibleTiles)
+		for (auto Tile : PossibleTiles)
 		{
 			float DistanceToTile = FVector2D::Distance(CurrentPosition, Tile->GridPosition);
 
@@ -146,7 +146,7 @@ void AEnemyAIController::MoveToClosestPossibleTile(TWeakObjectPtr<APlayerUnit> E
 				if (TotalScore < BestScore)
 				{
 					BestScore = TotalScore;
-					BestTile = Tile;
+					BestTile = Tile.Get();
 				}
 			}
 		}
@@ -178,21 +178,21 @@ void AEnemyAIController::Attack(TWeakObjectPtr<APlayerUnit> Enemy)
 		FVector2D AIPosition = AI->CurrentGridPosition;
 		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
 
-		TArray<AGridTile*> NeighbourTiles = AI->GridManager->GetNeighbourTiles(EnemyPosition.X, EnemyPosition.Y);
+		TArray<TWeakObjectPtr<AGridTile>> NeighbourTiles = AI->GridManager->GetNeighbourTiles(EnemyPosition.X, EnemyPosition.Y);
 
 		AGridTile* BestTile = nullptr;
 		float ClosestDistanceToEnemy = FLT_MAX;
 
-		for (AGridTile* Tile : NeighbourTiles)
+		for (auto Tile : NeighbourTiles)
 		{
-			if (Tile && !Tile->bIsOccupied)
+			if (Tile.IsValid() && !Tile->bIsOccupied)
 			{
 				float DistanceToEnemy = FVector2D::Distance(Tile->GridPosition, EnemyPosition);
 
 				if (DistanceToEnemy < ClosestDistanceToEnemy && Tile->GridPosition != EnemyPosition)
 				{
 					ClosestDistanceToEnemy = DistanceToEnemy;
-					BestTile = Tile;
+					BestTile = Tile.Get();
 				}
 			}
 		}
