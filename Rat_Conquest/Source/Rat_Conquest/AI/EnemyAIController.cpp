@@ -63,7 +63,7 @@ APlayerUnit* AEnemyAIController::FindEnemyunit()
 
 	APlayerUnit* AI = Cast<APlayerUnit>(GetPawn());
 
-	if (!AI->GridManager)
+	if (!AI->GridManager.IsValid())
 	{
 		UE_LOG(LogTemp, Error, TEXT("GridManager is not valid or has not been possessed"));
 		return nullptr;
@@ -119,11 +119,11 @@ APlayerUnit* AEnemyAIController::FindEnemyunit()
 	return closestUnit;
 }
 
-void AEnemyAIController::MoveToClosestPossibleTile(APlayerUnit* Enemy)
+void AEnemyAIController::MoveToClosestPossibleTile(TWeakObjectPtr<APlayerUnit> Enemy)
 {
 
 	APlayerUnit* AI = Cast<APlayerUnit>(GetPawn());
-	if (AI->GridManager && Enemy)
+	if (AI->GridManager.IsValid() && Enemy.IsValid())
 	{
 		FVector2D CurrentPosition = AI->CurrentGridPosition;
 		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
@@ -169,11 +169,11 @@ void AEnemyAIController::MoveToClosestPossibleTile(APlayerUnit* Enemy)
 	}
 }
 
-void AEnemyAIController::Attack(APlayerUnit* Enemy)
+void AEnemyAIController::Attack(TWeakObjectPtr<APlayerUnit> Enemy)
 {
 	APlayerUnit* AI = Cast<APlayerUnit>(GetPawn());
 
-	if (AI->GridManager && !AI->bIsPlayerUnit && Enemy)
+	if (AI->GridManager.IsValid() && !AI->bIsPlayerUnit && Enemy.IsValid())
 	{
 		FVector2D AIPosition = AI->CurrentGridPosition;
 		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
@@ -212,13 +212,13 @@ void AEnemyAIController::Attack(APlayerUnit* Enemy)
 	}
 	else
 	{
-		if (!AI->GridManager) UE_LOG(LogTemp, Error, TEXT("GridManager is invalid"));
-		if (!Enemy) UE_LOG(LogTemp, Error, TEXT("Enemy is null"));
+		if (!AI->GridManager.IsValid()) UE_LOG(LogTemp, Error, TEXT("GridManager is invalid"));
+		if (!Enemy.IsValid()) UE_LOG(LogTemp, Error, TEXT("Enemy is null"));
 		if (AI->bIsPlayerUnit) UE_LOG(LogTemp, Warning, TEXT("Player-controlled units cannot use this AI logic"));
 	}
 }
 
-void AEnemyAIController::RandedAttack(APlayerUnit* Enemy)
+void AEnemyAIController::RandedAttack(TWeakObjectPtr<APlayerUnit> Enemy)
 {
 	APlayerUnit* AI = Cast<APlayerUnit>(GetPawn());
 	//Attack the enemy

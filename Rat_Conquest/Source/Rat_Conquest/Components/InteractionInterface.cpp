@@ -22,6 +22,6 @@ void IInteractionInterface::EndInteract()
 {
 }
 
-void IInteractionInterface::Interact(APlayerCamera* PlayerCharacter)
+void IInteractionInterface::Interact(TWeakObjectPtr<APlayerCamera> PlayerCharacter)
 {
 }

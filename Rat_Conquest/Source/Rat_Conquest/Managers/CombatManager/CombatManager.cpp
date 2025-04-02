@@ -25,7 +25,7 @@ void ACombatManager::DealDamageToUnit(APlayerUnit* Attackerunit, APlayerUnit* De
     }
 
     int weaponDamage = 0;
-    if (Attackerunit->ItemSlots[0])
+    if (Attackerunit->ItemSlots[0].Get())
     {
         AItem* item = Cast<AItem>(Attackerunit->ItemSlots[0]);
         if (item)

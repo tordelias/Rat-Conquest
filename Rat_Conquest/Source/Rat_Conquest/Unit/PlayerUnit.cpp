@@ -73,7 +73,7 @@ APlayerUnit::APlayerUnit()
 	ItemSlots.SetNum(3);
 	GridStartPosition = FVector2D(0, 0);
 	GridManager = nullptr;
-	combatManager = nullptr;
+	CombatManager = nullptr;
 	bIsRangedUnit = false;
 	Health = maxHealth; 
 
@@ -110,7 +110,7 @@ void APlayerUnit::BeginPlay()
 
 	if (FoundCombatManagers.Num() > 0)
 	{
-		combatManager = Cast<ACombatManager>(FoundCombatManagers[0]);
+		CombatManager = Cast<ACombatManager>(FoundCombatManagers[0]);
 		if (FoundCombatManagers.Num() > 1)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Multiple Combatmanagers found! Using first instance."));
@@ -123,7 +123,7 @@ void APlayerUnit::BeginPlay()
 
 		GameManager = Cast<AGameManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass()));
 
-		if (!GameManager)
+		if (!GameManager.IsValid())
 		{
 			UE_LOG(LogTemp, Error, TEXT("BeginPlay(): No GameManager found!"));
 		}
@@ -224,7 +224,7 @@ void APlayerUnit::Tick(float DeltaTime)
 				// Movement finished
 				UE_LOG(LogTemp, Display, TEXT("Finished moving along the path."));
 
-				if (EnemyToAttack)
+				if (EnemyToAttack.IsValid())
 				{
 					// Face the enemy
 					FVector EnemyDirection = (EnemyToAttack->GetActorLocation() - GetActorLocation()).GetSafeNormal();
@@ -329,7 +329,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 {
 	if (!bIsCurrentUnit && bIsPlayerUnit)
 		return;
-	if (!GridManager)
+	if (!GridManager.IsValid())
 	{
 		UE_LOG(LogTemp, Error, TEXT("NO MANAGER |MoveToTile_PlayerUnit.cpp|"));
 		return;
@@ -427,7 +427,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 
 bool APlayerUnit::CalculatePathToTile(FVector2D InTargetGridPosition)
 {
-	if (!GridManager)
+	if (!GridManager.IsValid())
 	{
 		UE_LOG(LogTemp, Error, TEXT("NO MANAGER"));
 		return false;
@@ -543,7 +543,7 @@ TArray<FVector2D> APlayerUnit::GetPathToTile(FVector2D InTargetGridPosition, FVe
 
 void APlayerUnit::SetInitalPosition(FVector2D position)
 {
-	if (!GridManager) {
+	if (!GridManager.IsValid()) {
 		UE_LOG(LogTemp, Error, TEXT("NO MANAGER |SetInitalPosition_PlayerUnit.cpp|"));
 		return;
 	}
@@ -585,7 +585,7 @@ void APlayerUnit::SetInitalPosition(FVector2D position)
 
 void APlayerUnit::DelayedInitalPosition()
 {
-	if (GridManager && GridManager->bIsGridFinished() && GridManager->bIsGridScanned)
+	if (GridManager.IsValid() && GridManager->bIsGridFinished() && GridManager->bIsGridScanned)
 	{
 		SetInitalPosition(GridStartPosition);
 	}
@@ -600,113 +600,93 @@ float APlayerUnit::ChebyshevDistance(FVector2D A, FVector2D B)
 	return FMath::Max(FMath::Abs(A.X - B.X), FMath::Abs(A.Y - B.Y));
 }
 
-void APlayerUnit::PlayerAttack(APlayerCamera* PlayerCharacter)
+void APlayerUnit::PlayerAttack(TWeakObjectPtr<APlayerCamera> PlayerCharacter)
 {
-	if (!PlayerCharacter || !GridManager)
+	// Define constants
+	constexpr int ADJACENT_TILE_RANGE = 1;
+
+	// Validate inputs
+	if (!PlayerCharacter.IsValid() || !GridManager.IsValid())
 	{
-		UE_LOG(LogTemp, Error, TEXT("PlayerCharacter or GridManager is null"));
+		UE_LOG(LogTemp, Error, TEXT("Invalid PlayerCharacter or GridManager in PlayerAttack"));
 		return;
 	}
 
-	if (!IsValid(PlayerCharacter->GetCurrentUnit().Get()))
+	const TWeakObjectPtr<APlayerUnit> PlayerUnit = PlayerCharacter->GetCurrentUnit();
+	if (!PlayerUnit.IsValid())
 	{
-		UE_LOG(LogTemp, Error, TEXT("PlayerCharacter->GetCurrentUnit() is null"));
+		UE_LOG(LogTemp, Error, TEXT("Invalid PlayerUnit in PlayerAttack"));
 		return;
 	}
 
-	auto PlayerUnit = PlayerCharacter->GetCurrentUnit();
-	if (!IsValid(PlayerUnit.Get()))
-	{
-		UE_LOG(LogTemp, Error, TEXT("PlayerUnit is null"));
-		return;
-	}
-
-	FVector2D PlayerPosition = PlayerUnit->CurrentGridPosition;
-	FVector2D EnemyPosition = this->CurrentGridPosition;
+	const FVector2D PlayerPosition = PlayerUnit->CurrentGridPosition;
+	const FVector2D EnemyPosition = CurrentGridPosition;
 	TargetEnemyLocation = EnemyPosition;
 
-	float DistanceToEnemy = ChebyshevDistance(EnemyPosition, PlayerPosition);
+	const float DistanceToEnemy = ChebyshevDistance(EnemyPosition, PlayerPosition);
 
 	// Handle ranged attack
 	if (PlayerUnit->bIsRangedUnit)
 	{
-		if (DistanceToEnemy <= AttackRange)
-		{
-			UE_LOG(LogTemp, Log, TEXT("Ranged unit attacking from a distance"));
-
-			if (this != nullptr && PlayerUnit != nullptr && PlayerCharacter)
-			{
-				this->FinishTurn();
-				PlayerUnit->EnemyToAttack = this;
-				PlayerUnit->UseCurrentItem();
-			}
-		}
-		else
+		if (DistanceToEnemy > AttackRange)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Enemy is out of range for ranged attack"));
+			return;
 		}
+
+		PlayerUnit->EnemyToAttack = this;
+		PlayerUnit->UseCurrentItem();
+		return;
 	}
+
 	// Handle melee attack
-	else
+	if (DistanceToEnemy > PlayerUnit->MovementSpeed + ADJACENT_TILE_RANGE)
 	{
-		if (DistanceToEnemy > PlayerUnit->MovementSpeed + 1)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Enemy out of movement range |PlayerAttack_PlayerUnit.cpp|"));
-			return;
-		}
-
-		MouseGridPos = GetMousePosition(PlayerCharacter->GetMouseWorldLocation(), PlayerCharacter->GetMouseWorldDirection());
-		UE_LOG(LogTemp, Display, TEXT("Mouse pos X=%f, Y=%f, Enemy pos X=%f, Y=%f"), MouseGridPos.X, MouseGridPos.Y, TargetEnemyLocation.X, TargetEnemyLocation.Y);
-
-		FVector2D AttackDirection = GetCardinalDirection(FVector2D(this->GetTargetLocation().X, this->GetTargetLocation().Y), MouseGridPos);
-		UE_LOG(LogTemp, Display, TEXT("Cardinal Direction when attacking: %s"), *AttackDirection.ToString());
-
-		FVector2D AttackTileGridPos = EnemyPosition + AttackDirection;
-		UE_LOG(LogTemp, Display, TEXT("Attack tile pos X=%f, Y=%f"), AttackTileGridPos.X, AttackTileGridPos.Y);
-
-		if (!GridManager)
-		{
-			UE_LOG(LogTemp, Error, TEXT("GridManager is null before fetching attack tile"));
-			return;
-		}
-
-		AGridTile* AttackTile = GridManager->GetTileAtPosition(AttackTileGridPos.X, AttackTileGridPos.Y);
-		if (!AttackTile)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("No valid attack tile found at X=%f, Y=%f |PlayerAttack_PlayerUnit.cpp|"), AttackTileGridPos.X, AttackTileGridPos.Y);
-			return;
-		}
-
-		if (AttackTile->GridPosition == PlayerPosition)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Attack tile is the same as player position |PlayerAttack_PlayerUnit.cpp|"));
-			PlayerUnit->EnemyToAttack = this;
-			PlayerUnit->AttackAfterMovement();
-
-
-			return;
-		}
-
-		if (AttackTile->bIsOccupied)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Attack tile is occupied |PlayerAttack_PlayerUnit.cpp|"));
-			return;
-		}
-
-		if (ChebyshevDistance(PlayerPosition, AttackTileGridPos) > PlayerUnit->MovementSpeed + 1)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Attack tile out of range |PlayerAttack_PlayerUnit.cpp|"));
-			return;
-		}
-
-		if (AttackTile)
-		{
-			PlayerUnit->EnemyToAttack = this;
-			// In PlayerAttack function:
-			PlayerUnit->OnMovementComplete.BindUObject(PlayerUnit.Get(), &APlayerUnit::AttackAfterMovement);
-			PlayerUnit->MoveToTile(AttackTile->GridPosition);
-		}
+		UE_LOG(LogTemp, Warning, TEXT("Enemy out of movement range"));
+		return;
 	}
+
+	MouseGridPos = GetMousePosition(PlayerCharacter->GetMouseWorldLocation(), PlayerCharacter->GetMouseWorldDirection());
+	UE_LOG(LogTemp, Display, TEXT("Mouse pos X=%f, Y=%f, Enemy pos X=%f, Y=%f"),
+		MouseGridPos.X, MouseGridPos.Y, TargetEnemyLocation.X, TargetEnemyLocation.Y);
+
+	const FVector2D AttackDirection = GetCardinalDirection(
+		FVector2D(GetTargetLocation().X, GetTargetLocation().Y),
+		MouseGridPos);
+	UE_LOG(LogTemp, Display, TEXT("Cardinal Direction when attacking: %s"), *AttackDirection.ToString());
+
+	const FVector2D AttackTileGridPos = EnemyPosition + AttackDirection;
+	UE_LOG(LogTemp, Display, TEXT("Attack tile pos X=%f, Y=%f"), AttackTileGridPos.X, AttackTileGridPos.Y);
+
+	AGridTile* AttackTile = GridManager->GetTileAtPosition(AttackTileGridPos.X, AttackTileGridPos.Y);
+	if (!AttackTile)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No valid attack tile found"));
+		return;
+	}
+
+	if (AttackTile->GridPosition == PlayerPosition)
+	{
+		PlayerUnit->EnemyToAttack = this;
+		PlayerUnit->AttackAfterMovement();
+		return;
+	}
+
+	if (AttackTile->bIsOccupied)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Attack tile is occupied"));
+		return;
+	}
+
+	if (ChebyshevDistance(PlayerPosition, AttackTileGridPos) > PlayerUnit->MovementSpeed + ADJACENT_TILE_RANGE)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Attack tile out of range"));
+		return;
+	}
+
+	PlayerUnit->EnemyToAttack = this;
+	PlayerUnit->OnMovementComplete.BindUObject(PlayerUnit.Get(), &APlayerUnit::AttackAfterMovement);
+	PlayerUnit->MoveToTile(AttackTile->GridPosition);
 }
 
 
@@ -738,19 +718,19 @@ FVector2D APlayerUnit::GetCardinalDirection(FVector2D EnemyPos, FVector2D MouseP
 
 void APlayerUnit::AttackAfterMovement()
 {
-	if (!combatManager)
+	if (!CombatManager.IsValid())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Combat Manager is null"));
 		this->OnMovementComplete.Unbind();
 		return;
 	}
-	if (EnemyToAttack)
+	if (EnemyToAttack.IsValid())
 	{
 		if (SB_Attack) {
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), SB_Attack, GetActorLocation(), GetActorRotation());
 		}
 		animationToPlay = FVector2D(50, 0);
-		combatManager->DealDamageToUnit(this, EnemyToAttack);
+		CombatManager->DealDamageToUnit(this, EnemyToAttack.Get());
 		this->FinishTurn();
 		EnemyToAttack = nullptr;
 	}
@@ -819,7 +799,7 @@ void APlayerUnit::ExecuteAITurn()
 
 void APlayerUnit::FinishTurn()
 {
-	if (!GameManager)
+	if (!GameManager.IsValid())
 	{
 		UE_LOG(LogTemp, Error, TEXT("GameManager is null"));
 		return;
@@ -840,7 +820,7 @@ void APlayerUnit::FinishTurn()
 
 void APlayerUnit::DestoryUnit()
 {
-	if (GridManager)
+	if (GridManager.IsValid())
 	{
 		AActor* Tile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
 		AGridTile* GridTile = Cast<AGridTile>(Tile);
@@ -857,7 +837,7 @@ void APlayerUnit::DestoryUnit()
 
 void APlayerUnit::ResetPosition()
 {
-	if (GridManager)
+	if (GridManager.IsValid())
 	{
 		AActor* Tile = GridManager->GetTileAt(CurrentGridPosition.X, CurrentGridPosition.Y);
 		AGridTile* GridTile = Cast<AGridTile>(Tile);
@@ -869,60 +849,64 @@ void APlayerUnit::ResetPosition()
 	}
 	SetInitalPosition(GridStartPosition);
 }
-void APlayerUnit::EquipStartWeapon(AItem* ItemToAdd)
+void APlayerUnit::EquipStartWeapon(TWeakObjectPtr<AItem> ItemToAdd)
 {
-	if (!ItemToAdd)
+	// Validate input
+	if (!ItemToAdd.IsValid())
 	{
-		UE_LOG(LogTemp, Error, TEXT("ItemToAdd is null"));
+		UE_LOG(LogTemp, Error, TEXT("Attempted to equip null item"));
 		return;
 	}
-	// Determine the appropriate slot index for the new item
-	int32 SlotIndex = 0; // Default to weapon slot
-	// Check if the slot is already occupied
-	if (ItemSlots[SlotIndex])
+
+	// Ensure we have item slots
+	constexpr int32 WEAPON_SLOT_INDEX = 0;
+	if (ItemSlots.Num() <= WEAPON_SLOT_INDEX)
 	{
-		AItem* OldItem = ItemSlots[SlotIndex];
-		// Unequip the old item
-		OldItem->DropItem();
-		// Drop the old item back into the game world
-		DropItem(OldItem, CurrentGridPosition);
-	}
-	// Equip the new item
-	ItemSlots[SlotIndex] = ItemToAdd;
-	ItemToAdd->EquipItem(this);
-	//set the unit according to the item
-	if (ItemToAdd->bIsMelee)
-	{
-		bIsRangedUnit = false;
-	}
-	else
-	{
-		bIsRangedUnit = true;
-	}
-	if (bIsRangedUnit)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Player is a Ranged unit"));
+		UE_LOG(LogTemp, Error, TEXT("ItemSlots array not properly initialized"));
+		return;
 	}
 
+	// Handle existing item
+	if (ItemSlots[WEAPON_SLOT_INDEX].IsValid())
+	{
+		if (AItem* OldItem = ItemSlots[WEAPON_SLOT_INDEX].Get())
+		{
+			OldItem->DropItem();
+			DropItem(OldItem, CurrentGridPosition);
+		}
+	}
+
+	// Equip new item
+	ItemSlots[WEAPON_SLOT_INDEX] = ItemToAdd;
+	ItemToAdd->EquipItem(this);
+
+	// Update unit type based on weapon
+	bIsRangedUnit = !ItemToAdd->bIsMelee;
+
+#if !UE_BUILD_SHIPPING
+	UE_LOG(LogTemp, Log, TEXT("Equipped %s weapon: %s"),
+		bIsRangedUnit ? TEXT("Ranged") : TEXT("Melee"),
+		*ItemToAdd->GetName());
+#endif
 }
 
 void APlayerUnit::UseCurrentItem()
 {
 
-	if (ItemSlots[0]) { // use weapon to attack
+	if (ItemSlots[0].IsValid()) { // use weapon to attack
 		AWeapon* currentWeapon = Cast<AWeapon>(ItemSlots[0]);
-		if (currentWeapon && EnemyToAttack) {
+		if (currentWeapon && IsValid(EnemyToAttack.Get())) {
 			currentWeapon->SetEnemyLocation(EnemyToAttack->GetActorLocation());
 			currentWeapon->UseItem();
 			if (bIsRangedUnit) {
 				float CurrentDelay = currentWeapon->ProjectileTime;
 				
-				if (combatManager && EnemyToAttack) {
-					combatManager->DealDamageToUnit(this, EnemyToAttack);
+				if (IsValid(CombatManager.Get()) && IsValid(EnemyToAttack.Get())) {
+					CombatManager->DealDamageToUnit(this, EnemyToAttack.Get());
 				}
 			}
 			else {
-				combatManager->DealDamageToUnit(this, EnemyToAttack);
+				CombatManager->DealDamageToUnit(this, EnemyToAttack.Get());
 			}
 
 			EnemyToAttack = nullptr;
@@ -935,7 +919,7 @@ void APlayerUnit::UseCurrentItem()
 
 void APlayerUnit::CheckForGridObjects()
 {
-	if (!GridManager) {
+	if (!IsValid(GridManager.Get())) {
 		UE_LOG(LogTemp, Error, TEXT("NO MANAGER"));
 		return;
 	}
@@ -957,7 +941,7 @@ void APlayerUnit::CheckForGridObjects()
 void APlayerUnit::CheckForItems()
 {
 	// Ensure the GridManager is valid
-	if (!GridManager) {
+	if (!IsValid(GridManager.Get())) {
 		UE_LOG(LogTemp, Error, TEXT("NO MANAGER"));
 		return;
 	}
@@ -985,8 +969,8 @@ void APlayerUnit::CheckForItems()
 		
 
 		// Check if the slot is already occupied
-		if (ItemSlots[SlotIndex]) {
-			AItem* OldItem = ItemSlots[SlotIndex];
+		if (ItemSlots[SlotIndex].IsValid()) {
+			AItem* OldItem = ItemSlots[SlotIndex].Get();
 
 			// Unequip the old item
 			OldItem->DropItem();
@@ -1041,9 +1025,9 @@ void APlayerUnit::CalculateStats()
 
 }
 
-void APlayerUnit::DropItem(AItem* OldItem, FVector2D CurrentPosition)
+void APlayerUnit::DropItem(TWeakObjectPtr<AItem> OldItem, FVector2D CurrentPosition)
 {
-	if (!OldItem)
+	if (!IsValid(OldItem.Get()))
 	{
 		UE_LOG(LogTemp, Error, TEXT("OldItem is null"));
 		return;
@@ -1076,7 +1060,7 @@ void APlayerUnit::DropItem(AItem* OldItem, FVector2D CurrentPosition)
 	}
 
 	// If using a grid system, update the corresponding tile
-	if (GridManager)
+	if (IsValid(GridManager.Get()))
 	{
 		AActor* TargetTile = GridManager->GetTileAt(CurrentPosition.X, CurrentPosition.Y);
 		AGridTile* Tile = Cast<AGridTile>(TargetTile);
@@ -1139,7 +1123,7 @@ void APlayerUnit::EndFocus()
 	// Process MovementTiles instead of MovedTiles
 	for (auto tile : MovedTiles)
 	{
-		if (tile)
+		if (IsValid(tile.Get()))
 		tile->EndFocus();
 	}
 	MovedTiles.Empty();
@@ -1147,37 +1131,50 @@ void APlayerUnit::EndFocus()
 
 void APlayerUnit::BeginMouseHoverFocus()
 {
-	if(!this->bIsCurrentUnit && this)
+	// Early return if this is the current unit or skeletal mesh is invalid
+	if (bIsCurrentUnit || !SkeletalMesh)
 	{
-		SkeletalMesh->SetRenderCustomDepth(true);
-		if (GridManager && !bIsCurrentUnit)
+		return;
+	}
+
+	// Enable custom depth rendering
+	SkeletalMesh->SetRenderCustomDepth(true);
+
+	// Get movable tiles if grid manager is valid
+	if (GridManager.IsValid())
+	{
+		// Clear previous hover tiles first
+		for (auto& Tile : HoverTiles)
 		{
-			// Use HoverTiles instead of MovedTiles
-			HoverTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed);
-			for (AGridTile* Tile : HoverTiles)
+			if (Tile.IsValid())
 			{
-				if (bIsPlayerUnit)
-				{
-					if (Tile->bIsGreenHighlighted || Tile->bIsRedHighlighted)
-					{
-						Tile->YellowHighlight();
-					}
-					else
-					{
-						Tile->GreenHighlight();
-					}
-				}
-				else
-				{
-					if (Tile->bIsGreenHighlighted || Tile->bIsRedHighlighted)
-					{
-						Tile->YellowHighlight();
-					}
-					else
-					{
-						Tile->RedHighlight();
-					}
-				}
+				Tile->EndHighlight();
+			}
+		}
+
+		// Get new movable tiles
+		HoverTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed);
+
+		// Highlight tiles based on unit type
+		for (auto& Tile : HoverTiles)
+		{
+			if (!Tile.IsValid()) continue;
+
+			// Choose highlight color based on unit type
+			const bool bShouldRedHighlight = !bIsPlayerUnit && !(Tile->bIsGreenHighlighted || Tile->bIsRedHighlighted);
+			const bool bShouldGreenHighlight = bIsPlayerUnit && !(Tile->bIsGreenHighlighted || Tile->bIsRedHighlighted);
+
+			if (Tile->bIsGreenHighlighted || Tile->bIsRedHighlighted)
+			{
+				Tile->YellowHighlight();
+			}
+			else if (bShouldRedHighlight)
+			{
+				Tile->RedHighlight();
+			}
+			else if (bShouldGreenHighlight)
+			{
+				Tile->GreenHighlight();
 			}
 		}
 	}
@@ -1189,9 +1186,9 @@ void APlayerUnit::EndMouseHoverFocus()
 	{
 		SkeletalMesh->SetRenderCustomDepth(false);
 
-		for (AGridTile* Tile : HoverTiles)
+		for (auto Tile : HoverTiles)
 		{
-			if (Tile && Tile->unitRefrence != this)
+			if (Tile.IsValid() && Tile->unitRefrence != this)
 			{
 				Tile->EndMouseHoverFocus();
 			}
@@ -1203,9 +1200,9 @@ void APlayerUnit::EndMouseHoverFocus()
 
 
 
-void APlayerUnit::Interact(APlayerCamera* PlayerCharacter)
+void APlayerUnit::Interact(TWeakObjectPtr<APlayerCamera> PlayerCharacter)
 {
-	if (PlayerCharacter)
+	if (IsValid(PlayerCharacter.Get()))
 	{
 	
 		this->UpdateInteractableData();
@@ -1229,7 +1226,7 @@ void APlayerUnit::Mutate()
 			return;
 		}
 		//pause game only
-		if (GameManager)
+		if (GameManager.IsValid())
 		{
 			GameManager->PauseGame();
 		}
@@ -1266,7 +1263,7 @@ TArray<int> APlayerUnit::GetMutationC3()
 	return mutationData->GetStatsC3();
 }
 
-float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
+float APlayerUnit::GetMouseRotationToEnemy(TWeakObjectPtr<APlayerCamera> Camera)
 {
 	if (!this)
 	{
@@ -1274,7 +1271,7 @@ float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
 		return 0.0f;
 	}
 
-	if (!Camera)
+	if (!Camera.IsValid())
 	{
 		UE_LOG(LogTemp, Error, TEXT("GetMouseRotationToEnemy: Camera is null!"));
 		return 0.0f;
@@ -1302,13 +1299,6 @@ float APlayerUnit::GetMouseRotationToEnemy(APlayerCamera* Camera)
 
 	// Get target location
 	FVector TargetLocation = this->GetActorLocation();
-	//if (TargetLocation.ContainsNaN())
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("GetMouseRotationToEnemy: TargetLocation contains NaN values!"));
-	//	return 0.0f;
-	//}
-
-
 	FVector2D AttackDirection = GetCardinalDirection(
 		FVector2D(TargetLocation.X, TargetLocation.Y),
 		MouseGridPos
@@ -1380,7 +1370,7 @@ void APlayerUnit::ApplyMutation(TArray<int> statsToAdd)
 
 	UpdateInteractableData();
 
-	if (GameManager)
+	if (GameManager.IsValid())
 	{
 		GameManager->ResumeGame();
 	}
@@ -1420,7 +1410,7 @@ void APlayerUnit::UpdateInteractableData()
 
 void APlayerUnit::UpdateHealthBar()
 {
-	if (!HealthBarWidget)
+	if (!HealthBarWidget.IsValid())
 	{
 		UE_LOG(LogTemp, Error, TEXT("HealthBarWidget is NULL! Make sure it's properly set."));
 		return;
@@ -1435,7 +1425,7 @@ void APlayerUnit::UpdateHealthBarRotation()
 {
 
 	//set HealthBarWidgetComponent rotation to always face camera/palyerCamera
-	if (!HealthBarWidget)
+	if (!HealthBarWidget.IsValid())
 		return;
 
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();

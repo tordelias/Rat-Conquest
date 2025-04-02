@@ -444,7 +444,7 @@ void AGameManager::StartEncounter()
                 SpawnRotation,
                 SpawnParams
             );
-            if (NewEnemy->GridManager && NewEnemy->GridManager->bIsGridScanned) {
+            if (NewEnemy->GridManager.IsValid() && NewEnemy->GridManager->bIsGridScanned) {
 
                 NewEnemy->SpawnDefaultController();
                 NewEnemy->DelayedInitalPosition();
@@ -491,7 +491,7 @@ void AGameManager::StartEncounter()
 
         // Incremental delay for each unit
         FTimerHandle AIUnitTurnTimerHandle;
-        if (P_unit->GridManager && GridManager->bIsGridScanned) {
+        if (P_unit->GridManager.IsValid() && GridManager->bIsGridScanned) {
            
             P_unit->DelayedInitalPosition();
             // Increase the delay for the next unit

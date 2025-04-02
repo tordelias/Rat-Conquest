@@ -26,234 +26,234 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBlendSpaceChange);
 UCLASS()
 class RAT_CONQUEST_API APlayerUnit : public APawn, public IInteractionInterface
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	// Constructor
-	APlayerUnit();
+    // Constructor
+    APlayerUnit();
 
-	// Mesh & Visuals
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
-	USkeletalMeshComponent* SkeletalMesh;
+    // Mesh & Visuals
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+    TObjectPtr<USkeletalMeshComponent> SkeletalMesh;
 
-	UPROPERTY(EditAnywhere, Category = "Mesh")
-	UStaticMeshComponent* WeaponMesh;
+    UPROPERTY(EditAnywhere, Category = "Mesh")
+    TObjectPtr<UStaticMeshComponent> WeaponMesh;
 
+    UPROPERTY(EditAnywhere, Category = "Mesh")
+    TObjectPtr<UStaticMeshComponent> ArmorMesh;
 
-	UPROPERTY(EditAnywhere, Category = "Mesh")
-	UStaticMeshComponent* ArmorMesh;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Icon")
+    TObjectPtr<UTexture2D> UnitIcon;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Icon")
-	UTexture2D* UnitIcon;
+    // Grid Variables
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+    FVector2D CurrentGridPosition;
 
-	// Grid Variables
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
-	FVector2D CurrentGridPosition;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+    FVector2D GridStartPosition;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
-	FVector2D GridStartPosition;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+    TWeakObjectPtr<AGridManager> GridManager;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
-	AGridManager* GridManager;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+    TWeakObjectPtr<AGameManager> GameManager;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
-	AGameManager* GameManager;
+    // Combat Attributes
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat Manager")
+    TWeakObjectPtr<ACombatManager> CombatManager;
 
-	// Combat Attributes
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat Manager")
-	ACombatManager* combatManager;
-	UPROPERTY(EditAnywhere)
-	UWidgetComponent* HealthBarWidgetComponent;
+    UPROPERTY(EditAnywhere)
+    TObjectPtr<UWidgetComponent> HealthBarWidgetComponent;
 
-	UPROPERTY()
-	AItem* Weapon;
+    UPROPERTY()
+    TWeakObjectPtr<AItem> Weapon;
 
-	UPROPERTY()
-	AItem* Armour;
+    UPROPERTY()
+    TWeakObjectPtr<AItem> Armour;
 
-	UPROPERTY()
-	AItem* Artifact;
+    UPROPERTY()
+    TWeakObjectPtr<AItem> Artifact;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	int MovementSpeed = 3;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+    int MovementSpeed = 3;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	int Health = 3;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	int maxHealth = 5;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+    int Health = 3;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	int Damage = 1;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+    int maxHealth = 5;
 
-	int MinDamage = 1;
-	int MaxDamage = 1;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+    int Damage = 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	int Defence = 0;
+    int MinDamage = 1;
+    int MaxDamage = 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	int AttackRange = 6;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	int Initiative = 0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	int Attack = 1; 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+    int Defence = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	int experienceReward = 10;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+    int AttackRange = 6;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	bool bIsPlayerUnit = true;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+    int Initiative = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	bool bIsRangedUnit = true;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+    int Attack = 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	FName UnitName;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+    int experienceReward = 10;
 
-	// Inventory & Equipment
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	TSubclassOf<AItem> StartWeapon;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+    bool bIsPlayerUnit = true;
 
-	// Animation
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
-	FVector2D animationToPlay; // 0 = idle, 25 = walk, 50 = attack, 75 = secondary attack, 100 = death
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+    bool bIsRangedUnit = true;
 
-	// Projectile
-	UPROPERTY(EditAnywhere, Category = "Projectile")
-	TSubclassOf<AGenericProjectile> ProjectileClass;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+    FName UnitName;
 
-	// Interaction
-	UPROPERTY(VisibleInstanceOnly, Category = "Interact")
-	FInteractableData InstanceInteractableData;
+    // Inventory & Equipment
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+    TSubclassOf<AItem> StartWeapon;
 
-	// Delegates
-	FOnMovementCompleteSignature OnMovementComplete;
+    // Animation
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+    FVector2D animationToPlay; // 0 = idle, 25 = walk, 50 = attack, 75 = secondary attack, 100 = death
 
-	UPROPERTY(BlueprintAssignable, Category = "Health")
-	FOnHealthChanged OnHealthChanged;
+    // Projectile
+    UPROPERTY(EditAnywhere, Category = "Projectile")
+    TSubclassOf<AGenericProjectile> ProjectileClass;
 
-	UPROPERTY(BlueprintAssignable, Category = "Animation")
-	FOnBlendSpaceChange OnBlendSpaceChange;
+    // Interaction
+    UPROPERTY(VisibleInstanceOnly, Category = "Interact")
+    FInteractableData InstanceInteractableData;
 
-	UFUNCTION(BlueprintCallable, Category = "Animation")
-	void NotifyBlendSpaceChange();
-	//current blend space
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlendSpace")
-	UAnimBlueprint* CurrentAnimInstance;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlendSpace")
-	UAnimBlueprint* AnimBlueprint;
+    // Delegates
+    FOnMovementCompleteSignature OnMovementComplete;
 
-	//Sound & Effects
+    UPROPERTY(BlueprintAssignable, Category = "Health")
+    FOnHealthChanged OnHealthChanged;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
-	USoundBase* SB_Walk;
+    UPROPERTY(BlueprintAssignable, Category = "Animation")
+    FOnBlendSpaceChange OnBlendSpaceChange;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
-	USoundBase* SB_Attack;
+    UFUNCTION(BlueprintCallable, Category = "Animation")
+    void NotifyBlendSpaceChange();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
-	USoundBase* SB_PickupItem;
+    //current blend space
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlendSpace")
+    TObjectPtr<UAnimBlueprint> CurrentAnimInstance;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
-	USoundBase* SB_Mutate;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlendSpace")
+    TObjectPtr<UAnimBlueprint> AnimBlueprint;
 
-	// Public Functions
-	void MoveToTile(FVector2D NewGridPosition);
-	bool CalculatePathToTile(FVector2D InTargetGridPosition);
-	TArray<FVector2D> GetPathToTile(FVector2D InTargetGridPosition, FVector2D StartTile);
-	void SetInitalPosition(FVector2D position);
-	void DelayedInitalPosition();
-	void ResetPosition();
-	float ChebyshevDistance(FVector2D A, FVector2D B);
+    //Sound & Effects
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+    TObjectPtr<USoundBase> SB_Walk;
 
-	void PlayerAttack(class APlayerCamera* PlayerCharacter);
-	void AttackAfterMovement();
-	void ShootProjectile(FVector _EnemyLocation);
-	void KillAfterAnim();
-	void DestoryUnit();
-	void ExecutePlayerTurn();
-	void ExecuteAITurn();
-	void FinishTurn();
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+    TObjectPtr<USoundBase> SB_Attack;
 
-	void CheckForGridObjects();
-	void CheckForItems();
-	void CalculateStats();
-	void DropItem(AItem* OldItem, FVector2D CurrentPosition);
-	void EquipStartWeapon(AItem* ItemToAdd);
-	void UseCurrentItem();
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+    TObjectPtr<USoundBase> SB_PickupItem;
 
-	void Mutate();
-	TArray<int> GetMutationC1();
-	TArray<int> GetMutationC2();
-	TArray<int> GetMutationC3();
-	float GetMouseRotationToEnemy(APlayerCamera* Camera);
-	void ApplyMutation(TArray<int>);
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+    TObjectPtr<USoundBase> SB_Mutate;
 
-	void BeginFocus();
-	void EndFocus();
-	virtual void BeginMouseHoverFocus() override;
-	virtual void EndMouseHoverFocus() override;
-	virtual void Interact(APlayerCamera* PlayerCharacter) override;
+    // Public Functions
+    void MoveToTile(FVector2D NewGridPosition);
+    bool CalculatePathToTile(FVector2D InTargetGridPosition);
+    TArray<FVector2D> GetPathToTile(FVector2D InTargetGridPosition, FVector2D StartTile);
+    void SetInitalPosition(FVector2D position);
+    void DelayedInitalPosition();
+    void ResetPosition();
+    float ChebyshevDistance(FVector2D A, FVector2D B);
 
-	virtual void Tick(float DeltaTime) override;
-	virtual void BeginPlay() override;
-	void UpdateInteractableData();
+    void PlayerAttack(TWeakObjectPtr<APlayerCamera> PlayerCharacter);
+    void AttackAfterMovement();
+    void ShootProjectile(FVector _EnemyLocation);
+    void KillAfterAnim();
+    void DestoryUnit();
+    void ExecutePlayerTurn();
+    void ExecuteAITurn();
+    void FinishTurn();
 
-	void UpdateHealthBar();
-	void UpdateHealthBarRotation();
+    void CheckForGridObjects();
+    void CheckForItems();
+    void CalculateStats();
+    void DropItem(TWeakObjectPtr<AItem> OldItem, FVector2D CurrentPosition);
+    void EquipStartWeapon(TWeakObjectPtr<AItem> ItemToAdd);
+    void UseCurrentItem();
 
-	virtual void RandomizeStats();
+    void Mutate();
+    TArray<int> GetMutationC1();
+    TArray<int> GetMutationC2();
+    TArray<int> GetMutationC3();
+    float GetMouseRotationToEnemy(TWeakObjectPtr<APlayerCamera> Camera);
+    void ApplyMutation(TArray<int>);
 
-	FVector2D GetCardinalDirection(FVector2D FromGridPos, FVector2D ToGridPos);
-	FVector2D GetMousePosition(FVector WorldLocation, FVector WorldDirection);
+    void BeginFocus();
+    void EndFocus();
+    virtual void BeginMouseHoverFocus() override;
+    virtual void EndMouseHoverFocus() override;
+    virtual void Interact(TWeakObjectPtr<APlayerCamera> PlayerCharacter) override;
 
-	// Getters
-	USkeletalMeshComponent* GetMesh() { return SkeletalMesh; }
+    virtual void Tick(float DeltaTime) override;
+    virtual void BeginPlay() override;
+    void UpdateInteractableData();
 
+    void UpdateHealthBar();
+    void UpdateHealthBarRotation();
 
+    virtual void RandomizeStats();
 
-	// Public Variables
-	UPROPERTY()
-	bool bHasFinishedTurn = false;
+    FVector2D GetCardinalDirection(FVector2D FromGridPos, FVector2D ToGridPos);
+    FVector2D GetMousePosition(FVector WorldLocation, FVector WorldDirection);
 
-	bool bFirstMove = true;
-	bool bHasWeapon = false;
-	bool bIsCurrentUnit = false;
+    // Getters
+    TObjectPtr<USkeletalMeshComponent> GetMesh() { return SkeletalMesh; }
 
-	APlayerUnit* EnemyToAttack;
-	FVector2D TargetEnemyLocation = FVector2D(0, 0);
-	FVector2D MouseGridPos = FVector2D(0, 0);
+    // Public Variables
+    UPROPERTY()
+    bool bHasFinishedTurn = false;
 
-	TArray<AItem*> ItemSlots; // 0 = weapon, 1 = armor, 2 = accessory
-	std::shared_ptr<MutationData> mutationData;
+    bool bFirstMove = true;
+    bool bHasWeapon = false;
+    bool bIsCurrentUnit = false;
 
-	FTimerHandle DeathTimer;
+    TWeakObjectPtr<APlayerUnit> EnemyToAttack;
+    FVector2D TargetEnemyLocation = FVector2D(0, 0);
+    FVector2D MouseGridPos = FVector2D(0, 0);
 
+    TArray<TWeakObjectPtr<AItem>> ItemSlots; // 0 = weapon, 1 = armor, 2 = accessory
+    std::shared_ptr<MutationData> mutationData;
 
-	// Knockback Handling
-	bool bIsKnockbackActive = false;
-	float KnockbackProgress = 0.0f;
-	float KnockbackDuration = 1.f;
-	FVector KnockbackStartPosition;
-	FVector KnockbackTargetPosition;
+    FTimerHandle DeathTimer;
+
+    // Knockback Handling
+    bool bIsKnockbackActive = false;
+    float KnockbackProgress = 0.0f;
+    float KnockbackDuration = 1.f;
+    FVector KnockbackStartPosition;
+    FVector KnockbackTargetPosition;
 
 private:
-	// Private Variables
-	int unitLevel = 0;
-	bool bIsMoving = false;
+    // Private Variables
+    int unitLevel = 0;
+    bool bIsMoving = false;
 
-	float MovementProgress = 0.0f;
-	float MovementDuration = 0.5f;
-	FVector StartPosition;
-	FVector TargetPosition;
-	FVector2D TargetGridPosition;
-	TArray<FVector2D> PathToTake;
+    float MovementProgress = 0.0f;
+    float MovementDuration = 0.5f;
+    FVector StartPosition;
+    FVector TargetPosition;
+    FVector2D TargetGridPosition;
+    TArray<FVector2D> PathToTake;
 
+    // Tiles
+    TArray<TWeakObjectPtr<AGridTile>> MovedTiles;
+    TArray<TWeakObjectPtr<AGridTile>> HoverTiles;
 
-	// Tiles
-	TArray<AGridTile*> MovedTiles;
-	TArray<AGridTile*> HoverTiles;
-
-	UPROPERTY()
-	UHealthBar* HealthBarWidget;
+    UPROPERTY()
+    TWeakObjectPtr<UHealthBar> HealthBarWidget;
 };

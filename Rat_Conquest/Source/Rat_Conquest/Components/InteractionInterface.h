@@ -89,7 +89,7 @@ public:
 	virtual void EndMouseHoverFocus();
 	virtual void BeginInteract();
 	virtual void EndInteract();
-	virtual void Interact(APlayerCamera* PlayerCharacter);
+	virtual void Interact(TWeakObjectPtr<APlayerCamera> PlayerCharacter);
 
 	FInteractableData InteractableData;
 };

@@ -378,9 +378,9 @@ TArray<AGridTile*> AGridManager::GetNeighbourTiles(int32 Row, int32 Column)
     return NeighbourTiles;
 }
 
-TArray<AGridTile*> AGridManager::GetMovableTiles(int32 Row, int32 Column, int32 MovementRange)
+TArray<TWeakObjectPtr<AGridTile>> AGridManager::GetMovableTiles(int32 Row, int32 Column, int32 MovementRange)
 {
-    TSet<AGridTile*> VisitedTiles; // Use a TSet to prevent duplicate tiles
+    TSet<TWeakObjectPtr<AGridTile>> VisitedTiles; // Use a TSet to prevent duplicate tiles
     TQueue<FIntPoint> TilesToVisit; // Use a queue for breadth-first search (BFS)
 
     // Add the starting tile
@@ -394,7 +394,7 @@ TArray<AGridTile*> AGridManager::GetMovableTiles(int32 Row, int32 Column, int32 
     else
     {
         UE_LOG(LogTemp, Warning, TEXT("Starting tile is not valid at Row: %d, Column: %d"), Row, Column);
-        return TArray<AGridTile*>();
+		return TArray<TWeakObjectPtr<AGridTile>>();
     }
 
     while (!TilesToVisit.IsEmpty())

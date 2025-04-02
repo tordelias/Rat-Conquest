@@ -170,9 +170,9 @@ void AGridTile::EndMouseHoverFocus()
 }
 
 
-void AGridTile::Interact(APlayerCamera* PlayerCharacter)
+void AGridTile::Interact(TWeakObjectPtr<APlayerCamera> PlayerCharacter)
 {
-    if (PlayerCharacter)
+    if (PlayerCharacter.IsValid())
     {
         UpdateInteractableData();
         if (PlayerCharacter->GetCurrentUnit().Get() && !bIsOccupied)

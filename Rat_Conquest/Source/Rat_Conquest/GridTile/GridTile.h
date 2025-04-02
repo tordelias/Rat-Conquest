@@ -39,7 +39,7 @@ public:
     void EndHighlight();
     virtual void BeginMouseHoverFocus() override;
     virtual void EndMouseHoverFocus() override;
-    virtual void Interact(APlayerCamera* PlayerCharacter) override;
+    virtual void Interact(TWeakObjectPtr<APlayerCamera> PlayerCharacter) override;
 
     UPROPERTY(VisibleInstanceOnly, Category = "Pickup")
     FInteractableData InstanceInteractableData;

@@ -37,7 +37,7 @@ public:
 
 	TArray<AGridTile*> GetNeighbourTiles(int32 Row, int32 Column);
 
-	TArray<AGridTile*> GetMovableTiles(int32 Row, int32 Column, int32 MovementRange);
+	TArray<TWeakObjectPtr<AGridTile>> GetMovableTiles(int32 Row, int32 Column, int32 MovementRange);
 
 	FVector GetRandomPositionInGrid();
 

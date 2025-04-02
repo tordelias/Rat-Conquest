@@ -22,9 +22,9 @@ public:
 
 	void MoveToGridPosition();
 	APlayerUnit* FindEnemyunit();
-	void MoveToClosestPossibleTile(APlayerUnit* Enemy);
+	void MoveToClosestPossibleTile(TWeakObjectPtr<APlayerUnit> Enemy);
 
-	void Attack(APlayerUnit* Enemy);
-	void RandedAttack(APlayerUnit* Enemy);
+	void Attack(TWeakObjectPtr<APlayerUnit> Enemy);
+	void RandedAttack(TWeakObjectPtr<APlayerUnit> Enemy);
 	
 };

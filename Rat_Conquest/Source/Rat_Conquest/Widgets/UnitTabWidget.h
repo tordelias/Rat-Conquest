@@ -18,55 +18,55 @@ class RAT_CONQUEST_API UUnitTabWidget : public UUserWidget
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Icon")
-	UTexture2D* DefaultIcon;
+	TWeakObjectPtr<UTexture2D> DefaultIcon;
 
 	// Buttons that will wrap the item images
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UButton* ItemButton1;
+	TWeakObjectPtr<UButton> ItemButton1;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UButton* ItemButton2;
+	TWeakObjectPtr<UButton> ItemButton2;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UButton* ItemButton3;
+	TWeakObjectPtr<UButton> ItemButton3;
 
 	// Item images inside the buttons
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UImage* ItemImage1;
+	TWeakObjectPtr<UImage> ItemImage1;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UImage* ItemImage2;
+	TWeakObjectPtr<UImage> ItemImage2;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UImage* ItemImage3;
+	TWeakObjectPtr<UImage> ItemImage3;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* Attack;
+	TWeakObjectPtr<UTextBlock> Attack;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* Damage;
+	TWeakObjectPtr<UTextBlock> Damage;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* Range;
+	TWeakObjectPtr<UTextBlock> Range;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* Health;
+	TWeakObjectPtr<UTextBlock> Health;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* Defense;
+	TWeakObjectPtr<UTextBlock> Defense;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* Speed;
+	TWeakObjectPtr<UTextBlock> Speed;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* initiativ;
+	TWeakObjectPtr<UTextBlock> initiativ;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* ItemName1;
+	TWeakObjectPtr<UTextBlock> ItemName1;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* ItemName2;
+	TWeakObjectPtr<UTextBlock> ItemName2;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UTextBlock* ItemName3;
+	TWeakObjectPtr<UTextBlock> ItemName3;
 
 	// The unit whose items are displayed
 	UPROPERTY()
-	APlayerUnit* Unit;
+	TWeakObjectPtr<APlayerUnit> Unit;
 
 	// Tooltip Widget
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tooltip")
@@ -74,10 +74,10 @@ public:
 
 	// Instance of the tooltip widget
 	UPROPERTY()
-	UItemToolTipWidget* ToolTipInstance;
+	TObjectPtr<UItemToolTipWidget> ToolTipInstance;
 
 	// Function to initialize unit data
-	void SetData(APlayerUnit* _Unit);
+	void SetData(TWeakObjectPtr<APlayerUnit> _Unit);
 
 	// Called when the widget is constructed
 	virtual void NativeConstruct() override;
