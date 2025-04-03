@@ -16,31 +16,58 @@
 #include "Rat_Conquest/GridTile/GridTile.h"
 #include "Rat_Conquest/Items/ItemBase.h"
 
+#include "Camera/CameraComponent.h" // For UCameraComponent
+#include "GameFramework/SpringArmComponent.h" // For USpringArmComponent
+
 APlayerCamera::APlayerCamera()
 {
     PrimaryActorTick.bCanEverTick = true;
 
+    // Disable capsule collision (since this is camera-only)
     GetCapsuleComponent()->InitCapsuleSize(25.f, 50.0f);
+    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+    // SpringArm setup
     SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
     SpringArm->SetupAttachment(GetCapsuleComponent());
+
+    // Rotation settings
     SpringArm->bUsePawnControlRotation = false;
     SpringArm->bInheritPitch = false;
     SpringArm->bInheritYaw = false;
     SpringArm->bInheritRoll = false;
 
+    // Collision configuration
+    SpringArm->bDoCollisionTest = true;
+    SpringArm->ProbeSize = 12.0f; // Note: Correct spelling is ProbeSize (not ProbeSize)
+    SpringArm->ProbeChannel = ECC_Visibility; // Use Visibility channel which typically works well for cameras
+
+    // Prevent camera from getting too close
+    SpringArm->CameraLagSpeed = 0.f; // Disable if not using camera lag
+    SpringArm->bEnableCameraRotationLag = false;
+    SpringArm->bEnableCameraLag = false;
+    SpringArm->TargetArmLength = MaxZoom; // Start at max zoom
+    SpringArm->SocketOffset = FVector(0, 0, 60.f); 
+
+    // Camera setup
     ThirdPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
-    ThirdPersonCameraComponent->SetupAttachment(SpringArm.Get());
+    ThirdPersonCameraComponent->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
+    ThirdPersonCameraComponent->SetRelativeRotation(FRotator(0, 0, 0));
+   // ThirdPersonCameraComponent->bUsePawnViewRotation = false;
 
+    // Movement settings
     bUseControllerRotationYaw = false;
-    GetCharacterMovement()->bOrientRotationToMovement = false;
-    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-    GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Overlap);
+    if (GetCharacterMovement())
+    {
+        GetCharacterMovement()->bOrientRotationToMovement = false;
+    }
 
+    // Zoom settings
     MinZoom = 500.0f;
     MaxZoom = 1200.0f;
     ZoomSpeed = 30.0f;
 }
+
 
 void APlayerCamera::BeginPlay()
 {
@@ -351,6 +378,19 @@ void APlayerCamera::SwitchMouseCursor(TWeakObjectPtr<APlayerUnit> Enemy)
     }
 }
 
+void APlayerCamera::SetCameraPosition(FVector NewPosition)
+{
+	//Lerp camera position to new position
+	if (IsValid(SpringArm.Get()))
+	{
+		SpringArm->SetWorldLocation(FMath::Lerp(SpringArm->GetComponentLocation(), NewPosition, 0.1f));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SpringArm is not valid"));
+	}
+}
+
 void APlayerCamera::Look(const FInputActionValue& Value)
 {
     FVector2D LookAxis = Value.Get<FVector2D>();
@@ -384,6 +424,45 @@ void APlayerCamera::Zoom(const FInputActionValue& Value)
     SpringArm->TargetArmLength = FMath::Clamp(NewLength, MinZoom, MaxZoom);
 }
 
+void APlayerCamera::MoveCamera(const FInputActionValue& Value)
+{
+    if (!bIsMiddleMouseDown)
+    {
+        return; 
+    }
+
+    FVector2D MoveAxis = Value.Get<FVector2D>();
+
+    //const float DeadZone = 0.15f;
+    //if (FMath::Abs(MoveAxis.X) < DeadZone) MoveAxis.X = 0.f;
+    //if (FMath::Abs(MoveAxis.Y) < DeadZone) MoveAxis.Y = 0.f;
+
+    if (!IsValid(SpringArm.Get()))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("SpringArm is invalid!"));
+        return;
+    }
+
+    FRotator CameraRotation = SpringArm->GetComponentRotation();
+    CameraRotation.Pitch = 0.f;
+    CameraRotation.Roll = 0.f;
+
+    FVector ForwardVector = CameraRotation.Vector();
+    FVector RightVector = CameraRotation.RotateVector(FVector::RightVector);
+
+    FVector Movement = (RightVector * -MoveAxis.X) + (ForwardVector * -MoveAxis.Y);
+    Movement *= 10.0f; 
+
+    SpringArm->SetWorldLocation(SpringArm->GetComponentLocation() + Movement);
+}
+void APlayerCamera::MMBPressed(const FInputActionValue& Value)
+{
+	bIsMiddleMouseDown = true;
+}
+void APlayerCamera::MMBReleased(const FInputActionValue& Value)
+{
+	bIsMiddleMouseDown = false;
+}
 // Called to bind functionality to input
 void APlayerCamera::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -394,6 +473,10 @@ void APlayerCamera::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
         EnhancedInputComponent->BindAction(IA_Look, ETriggerEvent::Triggered, this, &APlayerCamera::Look);
         EnhancedInputComponent->BindAction(IA_Zoom, ETriggerEvent::Triggered, this, &APlayerCamera::Zoom);
         EnhancedInputComponent->BindAction(IA_Interact, ETriggerEvent::Started, this, &APlayerCamera::BeginInteract);
+		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Triggered, this, &APlayerCamera::MoveCamera);
+
+		EnhancedInputComponent->BindAction(IA_MMB, ETriggerEvent::Started, this, &APlayerCamera::MMBPressed);
+		EnhancedInputComponent->BindAction(IA_MMB, ETriggerEvent::Completed, this, &APlayerCamera::MMBReleased);
 
     }
 }

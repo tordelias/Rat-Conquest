@@ -65,9 +65,19 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UInputAction> IA_Interact;
 
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<UInputAction> IA_Move;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<UInputAction> IA_MMB;
+
 private:
+
     void Look(const FInputActionValue& Value);
     void Zoom(const FInputActionValue& Value);
+	void MoveCamera(const FInputActionValue& Value);
+	void MMBPressed(const FInputActionValue& Value);
+	void MMBReleased(const FInputActionValue& Value);
 
 protected:
     // Called when the game starts or when spawned
@@ -89,7 +99,13 @@ protected:
     void EndInteract();
     void Interact();
     void SwitchMouseCursor(TWeakObjectPtr<APlayerUnit> Enemy);
+
+	void SetCameraPosition(FVector NewPosition);
+	FVector NewCameraPosition;
+	FVector OldCameraPosition;
+
     bool bIsDeaultCursor = true;
+    bool bIsMiddleMouseDown = false;
 
     // PlayerUnit movement
     UPROPERTY()
