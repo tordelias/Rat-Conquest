@@ -267,10 +267,10 @@ void AGameManager::EndUnitTurn()
                 MainHUD->ShowVictoryWidget();
             }
         }
-        if (LevelGenerator && RoomsExplored < 3 && !bTestEncounter) {
+        if (LevelGenerator && RoomsExplored < 2 && !bTestEncounter) {
             LevelGenerator->SetupRoomSelectUI();
         }
-        else if (RoomsExplored >= 3 && !bTestEncounter) {
+        else if (RoomsExplored >= 2 && !bTestEncounter) {
             //Show victory screen
             if (MainHUD) {
                 MainHUD->ShowVictoryWidget();

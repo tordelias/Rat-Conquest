@@ -31,6 +31,7 @@ void ACombatManager::DealDamageToUnit(TWeakObjectPtr<APlayerUnit> Attackerunit, 
         if (item)
         {
             weaponDamage = item->Damage + FMath::RandRange(-2, 2);
+			weaponDamage = FMath::Max(1, weaponDamage); // Ensure weapon damage is not negative
         }
     }
     int TotalDamage = Attackerunit->Damage + weaponDamage * Attackerunit->Attack;
@@ -108,16 +109,7 @@ void ACombatManager::HandleUnitDamage(TWeakObjectPtr<APlayerUnit> unit, int amou
 	int TotalDamage = FMath::Max(amount - unit->Defence, 1);
 	unit->Health -= TotalDamage;
 
-    if (unit->bIsPlayerUnit) {
-        if (SB_PlayerHurt) {
-			UGameplayStatics::PlaySound2D(GetWorld(), SB_PlayerHurt);
-		}
-	}
-	else {
-		if (SB_EnemyHurt) {
-			UGameplayStatics::PlaySound2D(GetWorld(), SB_EnemyHurt);
-		}
-	}
+  
     if (SB_Impact) {
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SB_Impact, unit->GetActorLocation());
     }
@@ -171,7 +163,16 @@ void ACombatManager::KillUnit(TWeakObjectPtr<APlayerUnit> unit)
         // Optionally update the turn order after a unit dies
         GameManager->UpdateTurnQueue();
     }
-
+    if (unit->bIsPlayerUnit) {
+        if (SB_PlayerHurt) {
+            UGameplayStatics::PlaySound2D(GetWorld(), SB_PlayerHurt);
+        }
+    }
+    else {
+        if (SB_EnemyHurt) {
+            UGameplayStatics::PlaySound2D(GetWorld(), SB_EnemyHurt);
+        }
+    }
     // Destroy the unit (after playing death animation, if needed)
     unit->KillAfterAnim();
 }
