@@ -1034,15 +1034,7 @@ void APlayerUnit::DropItem(TWeakObjectPtr<AItem> OldItem, FVector2D CurrentPosit
 	}
 
 	// Remove the item from the player's inventory
-	ItemSlots[0] = nullptr;
-	if (OldItem->IsValidLowLevel())
-	{
-		OldItem->Destroy();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("OldItem is not valid"));
-	}
+	
 	// Determine the world location to drop the item
 	FVector DropLocation = GetActorLocation(); // Adjust the offset as needed
 
@@ -1052,13 +1044,24 @@ void APlayerUnit::DropItem(TWeakObjectPtr<AItem> OldItem, FVector2D CurrentPosit
 	SpawnParams.Instigator = GetInstigator();
 
 	// Spawn the item actor in the world
+	if (!OldItem.IsValid())
+		return;
 	AItem* DroppedItem = GetWorld()->SpawnActor<AItem>(OldItem->GetClass(), DropLocation, FRotator::ZeroRotator, SpawnParams);
+	
 	if (!DroppedItem)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to spawn dropped item"));
 		return;
 	}
-
+	ItemSlots[0] = nullptr;
+	if (OldItem->IsValidLowLevel())
+	{
+		OldItem->Destroy();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("OldItem is not valid"));
+	}
 	// If using a grid system, update the corresponding tile
 	if (IsValid(GridManager.Get()))
 	{
