@@ -38,6 +38,8 @@ void AItem::DropItem()
 	UE_LOG(LogTemp, Warning, TEXT("Item Dropped"));
 	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	ItemMesh->SetVisibility(true);
+    ItemMesh->SetRenderCustomDepth(false);
+    ItemMesh->SetCustomDepthStencilValue(0);
     bIsEquipped = false;
 }
 
@@ -76,6 +78,21 @@ void AItem::InitializeItem()
         if (ItemDataB->ItemAssetData.Mesh)
         {
             ItemMesh->SetStaticMesh(ItemDataB->ItemAssetData.Mesh);
+            ItemMesh->SetRenderCustomDepth(true);
+            if (ItemDataB->ItemQuality == EItemQuality::Common) {
+            
+				ItemMesh->SetCustomDepthStencilValue(5);
+			}
+			else if (ItemDataB->ItemQuality == EItemQuality::Uncommon) {
+				ItemMesh->SetCustomDepthStencilValue(1);
+			}
+			else if (ItemDataB->ItemQuality == EItemQuality::Rare) {
+				ItemMesh->SetCustomDepthStencilValue(4);
+			}
+			else if (ItemDataB->ItemQuality == EItemQuality::Legendary) {
+				ItemMesh->SetCustomDepthStencilValue(3);
+            }
+            ItemMesh->SetVisibility(true);
             UE_LOG(LogTemp, Warning, TEXT("Static Mesh Set Successfully: %s"), *ItemDataB->ItemAssetData.Mesh->GetName());
         }
         else
