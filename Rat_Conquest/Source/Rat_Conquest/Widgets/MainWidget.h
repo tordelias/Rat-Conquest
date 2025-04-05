@@ -28,6 +28,7 @@ public:
 	void RemoveUnitFromQueue(APlayerUnit* unit);
 
 	void AddPlayerUnitToScreen(APlayerUnit* unit);
+	void HighlightPlayerUnit(TWeakObjectPtr<APlayerUnit> unit);
 
 protected:
     // Reference to the TurnIndicatorWidget class

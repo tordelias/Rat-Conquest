@@ -100,3 +100,15 @@ void UMainWidget::AddPlayerUnitToScreen(APlayerUnit* unit)
 		UE_LOG(LogTemp, Error, TEXT("UnitWidget is null!"));
 	}
 }
+
+void UMainWidget::HighlightPlayerUnit(TWeakObjectPtr<APlayerUnit> unit)
+{
+	if (UnitWidgetContainer)
+	{
+		UnitWidgetContainer->HighlightCurrentUnit(unit);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("UnitWidget is null!"));
+	}
+}

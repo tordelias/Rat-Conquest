@@ -100,9 +100,12 @@ protected:
     void Interact();
     void SwitchMouseCursor(TWeakObjectPtr<APlayerUnit> Enemy);
 
-	void SetCameraPosition(FVector NewPosition);
 	FVector NewCameraPosition;
 	FVector OldCameraPosition;
+	bool bIsCameraMoving = false;
+    float LerpAlpha = 0.0f;
+    UPROPERTY(EditAnywhere, Category = "Camera")
+    float CameraLerpSpeed = 5.0f;
 
     bool bIsDeaultCursor = true;
     bool bIsMiddleMouseDown = false;
@@ -127,6 +130,7 @@ public:
     TWeakObjectPtr<APlayerUnit> GetCurrentUnit() const { return CurrentUnit; }
 
     void SetCameraTopDown(float ZRotation, float height);
+    void SetCameraPosition(FVector NewPosition);
 
     FORCEINLINE bool bIsInteracting() const { return GetWorldTimerManager().IsTimerActive(TimerHandleInteraction); }
 

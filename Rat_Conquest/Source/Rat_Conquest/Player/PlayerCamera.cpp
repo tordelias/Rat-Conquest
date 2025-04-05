@@ -16,9 +16,6 @@
 #include "Rat_Conquest/GridTile/GridTile.h"
 #include "Rat_Conquest/Items/ItemBase.h"
 
-#include "Camera/CameraComponent.h" // For UCameraComponent
-#include "GameFramework/SpringArmComponent.h" // For USpringArmComponent
-
 APlayerCamera::APlayerCamera()
 {
     PrimaryActorTick.bCanEverTick = true;
@@ -39,14 +36,13 @@ APlayerCamera::APlayerCamera()
 
     // Collision configuration
     SpringArm->bDoCollisionTest = true;
-    SpringArm->ProbeSize = 12.0f; // Note: Correct spelling is ProbeSize (not ProbeSize)
-    SpringArm->ProbeChannel = ECC_Visibility; // Use Visibility channel which typically works well for cameras
+    SpringArm->ProbeSize = 12.0f;
+    SpringArm->ProbeChannel = ECC_Visibility;
 
-    // Prevent camera from getting too close
-    SpringArm->CameraLagSpeed = 0.f; // Disable if not using camera lag
+    SpringArm->CameraLagSpeed = 0.f; 
     SpringArm->bEnableCameraRotationLag = false;
     SpringArm->bEnableCameraLag = false;
-    SpringArm->TargetArmLength = MaxZoom; // Start at max zoom
+    SpringArm->TargetArmLength = MaxZoom;
     SpringArm->SocketOffset = FVector(0, 0, 60.f); 
 
     // Camera setup
@@ -91,6 +87,22 @@ void APlayerCamera::Tick(float DeltaTime)
     if (GetWorld()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionCheckFrequency)
     {
         PerformInteractionCheck();
+    }
+    if (bIsCameraMoving)
+    {
+        // Update lerp alpha
+        LerpAlpha += DeltaTime * CameraLerpSpeed;
+        LerpAlpha = FMath::Clamp(LerpAlpha, 0.0f, 1.0f);
+
+        // Perform the lerp
+        FVector CurrentPosition = FMath::Lerp(OldCameraPosition, NewCameraPosition, LerpAlpha);
+        SpringArm->SetWorldLocation(CurrentPosition);
+
+        // Check if we've reached the target
+        if (LerpAlpha >= 1.0f)
+        {
+            bIsCameraMoving = false;
+        }
     }
 }
 
@@ -381,14 +393,11 @@ void APlayerCamera::SwitchMouseCursor(TWeakObjectPtr<APlayerUnit> Enemy)
 void APlayerCamera::SetCameraPosition(FVector NewPosition)
 {
 	//Lerp camera position to new position
-	if (IsValid(SpringArm.Get()))
-	{
-		SpringArm->SetWorldLocation(FMath::Lerp(SpringArm->GetComponentLocation(), NewPosition, 0.1f));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("SpringArm is not valid"));
-	}
+	NewCameraPosition = NewPosition;
+	OldCameraPosition = SpringArm->GetComponentLocation();
+	NewCameraPosition.Z = OldCameraPosition.Z; // Keep the Z value the same
+	bIsCameraMoving = true;
+    LerpAlpha = 0.0f;
 }
 
 void APlayerCamera::Look(const FInputActionValue& Value)
@@ -430,7 +439,7 @@ void APlayerCamera::MoveCamera(const FInputActionValue& Value)
     {
         return; 
     }
-
+    bIsCameraMoving = false;
     FVector2D MoveAxis = Value.Get<FVector2D>();
 
     //const float DeadZone = 0.15f;

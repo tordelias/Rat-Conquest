@@ -68,6 +68,7 @@ public:
 	void UpdateTurnQueue(const TArray<APlayerUnit*>& TurnQueue);
 	void RemoveUnitFromQueue(APlayerUnit* unit);
 	void AddPlayerUnitToScreen(APlayerUnit* unit);
+	void HighlightPlayerUnit(TWeakObjectPtr<APlayerUnit> unit);
 
 	//statWidget functions
 	void ShowStatWidget();

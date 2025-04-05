@@ -100,6 +100,54 @@ void UUnitWidget::OnUnitHealthChanged()
 	}
 }
 
+void UUnitWidget::HighlightCurrentUnit(TWeakObjectPtr<APlayerUnit> CurrentUnit)
+{
+	if (CurrentUnit.IsValid())
+	{
+		// Highlight the unit image and show the unit tab
+		if (UnitImageWidget1->Unit == CurrentUnit)
+		{
+			UnitImageWidget1->SetSize(true);
+			UnitImageWidget2->SetSize(false);
+			UnitImageWidget3->SetSize(false);
+			UnitImageWidget4->SetSize(false);
+		}
+		else if (UnitImageWidget2->Unit == CurrentUnit)
+		{
+			UnitImageWidget2->SetSize(true);
+			UnitImageWidget1->SetSize(false);
+			UnitImageWidget3->SetSize(false);
+			UnitImageWidget4->SetSize(false);
+		}
+		else if (UnitImageWidget3->Unit == CurrentUnit)
+		{
+			UnitImageWidget3->SetSize(true);
+			UnitImageWidget1->SetSize(false);
+			UnitImageWidget2->SetSize(false);
+			UnitImageWidget4->SetSize(false);
+		}
+		else if (UnitImageWidget4->Unit == CurrentUnit)
+		{
+			UnitImageWidget4->SetSize(true);
+			UnitImageWidget1->SetSize(false);
+			UnitImageWidget2->SetSize(false);
+			UnitImageWidget3->SetSize(false);
+		}
+		else
+		{
+			UnitImageWidget1->SetSize(false);
+			UnitImageWidget2->SetSize(false);
+			UnitImageWidget3->SetSize(false);
+			UnitImageWidget4->SetSize(false);
+		}
+	}
+	else
+	{
+		if (UnitTabWidget1)
+			UnitTabWidget1->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
 void UUnitWidget::SetData(APlayerUnit* _Unit)
 {
 	if (!_Unit) return;

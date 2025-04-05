@@ -14,6 +14,7 @@
 #include "Rat_Conquest/Widgets/TurnIndicatorWidget.h"
 #include "Rat_Conquest/AI/EnemyAIController.h"
 #include "Sound/SoundBase.h"
+#include "Rat_Conquest/Unit/UnitMarker.h"
 // Sets default values
 AGameManager::AGameManager()
 {
@@ -68,12 +69,9 @@ void AGameManager::BeginPlay()
         CheckForEncounter();
     }
   
-    
- 
+	// create the UniutMarker
+	unitMarker = GetWorld()->SpawnActor<AUnitMarker>(AUnitMarker::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
 
-  
-    
-	
 }
 
 void AGameManager::TogglePlayerTurn()
@@ -181,9 +179,8 @@ void AGameManager::ExecuteTurn()
 
     // Reset turn state for the unit
     CurrentUnit->bHasFinishedTurn = false;
-
+	MarkCurrentUnit();
     APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-
     if (CurrentUnit->bIsPlayerUnit)
     {
         if (PlayerCharacter)
@@ -671,6 +668,33 @@ void AGameManager::HighlightUnitAndTiles(APlayerUnit* NewUnit)
     else
     {
         CurrentlyFocusedUnit = nullptr;
+    }
+}
+
+void AGameManager::MarkCurrentUnit()
+{
+    if (IsValid(unitMarker.Get()) && IsValid(CurrentUnit.Get()))
+    {
+		unitMarker->SetPosition(CurrentUnit->GetActorLocation());
+		unitMarker->SetTargetActor(CurrentUnit); 
+        //Increase widget size for currentUnit
+        if (IsValid(MainHUD.Get()))
+        {
+            MainHUD->HighlightPlayerUnit(CurrentUnit);
+        }
+        if (CurrentUnit->bIsPlayerUnit)
+        {
+            //cast to playerCamera
+			APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+			if (PlayerCharacter)
+			{
+				PlayerCharacter->SetCameraPosition(CurrentUnit->GetActorLocation());
+			}
+		}
+	}
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Unit marker is not valid"));
     }
 }
 

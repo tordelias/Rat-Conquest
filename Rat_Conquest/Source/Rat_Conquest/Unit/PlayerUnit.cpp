@@ -1099,7 +1099,7 @@ void APlayerUnit::BeginFocus()
 	this->UpdateInteractableData();
 	if (SkeletalMesh)
 	{
-		SkeletalMesh->SetRenderCustomDepth(true);
+	//	SkeletalMesh->SetRenderCustomDepth(true);
 	}
 	// Store movement tiles in MovementTiles
 	MovedTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed);
@@ -1351,6 +1351,7 @@ void APlayerUnit::ApplyMutation(TArray<int> statsToAdd)
 
 	if (statsToAdd.Num() >= 3)
 	{
+
 		this->MovementSpeed += statsToAdd[0];
 		this->Damage += statsToAdd[1];
 		this->Defence += statsToAdd[2];

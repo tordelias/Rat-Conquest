@@ -92,5 +92,8 @@ public:
 	UFUNCTION()
 	void OnUnitHealthChanged();
 
+	UFUNCTION()
+	void HighlightCurrentUnit(TWeakObjectPtr<APlayerUnit> CurrentUnit);
+
 
 };

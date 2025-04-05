@@ -189,6 +189,18 @@ void AMainHUD::AddPlayerUnitToScreen(APlayerUnit* unit)
 	}
 }
 
+void AMainHUD::HighlightPlayerUnit(TWeakObjectPtr<APlayerUnit> unit)
+{
+	if (MainWidget)
+	{
+		MainWidget->HighlightPlayerUnit(unit);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("MainWidget is null!"));
+	}
+}
+
 void AMainHUD::ShowMutationWidget()
 {
 	if (MutationWidget)

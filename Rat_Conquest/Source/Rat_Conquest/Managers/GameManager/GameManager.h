@@ -120,8 +120,12 @@ private:
 	TArray<TObjectPtr<class AGridTile>> CurrentlyFocusedTiles;
 	TObjectPtr<APlayerUnit> CurrentlyFocusedUnit = nullptr;
 	void HighlightUnitAndTiles(APlayerUnit* NewUnit);
+	void MarkCurrentUnit(); 
 
 	TObjectPtr<AMainHUD> MainHUD;
+
+	UPROPERTY()
+	TObjectPtr<class AUnitMarker> unitMarker;
 
 	bool bIsGamePaused = false;
 };
