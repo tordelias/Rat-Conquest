@@ -71,6 +71,12 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UInputAction> IA_MMB;
 
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<UInputAction> IA_RMB;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<UInputAction> IA_Pause;
+
 private:
 
     void Look(const FInputActionValue& Value);
@@ -78,6 +84,11 @@ private:
 	void MoveCamera(const FInputActionValue& Value);
 	void MMBPressed(const FInputActionValue& Value);
 	void MMBReleased(const FInputActionValue& Value);
+	void RMBPressed(const FInputActionValue& Value);
+	void RMBReleased(const FInputActionValue& Value);
+	void PauseGame(const FInputActionValue& Value);
+
+
 
 protected:
     // Called when the game starts or when spawned
@@ -109,6 +120,7 @@ protected:
 
     bool bIsDeaultCursor = true;
     bool bIsMiddleMouseDown = false;
+	bool bIsRightMouseDown = false;
 
     // PlayerUnit movement
     UPROPERTY()

@@ -41,6 +41,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget", meta = (AllowPrivate = "true"))
 	TSubclassOf<UUserWidget> VictoryWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Widget", meta = (AllowPrivate = "true"))
+	TSubclassOf<UUserWidget> PausescreenWidgetClass;
+
 	UPROPERTY()
 	UUnitStatWidget* StatWidget;
 
@@ -58,6 +61,10 @@ protected:
 
 	UPROPERTY()
 	UUserWidget* VictoryWidget;
+
+	UPROPERTY()
+	UUserWidget* PauseScreenWidget; 
+
 public:
 	//MainWidget functions
 	UFUNCTION(BlueprintCallable)
@@ -93,5 +100,11 @@ public:
 	//Victory widget
 	void ShowVictoryWidget();
 	void CloseVictoryWidget();
+
+	//Paucescreen widget
+	void ShowPausescreenWidget();
+	void ClosePausescreenWidget();
+
+	bool IsPauseScreenWidgetVissible();
 	
 };

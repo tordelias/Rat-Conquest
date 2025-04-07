@@ -472,6 +472,40 @@ void APlayerCamera::MMBReleased(const FInputActionValue& Value)
 {
 	bIsMiddleMouseDown = false;
 }
+void APlayerCamera::RMBPressed(const FInputActionValue& Value)
+{
+	bIsRightMouseDown = true;
+}
+void APlayerCamera::RMBReleased(const FInputActionValue& Value)
+{
+    bIsRightMouseDown = false; 
+}
+void APlayerCamera::PauseGame(const FInputActionValue& Value)
+{
+    if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController()))
+    {
+        if (!PC->IsLocalController()) return;
+
+        const bool bShouldPause = !PC->IsPaused();
+
+        if (mainHUD.IsValid())
+        {
+            if (bShouldPause)
+            {
+                // Pause the game & show widget
+                PC->SetPause(true);
+                mainHUD->ShowPausescreenWidget();
+            }
+            else if (mainHUD->IsPauseScreenWidgetVissible()) // Only unpause if widget was open
+            {
+                // Close widget & unpause
+                mainHUD->ClosePausescreenWidget();
+                PC->SetPause(false);
+            }
+            // If widget is already hidden, do nothing (game stays paused)
+        }
+    }
+}
 // Called to bind functionality to input
 void APlayerCamera::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -486,6 +520,16 @@ void APlayerCamera::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 		EnhancedInputComponent->BindAction(IA_MMB, ETriggerEvent::Started, this, &APlayerCamera::MMBPressed);
 		EnhancedInputComponent->BindAction(IA_MMB, ETriggerEvent::Completed, this, &APlayerCamera::MMBReleased);
+
+		EnhancedInputComponent->BindAction(IA_RMB, ETriggerEvent::Started, this, &APlayerCamera::RMBPressed);
+		EnhancedInputComponent->BindAction(IA_RMB, ETriggerEvent::Completed, this, &APlayerCamera::RMBReleased);
+
+
+		EnhancedInputComponent->BindAction(IA_Pause, ETriggerEvent::Started, this, &APlayerCamera::PauseGame);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerInputComponent is not of type UEnhancedInputComponent!"));
 
     }
 }

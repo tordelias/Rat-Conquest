@@ -76,6 +76,17 @@ void AMainHUD::BeginPlay()
 			VictoryWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
+
+	if (PausescreenWidgetClass) {
+		PauseScreenWidget = CreateWidget<UUserWidget>(GetWorld(), PausescreenWidgetClass);
+		if (PauseScreenWidget) {
+			PauseScreenWidget->AddToViewport();
+			PauseScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("PauseScreenWidget is null!"));
+	}
 	
 }
 
@@ -380,4 +391,46 @@ void AMainHUD::CloseVictoryWidget()
 	}
 
 	
+}
+
+void AMainHUD::ShowPausescreenWidget()
+{
+	if (PausescreenWidgetClass)
+	{
+		PauseScreenWidget = CreateWidget<UUserWidget>(GetWorld(), PausescreenWidgetClass);
+		if (PauseScreenWidget)
+		{
+			PauseScreenWidget->AddToViewport();
+			PauseScreenWidget->SetVisibility(ESlateVisibility::Visible);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("PauseScreenWidget is null!"));
+		}
+	}
+}
+
+void AMainHUD::ClosePausescreenWidget()
+{
+	if (PauseScreenWidget)
+	{
+		PauseScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("PauseScreenWidget is null!"));
+	}
+}
+
+bool AMainHUD::IsPauseScreenWidgetVissible()
+{
+	if (PauseScreenWidget)
+	{
+		return PauseScreenWidget->IsVisible();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("PauseScreenWidget is null!"));
+		return false;
+	}
 }
