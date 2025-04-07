@@ -43,6 +43,7 @@ void UItemToolTipWidget::SetData(AItem* _Item)
 		else if (Item->ItemDataB->ItemType == EItemType::Weapon)
 		{
 			//Set Damage, Attack, Range
+			//SetText(FText::FromString("Damage: " + FString::FromInt(Unit->MinDamage) + "/" + FString::FromInt(Unit->MaxDamage)));
 			Damage->SetText(FText::FromString(FString::FromInt(Item->ItemDataB->ItemStatistics.Damage)));
 			Attack->SetText(FText::FromString(FString::FromInt(Item->ItemDataB->ItemStatistics.Attack)));
 			Range->SetText(FText::FromString(FString::FromInt(Item->ItemDataB->ItemStatistics.Range)));

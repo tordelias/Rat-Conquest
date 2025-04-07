@@ -52,7 +52,7 @@ void UUnitTabWidget::SetData(TWeakObjectPtr<APlayerUnit> _Unit)
     }
 
     if (Attack.IsValid())     Attack->SetText(FText::AsNumber(Unit->Attack));
-    if (Damage.IsValid())     Damage->SetText(FText::AsNumber(Unit->Damage));
+    if (Damage.IsValid())     Damage->SetText(FText::FromString(FString::FromInt(Unit->MinDamage) + "/" + FString::FromInt(Unit->MaxDamage)));
     if (Range.IsValid())      Range->SetText(FText::AsNumber(Unit->AttackRange));
 	if (Health.IsValid())     Health->SetText(FText::FromString(FString::FromInt(Unit->Health) + "/" + FString::FromInt(Unit->maxHealth)));
     if (Defense.IsValid())    Defense->SetText(FText::AsNumber(Unit->Defence));
