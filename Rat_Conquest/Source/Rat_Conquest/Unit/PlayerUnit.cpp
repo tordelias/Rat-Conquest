@@ -235,9 +235,9 @@ void APlayerUnit::Tick(float DeltaTime)
 				{
 					// Face forward (default)
 					if (!bIsPlayerUnit)
-						SetActorRotation(FRotator(0, 180, 0));
+						SetActorRotation(FRotator(0, TurnAngle + 180, 0));
 					else
-						SetActorRotation(FRotator(0, 0, 0));
+						SetActorRotation(FRotator(0, TurnAngle, 0));
 				}
 
 				// Trigger animation reset
@@ -316,6 +316,14 @@ FVector2D APlayerUnit::GetMousePosition(FVector WorldLocation, FVector WorldDire
 	UE_LOG(LogTemp, Display, TEXT("MouseWorldPos: %s"), *MouseWorldPos.ToString());
 	MouseWorldPos.Z = GridManager->GridHeight;
 	return FVector2D(MouseWorldPos.X, MouseWorldPos.Y);
+}
+
+void APlayerUnit::ResetRotation()
+{
+	if (!bIsPlayerUnit)
+		SetActorRotation(FRotator(0, TurnAngle + 180, 0));
+	else
+		SetActorRotation(FRotator(0, TurnAngle, 0));
 }
 
 
@@ -724,22 +732,32 @@ void APlayerUnit::AttackAfterMovement()
 		this->OnMovementComplete.Unbind();
 		return;
 	}
+
 	if (EnemyToAttack.IsValid())
 	{
-		if (SB_Attack) {
+		if (SB_Attack)
+		{
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), SB_Attack, GetActorLocation(), GetActorRotation());
 		}
+
 		animationToPlay = FVector2D(50, 0);
 		CombatManager->DealDamageToUnit(this, EnemyToAttack.Get());
 		this->FinishTurn();
+
+		// Delay ResetRotation by 1 second
+		FTimerHandle RotationResetHandle;
+		GetWorld()->GetTimerManager().SetTimer(RotationResetHandle, this, &APlayerUnit::ResetRotation, 1.0f, false );
+
 		EnemyToAttack = nullptr;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("nemyToAttack is null"));
+		UE_LOG(LogTemp, Warning, TEXT("EnemyToAttack is null"));
 	}
+
 	this->OnMovementComplete.Unbind();
 }
+
 
 void APlayerUnit::ShootProjectile(FVector _EnemyLocation)
 {

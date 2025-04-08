@@ -206,6 +206,8 @@ public:
     void UpdateHealthBar();
     void UpdateHealthBarRotation();
 
+	void SetTurnAngle(float Angle) { TurnAngle = Angle; }
+
     virtual void RandomizeStats();
 
     FVector2D GetCardinalDirection(FVector2D FromGridPos, FVector2D ToGridPos);
@@ -239,9 +241,13 @@ public:
     FVector KnockbackTargetPosition;
 
 private:
+
+	void ResetRotation();
     // Private Variables
     int unitLevel = 0;
     bool bIsMoving = false;
+
+    float TurnAngle = 0.0f; 
 
     float MovementProgress = 0.0f;
     float MovementDuration = 0.5f;

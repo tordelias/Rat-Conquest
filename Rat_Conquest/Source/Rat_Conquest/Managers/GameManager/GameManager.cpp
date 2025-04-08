@@ -114,6 +114,9 @@ void AGameManager::InitalizeUnits()
         }
 	}
 
+    if(!LevelGenerator)
+        RotateUnits(180);
+
 }
 
 void AGameManager::StartTurnOrder()
@@ -646,6 +649,28 @@ void AGameManager::SpawnLoot()
     );
    
     GridManager->ScanWorldForObjects();
+}
+
+void AGameManager::RotateUnits(float roation)
+{
+
+	for (TObjectPtr<APlayerUnit> unit : PlayerUnits)
+	{
+		if (unit)
+		{
+            UE_LOG(LogTemp, Error, TEXT("Rotating units degrees"));
+			unit->SetTurnAngle(roation);
+			unit->SetActorRotation(FRotator(0, roation, 0));
+		}
+	}
+	for (TObjectPtr<APlayerUnit> unit : EnemyUnits)
+	{
+		if (unit)
+		{
+            unit->SetTurnAngle(roation);
+			unit->SetActorRotation(FRotator(0, roation + 180, 0));
+		}
+	}
 }
 
 
