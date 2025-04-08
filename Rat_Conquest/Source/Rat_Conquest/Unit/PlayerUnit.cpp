@@ -525,12 +525,15 @@ TArray<FVector2D> APlayerUnit::GetPathToTile(FVector2D InTargetGridPosition, FVe
 				continue; // Skip occupied or already evaluated tiles
 			}
 
-			// Calculate the tentative G cost
 			float TentativeG = CurrentTile->G + ChebyshevDistance(CurrentTile->GridPosition, Neighbour->GridPosition);
+
+			if (TentativeG > MovementSpeed)
+			{
+				continue;
+			}
 
 			if (!OpenList.Contains(Neighbour) || TentativeG < Neighbour->G)
 			{
-				// This path to the neighbor is better than any previous one
 				CameFrom.Add(Neighbour, CurrentTile);
 				Neighbour->G = TentativeG;
 				Neighbour->H = ChebyshevDistance(Neighbour->GridPosition, InTargetGridPosition);
@@ -542,6 +545,7 @@ TArray<FVector2D> APlayerUnit::GetPathToTile(FVector2D InTargetGridPosition, FVe
 				}
 			}
 		}
+
 	}
 
 	// If the loop ends without finding the target, return an empty path

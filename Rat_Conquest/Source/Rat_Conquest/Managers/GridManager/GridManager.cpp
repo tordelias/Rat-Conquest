@@ -415,55 +415,91 @@ TArray<TWeakObjectPtr<AGridTile>> AGridManager::GetNeighbourTiles(int32 Row, int
 
 TArray<TWeakObjectPtr<AGridTile>> AGridManager::GetMovableTiles(int32 Row, int32 Column, int32 MovementRange)
 {
-    TSet<TWeakObjectPtr<AGridTile>> VisitedTiles; // Use a TSet to prevent duplicate tiles
-    TQueue<FIntPoint> TilesToVisit; // Use a queue for breadth-first search (BFS)
+    TArray<TWeakObjectPtr<AGridTile>> MovableTiles;
+    TArray<AGridTile*> OpenList;
+    TArray<AGridTile*> ClosedList;
 
-    // Add the starting tile
-    AActor* StartingTileActor = GetTileAt(Row, Column).Get();
-    AGridTile* StartingTile = Cast<AGridTile>(StartingTileActor);
-    if (StartingTile)
+    ResetAllTilesPathfindingData();
+
+    AGridTile* StartTile = Cast<AGridTile>(GetTileAt(Row, Column).Get());
+    if (!StartTile)
     {
-        TilesToVisit.Enqueue(FIntPoint(Row, Column));
-        VisitedTiles.Add(StartingTile);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Starting tile is not valid at Row: %d, Column: %d"), Row, Column);
-		return TArray<TWeakObjectPtr<AGridTile>>();
+        UE_LOG(LogTemp, Warning, TEXT("Invalid start tile at Row: %d, Column: %d"), Row, Column);
+        return MovableTiles;
     }
 
-    while (!TilesToVisit.IsEmpty())
+    // Initialize start tile
+    StartTile->G = 0;
+    OpenList.Add(StartTile);
+
+    while (OpenList.Num() > 0)
     {
-        FIntPoint Current = FIntPoint::ZeroValue;
-        TilesToVisit.Dequeue(Current);
-
-        int32 CurrentRow = Current.X;
-        int32 CurrentColumn = Current.Y;
-
-        // Get neighbors of the current tile
-        TArray<TWeakObjectPtr<AGridTile>> Neighbors = GetNeighbourTiles(CurrentRow, CurrentColumn);
-
-        for (auto Neighbor : Neighbors)
+        // Get tile with lowest G cost (closest to start)
+        AGridTile* CurrentTile = OpenList[0];
+        for (AGridTile* Tile : OpenList)
         {
-            if (!Neighbor.IsValid() || Neighbor->bIsOccupied) continue;
-            int32 NeighborRow = Neighbor->GridPosition.X;
-            int32 NeighborColumn = Neighbor->GridPosition.Y;
-
-            int32 RowDiff = FMath::Abs(NeighborRow - Row);
-            int32 ColDiff = FMath::Abs(NeighborColumn - Column);
-            int32 Distance = FMath::Max(RowDiff, ColDiff);
-
-            if (Distance <= MovementRange && !VisitedTiles.Contains(Neighbor))
+            if (Tile->G < CurrentTile->G)
             {
-                VisitedTiles.Add(Neighbor);
-                TilesToVisit.Enqueue(FIntPoint(NeighborRow, NeighborColumn));
+                CurrentTile = Tile;
+            }
+        }
+
+        // Move from open to closed list
+        OpenList.Remove(CurrentTile);
+        ClosedList.Add(CurrentTile);
+
+        // Get neighbors (same as your pathfinding)
+        TArray<AGridTile*> NeighbourTiles;
+        NeighbourTiles.Add(GetTileAtPosition(CurrentTile->GridPosition.X + 1, CurrentTile->GridPosition.Y).Get()); // Right
+        NeighbourTiles.Add(GetTileAtPosition(CurrentTile->GridPosition.X - 1, CurrentTile->GridPosition.Y).Get()); // Left
+        NeighbourTiles.Add(GetTileAtPosition(CurrentTile->GridPosition.X, CurrentTile->GridPosition.Y + 1).Get()); // Up
+        NeighbourTiles.Add(GetTileAtPosition(CurrentTile->GridPosition.X, CurrentTile->GridPosition.Y - 1).Get()); // Down
+
+        for (AGridTile* Neighbour : NeighbourTiles)
+        {
+            if (!Neighbour || ClosedList.Contains(Neighbour))
+            {
+                continue;
+            }
+
+            // Calculate movement cost (using Chebyshev distance like your pathfinding)
+            float MoveCost = FMath::Max(
+                FMath::Abs(CurrentTile->GridPosition.X - Neighbour->GridPosition.X),
+                FMath::Abs(CurrentTile->GridPosition.Y - Neighbour->GridPosition.Y)
+            );
+            float TentativeG = CurrentTile->G + MoveCost;
+
+            // Skip if beyond movement range or blocked
+            if (TentativeG > MovementRange || Neighbour->bIsOccupied)
+            {
+                continue;
+            }
+
+            // If we found a better path to this neighbor
+            if (TentativeG < Neighbour->G || !OpenList.Contains(Neighbour))
+            {
+                Neighbour->G = TentativeG;
+
+                if (!OpenList.Contains(Neighbour))
+                {
+                    OpenList.Add(Neighbour);
+                }
             }
         }
     }
 
-    // Convert TSet to TArray for return
-    return VisitedTiles.Array();
+    // Convert closed list to result (excluding start tile and blocked tiles)
+    for (AGridTile* Tile : ClosedList)
+    {
+        if (Tile != StartTile && !Tile->bIsOccupied)
+        {
+            MovableTiles.Add(Tile);
+        }
+    }
+
+    return MovableTiles;
 }
+
 
 FVector AGridManager::GetRandomPositionInGrid()
 {
