@@ -403,7 +403,22 @@ void ALevelGenerator::MoveToRoom(int32 DirectionIndex)
                 UE_LOG(LogTemp, Error, TEXT("HUD is null |level gen.cpp|"));
             }
 			OnPlayerEnterRoom(CurrentRoom);
-           
+            if (DirectionIndex == 0) {
+
+				GameManager->RotateUnits(270);
+
+			}
+			else if (DirectionIndex == 1) {
+				GameManager->RotateUnits(0);
+			}
+			else if (DirectionIndex == 2) {
+				GameManager->RotateUnits(270);
+			}
+            else if (DirectionIndex == 3) {
+                GameManager->RotateUnits(0);
+            }
+			UE_LOG(LogTemp, Warning, TEXT("Room Direction: %d"), DirectionIndex);
+                
            
             LastMoveTime = GetWorld()->GetTimeSeconds();
             if (TargetRoom->bIsExplored) {

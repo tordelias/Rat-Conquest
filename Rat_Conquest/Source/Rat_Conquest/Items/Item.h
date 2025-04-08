@@ -31,6 +31,9 @@ public:
 	UStaticMeshComponent* ItemMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
+	UStaticMeshComponent* RingMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	UDataTable* ItemDataTable;
 	 //stats
 

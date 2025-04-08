@@ -9,6 +9,7 @@ AItem::AItem()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
+	RingMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RingMesh"));
 	RootComponent = ItemMesh;
 }
 
@@ -30,6 +31,7 @@ void AItem::EquipItem(AActor* UnitOwner)
     FVector Offset(0.f, 0.f, 80.f); // Adjust the offset as needed
     SetActorRelativeLocation(Offset);
 	ItemMesh->SetVisibility(false);
+	RingMesh->SetVisibility(false);
     bIsEquipped = true;    
 }
 
@@ -38,6 +40,7 @@ void AItem::DropItem()
 	UE_LOG(LogTemp, Warning, TEXT("Item Dropped"));
 	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	ItemMesh->SetVisibility(true);
+    RingMesh->SetVisibility(true);
     ItemMesh->SetRenderCustomDepth(false);
     ItemMesh->SetCustomDepthStencilValue(0);
     bIsEquipped = false;
