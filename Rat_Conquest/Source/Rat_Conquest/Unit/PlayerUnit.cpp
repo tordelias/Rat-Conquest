@@ -1105,14 +1105,14 @@ void APlayerUnit::BeginFocus()
 	MovedTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed);
 	for (auto tile : MovedTiles)
 	{
-		if (bIsPlayerUnit)
-		{
+		//if (bIsPlayerUnit)
+		//{
 			tile->GreenHighlight();
-		}
-		else
-		{
-			tile->RedHighlight();
-		}
+		//}
+		//else
+		//{
+		//	tile->RedHighlight();
+		//}
 		tile->BeginFocus();
 	}
 }
@@ -1164,20 +1164,20 @@ void APlayerUnit::BeginMouseHoverFocus()
 			if (!Tile.IsValid()) continue;
 
 			// Choose highlight color based on unit type
-			const bool bShouldRedHighlight = !bIsPlayerUnit && !(Tile->bIsGreenHighlighted || Tile->bIsRedHighlighted);
-			const bool bShouldGreenHighlight = bIsPlayerUnit && !(Tile->bIsGreenHighlighted || Tile->bIsRedHighlighted);
+			//const bool bShouldRedHighlight = !bIsPlayerUnit && !(Tile->bIsGreenHighlighted || Tile->bIsRedHighlighted);
+			//const bool bShouldGreenHighlight = bIsPlayerUnit && !(Tile->bIsGreenHighlighted || Tile->bIsRedHighlighted);
 
 			if (Tile->bIsGreenHighlighted || Tile->bIsRedHighlighted)
 			{
 				Tile->YellowHighlight();
 			}
-			else if (bShouldRedHighlight)
+			//else if (bShouldRedHighlight)
+			//{
+			//	Tile->RedHighlight();
+			//}
+			else /*if (bShouldGreenHighlight)*/
 			{
 				Tile->RedHighlight();
-			}
-			else if (bShouldGreenHighlight)
-			{
-				Tile->GreenHighlight();
 			}
 		}
 	}
