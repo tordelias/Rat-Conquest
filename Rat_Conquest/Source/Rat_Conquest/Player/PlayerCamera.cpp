@@ -35,7 +35,7 @@ APlayerCamera::APlayerCamera()
     SpringArm->bInheritRoll = false;
 
     // Collision configuration
-    SpringArm->bDoCollisionTest = true;
+    SpringArm->bDoCollisionTest = false;
     SpringArm->ProbeSize = 12.0f;
     SpringArm->ProbeChannel = ECC_Visibility;
 
@@ -351,7 +351,7 @@ void APlayerCamera::SwitchMouseCursor(TWeakObjectPtr<APlayerUnit> Enemy)
         {
             float Range = CurrentUnit->MovementSpeed;
             FVector2D PlayerLocation = CurrentUnit->CurrentGridPosition;
-            float Distance = FVector2D::Distance(PlayerLocation, Enemy->CurrentGridPosition);
+            float Distance = Enemy->ChebyshevDistance(PlayerLocation, Enemy->CurrentGridPosition);
 
             if (Distance <= Range + 1)
             {

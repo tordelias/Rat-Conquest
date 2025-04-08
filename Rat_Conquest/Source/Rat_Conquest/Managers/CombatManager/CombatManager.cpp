@@ -44,15 +44,15 @@ void ACombatManager::DealDamageToUnit(TWeakObjectPtr<APlayerUnit> Attackerunit, 
         // Add 1-second delay before Mutate()
         GetWorld()->GetTimerManager().SetTimer(
             DelayTimerHandle,
-            [WeakAttacker = TWeakObjectPtr<APlayerUnit>(Attackerunit)]() // Capture as weak pointer
+            [WeakAttacker = TWeakObjectPtr<APlayerUnit>(Attackerunit)]() 
             {
-                if (WeakAttacker.IsValid()) // Check if still valid
+                if (WeakAttacker.IsValid())
                 {
                     WeakAttacker->Mutate();
                 }
             },
-            1.0f, // Delay duration
-            false // Don't loop
+            1.0f, 
+            false 
         );
     }
 
