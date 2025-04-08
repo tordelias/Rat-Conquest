@@ -31,7 +31,7 @@ void ACombatManager::DealDamageToUnit(TWeakObjectPtr<APlayerUnit> Attackerunit, 
         if (item)
         {
             weaponDamage = item->Damage + FMath::RandRange(-2, 2);
-			weaponDamage = FMath::Max(1, weaponDamage); // Ensure weapon damage is not negative
+            weaponDamage = FMath::Max(1, weaponDamage);
         }
     }
     int TotalDamage = Attackerunit->Damage + weaponDamage * Attackerunit->Attack;
@@ -40,15 +40,25 @@ void ACombatManager::DealDamageToUnit(TWeakObjectPtr<APlayerUnit> Attackerunit, 
     if (TotalDamage >= Defenderunit->Health && Attackerunit->bIsPlayerUnit)
     {
         Attackerunit->mutationData->AddExperience(Defenderunit->experienceReward);
-		Attackerunit->Mutate();
+
+        // Add 1-second delay before Mutate()
+        GetWorld()->GetTimerManager().SetTimer(
+            DelayTimerHandle,
+            [WeakAttacker = TWeakObjectPtr<APlayerUnit>(Attackerunit)]() // Capture as weak pointer
+            {
+                if (WeakAttacker.IsValid()) // Check if still valid
+                {
+                    WeakAttacker->Mutate();
+                }
+            },
+            1.0f, // Delay duration
+            false // Don't loop
+        );
     }
 
     UE_LOG(LogTemp, Warning, TEXT("Dealing %d damage to %s"), TotalDamage, *Defenderunit->GetName());
 
-    // Add a small knockback effect
     ApplyKnockback(Attackerunit, Defenderunit);
-
-    // Apply damage to the defender
     HandleUnitDamage(Defenderunit, TotalDamage);
 }
 

@@ -124,6 +124,8 @@ private:
 
 	TObjectPtr<AMainHUD> MainHUD;
 
+	FTimerHandle CameraDelayTimerHandle;
+
 	UPROPERTY()
 	TObjectPtr<class AUnitMarker> unitMarker;
 

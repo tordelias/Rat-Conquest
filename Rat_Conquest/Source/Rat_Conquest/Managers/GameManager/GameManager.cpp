@@ -675,23 +675,36 @@ void AGameManager::MarkCurrentUnit()
 {
     if (IsValid(unitMarker.Get()) && IsValid(CurrentUnit.Get()))
     {
-		unitMarker->SetPosition(CurrentUnit->GetActorLocation());
-		unitMarker->SetTargetActor(CurrentUnit); 
-        //Increase widget size for currentUnit
+        unitMarker->SetPosition(CurrentUnit->GetActorLocation());
+        unitMarker->SetTargetActor(CurrentUnit);
+
+        // Increase widget size for currentUnit
         if (IsValid(MainHUD.Get()))
         {
             MainHUD->HighlightPlayerUnit(CurrentUnit);
         }
+
         if (CurrentUnit->bIsPlayerUnit)
         {
-            //cast to playerCamera
-			APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-			if (PlayerCharacter)
-			{
-				PlayerCharacter->SetCameraPosition(CurrentUnit->GetActorLocation());
-			}
-		}
-	}
+            // Cast to playerCamera
+            APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+            if (PlayerCharacter)
+            {
+                GetWorld()->GetTimerManager().SetTimer(
+                    CameraDelayTimerHandle,
+                    [this, PlayerCharacter]()
+                    {
+                        if (IsValid(PlayerCharacter) && IsValid(CurrentUnit.Get()))
+                        {
+                            PlayerCharacter->SetCameraPosition(CurrentUnit->GetActorLocation());
+                        }
+                    },
+					1.0f, // Delay before moving the camera
+                    false
+                );
+            }
+        }
+    }
     else
     {
         UE_LOG(LogTemp, Warning, TEXT("Unit marker is not valid"));
