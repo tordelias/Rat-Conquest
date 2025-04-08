@@ -397,6 +397,7 @@ void AGameManager::CheckForEncounter()
 
 void AGameManager::LoadNextEncounter()
 {
+	GridManager->ClearUnitsFromTile();
     bEncounterComplete = false;
     GridManager->bIsGridScanned = false;
     GridManager->ScanWorldForObjects();

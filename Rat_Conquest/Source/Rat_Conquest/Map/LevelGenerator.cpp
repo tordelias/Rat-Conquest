@@ -104,11 +104,15 @@ void ALevelGenerator::Tick(float DeltaTime)
 
     }
     //if (GameManager && !GameManager->bEncounterComplete) return;
-    //if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Q)) {
-
-    //    DebugConnectedRooms();
-    //   
-    //}
+    if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Q)) {
+        if (AMainHUD* hud = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD()))
+        {
+            hud->SetupRoomSelectWidget(this);
+			hud->ShowRoomSelectWidget();
+        }
+       
+       
+    }
     //if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Up))
     //{
     //    MoveToRoom(0); // North
@@ -385,6 +389,7 @@ void ALevelGenerator::MoveToRoom(int32 DirectionIndex)
         if (TargetRoom->GetDoorDirection(GetOppositeDirection(DirectionIndex)))
         {
             CurrentRoom = TargetRoom;
+           
             UE_LOG(LogTemp, Display, TEXT("Moved to room at (%d, %d)"),
                 FMath::RoundToInt(TargetPosition.X),
                 FMath::RoundToInt(TargetPosition.Y));
@@ -399,7 +404,7 @@ void ALevelGenerator::MoveToRoom(int32 DirectionIndex)
             }
 			OnPlayerEnterRoom(CurrentRoom);
            
-
+           
             LastMoveTime = GetWorld()->GetTimeSeconds();
             if (TargetRoom->bIsExplored) {
                 GameManager->LoadExploredEncounter();

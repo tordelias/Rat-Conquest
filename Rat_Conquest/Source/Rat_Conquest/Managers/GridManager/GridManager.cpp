@@ -115,9 +115,7 @@ void AGridManager::ScanWorldForObjects()
 			{
 				Tile->bIsOccupied = false;
             }
-            else {
-				Tile->bIsOccupied = true;
-            }
+         
 
         }
 			
@@ -132,6 +130,7 @@ void AGridManager::ScanWorldForObjects()
             num++;
         // Clear existing occupants
         Tile->TileObjects.Empty();
+		Tile->ItemSlot = nullptr;
         
         // Check for overlapping actors
         TArray<AActor*> OverlappingActors;
@@ -227,6 +226,31 @@ void AGridManager::UpdateGridPosition()
     }
 
     UE_LOG(LogTemp, Display, TEXT("Grid moved to new origin: %s"), *NewOrigin.ToString());
+}
+
+void AGridManager::ClearUnitsFromTile()
+{
+    TArray<AGridTile*> TileCopy;
+    for (auto& TilePair : GridTiles)
+    {
+        AGridTile* Tile = Cast<AGridTile>(TilePair.Value);
+        if (Tile)
+        {
+            TileCopy.Add(Tile);
+        }
+    }
+
+    for (AGridTile* Tile : TileCopy)
+    {
+        if (Tile)
+        {
+            Tile->ItemSlot = nullptr;
+            Tile->bIsOccupied = false;
+            Tile->TileObjects.Empty();
+            Tile->SetUnitReference(nullptr);
+        }
+    }
+	
 }
 
 TWeakObjectPtr<AActor> AGridManager::SetStartingPositions(bool _bPlayerUnit)
@@ -493,6 +517,7 @@ void AGridManager::Tick(float DeltaTime)
     if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::T))
     {
         //ScanWorldForObjects();
+		ClearUnitsFromTile();
 		UE_LOG(LogTemp, Display, TEXT("Scanning for objects!"));
 
     }

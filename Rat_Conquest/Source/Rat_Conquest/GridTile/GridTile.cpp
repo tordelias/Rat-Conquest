@@ -237,7 +237,7 @@ bool AGridTile::IsTileOccupied()
 
 bool AGridTile::CheckIfTileOccupied()
 {
-    if (TileObjects.Num() == 0 && unitRefrence == nullptr)
+    if (TileObjects.Num() == 0 && !unitRefrence.IsValid())
     {
 		return false;
     }

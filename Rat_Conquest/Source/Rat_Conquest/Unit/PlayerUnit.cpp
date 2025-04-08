@@ -903,10 +903,12 @@ void APlayerUnit::UseCurrentItem()
 				
 				if (IsValid(CombatManager.Get()) && IsValid(EnemyToAttack.Get())) {
 					CombatManager->DealDamageToUnit(this, EnemyToAttack.Get());
+					FinishTurn();
 				}
 			}
 			else {
 				CombatManager->DealDamageToUnit(this, EnemyToAttack.Get());
+				
 			}
 
 			EnemyToAttack = nullptr;

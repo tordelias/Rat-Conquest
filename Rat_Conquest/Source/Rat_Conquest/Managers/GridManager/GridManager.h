@@ -24,6 +24,7 @@ public:
     void SetGridSize(int32 Rows, int32 Columns);
     void ScanWorldForObjects();
     void UpdateGridPosition();
+    void ClearUnitsFromTile();
 
     TWeakObjectPtr<AActor> SetStartingPositions(bool bPlayerUnit);
     TWeakObjectPtr<AActor> GetClosestAvailableTile(FVector2D Location);
