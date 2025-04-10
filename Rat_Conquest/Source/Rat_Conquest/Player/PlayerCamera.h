@@ -103,6 +103,14 @@ protected:
     FTimerHandle TimerHandleInteraction;
     FInteractionData InteractionData;
 
+	//Ignore Actors
+    TArray<TWeakObjectPtr<AActor>> CachedPlayerUnits;
+    TArray<TWeakObjectPtr<AActor>> CachedItemActors;
+    float CacheUpdateInterval = 1.0f;
+    float LastCacheUpdateTime = 0.0f;
+
+    void UpdateIgnoreActorsCache();
+
     void PerformInteractionCheck();
     void FoundInteractable(TWeakObjectPtr<AActor> NewInteractable);
     void NoInteractableFound();

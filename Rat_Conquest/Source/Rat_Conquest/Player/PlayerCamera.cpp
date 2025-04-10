@@ -15,6 +15,8 @@
 #include "Rat_Conquest/Widgets/MainHUD.h"
 #include "Rat_Conquest/GridTile/GridTile.h"
 #include "Rat_Conquest/Items/ItemBase.h"
+#include "Rat_Conquest/Items/Item.h"
+#include "Kismet/GameplayStatics.h"
 
 APlayerCamera::APlayerCamera()
 {
@@ -106,8 +108,42 @@ void APlayerCamera::Tick(float DeltaTime)
     }
 }
 
+// In your cpp file
+void APlayerCamera::UpdateIgnoreActorsCache()
+{
+    CachedPlayerUnits.Empty();
+    CachedItemActors.Empty();
+
+    if (!GetWorld()) return;
+
+    // Cache player units
+    TArray<AActor*> PlayerUnits;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerUnit::StaticClass(), PlayerUnits);
+    for (AActor* Unit : PlayerUnits)
+    {
+        if (IsValid(Unit))
+        {
+            CachedPlayerUnits.Add(Unit);
+        }
+    }
+
+    // Cache item actors by finding all AItem actors
+    TArray<AActor*> Items;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItem::StaticClass(), Items);
+    for (AActor* Item : Items)
+    {
+        if (IsValid(Item))
+        {
+            CachedItemActors.Add(Item);
+        }
+    }
+
+    LastCacheUpdateTime = GetWorld()->GetTimeSeconds();
+}
+
 void APlayerCamera::PerformInteractionCheck()
 {
+    // Initial controller check
     if (APlayerController* PC = Cast<APlayerController>(GetController()))
     {
         PC->DeprojectMousePositionToWorld(MouseWorldLocation, MouseWorldDirection);
@@ -118,12 +154,44 @@ void APlayerCamera::PerformInteractionCheck()
         return;
     }
 
+    // Update cache if needed
+    if (GetWorld() && (GetWorld()->GetTimeSeconds() - LastCacheUpdateTime > CacheUpdateInterval))
+    {
+        UpdateIgnoreActorsCache();
+    }
+
     FVector TraceEnd = MouseWorldLocation + (MouseWorldDirection * InteractionCheckDistance);
     FHitResult MouseHit;
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(this);
 
-    bool bHitSomething = GetWorld()->LineTraceSingleByChannel(MouseHit, MouseWorldLocation, TraceEnd, ECC_Visibility, QueryParams);
+    // Add cached actors to ignore list
+    for (TWeakObjectPtr<AActor> Actor : CachedPlayerUnits)
+    {
+        if (Actor.IsValid())
+        {
+            QueryParams.AddIgnoredActor(Actor.Get());
+        }
+    }
+
+    for (TWeakObjectPtr<AActor> Actor : CachedItemActors)
+    {
+        if (Actor.IsValid())
+        {
+            QueryParams.AddIgnoredActor(Actor.Get());
+        }
+    }
+
+    // Perform trace
+    bool bHitSomething = GetWorld()->LineTraceSingleByChannel(
+        MouseHit,
+        MouseWorldLocation,
+        TraceEnd,
+        ECC_Visibility,
+        QueryParams
+    );
+
+    // Rest of your interaction logic...
     AActor* HitActor = bHitSomething ? MouseHit.GetActor() : nullptr;
 
     if (HitActor && HitActor->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
@@ -153,12 +221,12 @@ void APlayerCamera::PerformInteractionCheck()
             FoundInteractable(HitActor);
         }
     }
+
     else if (GetWorld()->GetTimeSeconds() - InteractionData.LastInteractionCheckTime > InteractionCheckFrequency)
     {
         NoInteractableFound();
     }
 }
-
 void APlayerCamera::FoundInteractable(TWeakObjectPtr<AActor> NewInteractable)
 {
     // Level 1: Basic null check
