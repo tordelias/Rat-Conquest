@@ -59,6 +59,9 @@ APlayerUnit::APlayerUnit()
 	ArmorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ArmorMesh"));
 	ArmorMesh->SetupAttachment(SkeletalMesh, TEXT("Chest"));
 
+	OutfitMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OutfitMesh"));
+	OutfitMesh->SetupAttachment(SkeletalMesh, TEXT("Chest"));
+
 	ArmorMesh->SetRelativeScale3D(FVector(1.0f));
 	HealthBarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidgetComponent"));
 	HealthBarWidgetComponent->SetupAttachment(RootComponent);
@@ -987,9 +990,29 @@ void APlayerUnit::CheckForItems()
 			UE_LOG(LogTemp, Error, TEXT("Item is null"));
 			return;
 		}
-
+		int32 SlotIndex = 0;
+		if (NewItem->ItemDataB->ItemType == EItemType::Weapon)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Player picked up weapon"));
+		}
+		else if (NewItem->ItemDataB->ItemType == EItemType::Armor)
+		{
+			SlotIndex = 1; // Armor slot
+			UE_LOG(LogTemp, Error, TEXT("Player picked up armor"));
+		}
+		else if (NewItem->ItemDataB->ItemType == EItemType::Artifact)
+		{
+			SlotIndex = 2; // Consumable slot
+			UE_LOG(LogTemp, Error, TEXT("Player picked up consumable"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Unknown item type"));
+			return;
+		}
+		
 		// Determine the appropriate slot index for the new item
-		int32 SlotIndex = 0; // Default to weapon slot
+		 // Default to weapon slot
 		
 
 		// Check if the slot is already occupied
@@ -1009,7 +1032,22 @@ void APlayerUnit::CheckForItems()
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), SB_PickupItem, GetActorLocation(), GetActorRotation());
 		}
 		NewItem->EquipItem(this);
-		WeaponMesh->SetStaticMesh(NewItem->ItemMesh->GetStaticMesh());
+		if (NewItem->ItemDataB->ItemType == EItemType::Weapon)
+		{
+			// Set the weapon mesh
+			WeaponMesh->SetStaticMesh(NewItem->ItemMesh->GetStaticMesh());
+		}
+		else if (NewItem->ItemDataB->ItemType == EItemType::Armor)
+		{
+			// Set the armor mesh
+			OutfitMesh->SetStaticMesh(NewItem->ItemMesh->GetStaticMesh());
+		}
+		else if (NewItem->ItemDataB->ItemType == EItemType::Artifact)
+		{
+			// Set the artifact mesh
+			//ItemMesh->SetStaticMesh(NewItem->ItemMesh->GetStaticMesh());
+		}
+		
 
 
 		if(NewItem->ItemDataB->ItemAssetData.AnimBlueprint)

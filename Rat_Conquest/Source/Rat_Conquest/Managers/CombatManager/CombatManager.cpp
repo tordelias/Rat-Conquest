@@ -115,8 +115,16 @@ void ACombatManager::HandleUnitDamage(TWeakObjectPtr<APlayerUnit> unit, int amou
 		UE_LOG(LogTemp, Error, TEXT("TakeDamage failed: Unit is null!"));
 		return;
 	}
-
-	int TotalDamage = FMath::Max(amount - unit->Defence, 1);
+	int armorDefense = 0;
+    if (unit->ItemSlots[1].Get())
+    {
+        AItem* item = Cast<AItem>(unit->ItemSlots[1]);
+        if (item)
+        {
+            armorDefense = item->Defence;
+        }
+    }
+	int TotalDamage = FMath::Max(amount - (unit->Defence + armorDefense), 1);
 	unit->Health -= TotalDamage;
 
   

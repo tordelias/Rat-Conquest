@@ -631,7 +631,7 @@ void AGameManager::SpawnLoot()
     
     if (SpawnLocation == FVector())
         return; // No valid unoccupied positions available
-    SpawnLocation.Z += 25;
+    SpawnLocation.Z += 45;
     int RandomIndex = FMath::RandRange(0, ItemPool.Num() - 1);
 
     FRotator SpawnRotation = FRotator::ZeroRotator;
