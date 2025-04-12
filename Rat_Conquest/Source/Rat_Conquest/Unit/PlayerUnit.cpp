@@ -804,7 +804,7 @@ void APlayerUnit::ExecuteAITurn()
 	if (AIController)
 	{
 		// Call the MoveToGridPosition() function on the AI Controller
-		AIController->MoveToGridPosition();
+		AIController->ChooseAction();
 
 		// Log success
 		UE_LOG(LogTemp, Log, TEXT("Called MoveToGridPosition from AI Controller."));

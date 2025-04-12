@@ -7,6 +7,20 @@
 #include "EnemyAIController.generated.h"
 
 class APlayerUnit; 
+class AGridTile;
+
+UENUM(BlueprintType)
+enum class EEnemyAIDifficulty : uint8
+{
+	Easy UMETA(DisplayName = "Easy"),
+	Normal UMETA(DisplayName = "Normal"),
+	Hard UMETA(DisplayName = "Hard")
+};
+struct FMeleeTileOption
+{
+	AGridTile* Tile;
+	float Score;
+};
 
 /**
  * 
@@ -17,14 +31,34 @@ class RAT_CONQUEST_API AEnemyAIController : public AAIController
 	GENERATED_BODY()
 
 public:
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	EEnemyAIDifficulty Difficulty = EEnemyAIDifficulty::Normal;
+
+
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 
-	void MoveToGridPosition();
-	APlayerUnit* FindEnemyunit();
 	void MoveToClosestPossibleTile(TWeakObjectPtr<APlayerUnit> Enemy);
+	void MoveToMostTacticalTile(TWeakObjectPtr<APlayerUnit> Enemy);
 
-	void Attack(TWeakObjectPtr<APlayerUnit> Enemy);
-	void RandedAttack(TWeakObjectPtr<APlayerUnit> Enemy);
+	void ChooseAction();
+	void MeleeAttack();
+	void RangedAttack();
+
+	TWeakObjectPtr<APlayerUnit> FindClosestEnemy();
+	TWeakObjectPtr<APlayerUnit> FindEnemyByThreat();
+	TWeakObjectPtr<APlayerUnit> FindMostVulnerableEnemy();
+
+
+private: 
+	UPROPERTY()
+	TWeakObjectPtr<APlayerUnit> Target;
+	FVector2d TargetGridPosition;
+
+	TArray<FMeleeTileOption> TileOptions;
+	void ScoreMeleeTiles(TArray<TWeakObjectPtr<AGridTile>> NeighbourTiles, TWeakObjectPtr<APlayerUnit> Enemy);
+
+	bool bIsRanged = false; 
 	
 };

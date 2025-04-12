@@ -389,20 +389,22 @@ TArray<TWeakObjectPtr<AGridTile>> AGridManager::GetNeighbourTiles(int32 Row, int
         return NeighbourTiles;
     }
 
-    int32 StartRow = FMath::Max(0, Row - 1);
-    int32 EndRow = FMath::Min(Row + 1, GridSize.X - 1);
-    int32 StartColumn = FMath::Max(0, Column - 1);
-    int32 EndColumn = FMath::Min(Column + 1, GridSize.Y - 1);
+    // Check four orthogonal directions instead of all 8 neighbors
+    const TArray<FIntPoint> Directions = {
+        FIntPoint(1, 0),   // Right
+        FIntPoint(-1, 0),  // Left
+        FIntPoint(0, 1),    // Up
+        FIntPoint(0, -1)    // Down
+    };
 
-    for (int32 i = StartRow; i <= EndRow; ++i)
+    for (const FIntPoint& Dir : Directions)
     {
-        for (int32 j = StartColumn; j <= EndColumn; ++j)
-        {
-            if (i == Row && j == Column)
-            {
-                continue; // Skip the center tile
-            }
+        int32 i = Row + Dir.X;
+        int32 j = Column + Dir.Y;
 
+        // Check bounds
+        if (i >= 0 && i < GridSize.X && j >= 0 && j < GridSize.Y)
+        {
             AGridTile* Tile = Cast<AGridTile>(GetTileAt(i, j));
             if (Tile != nullptr)
             {
@@ -410,6 +412,7 @@ TArray<TWeakObjectPtr<AGridTile>> AGridManager::GetNeighbourTiles(int32 Row, int
             }
         }
     }
+
     return NeighbourTiles;
 }
 

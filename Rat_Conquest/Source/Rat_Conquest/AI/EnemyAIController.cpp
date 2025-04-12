@@ -9,221 +9,492 @@
 #include "Rat_Conquest/Managers/GridManager/GridManager.h"
 #include "Rat_Conquest/GridTile/GridTile.h"
 #include "Rat_Conquest/Managers/CombatManager/CombatManager.h"
+#include "Rat_Conquest/Items/Item.h"
 
 void AEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	UE_LOG(LogTemp, Error, TEXT("AEnemyAIController possessed pawn: %s"), *InPawn->GetName());
 }
 
 void AEnemyAIController::Tick(float DeltaTime)
 {
 }
 
-void AEnemyAIController::MoveToGridPosition()
+
+void AEnemyAIController::MoveToClosestPossibleTile(TWeakObjectPtr<APlayerUnit> Enemy)
 {
-	UE_LOG(LogTemp, Error, TEXT("AI moving to grid position"));
-	auto closestEnemy = this->FindEnemyunit();
-	//cast to player unit
 	APlayerUnit* AI = Cast<APlayerUnit>(GetPawn());
-
-	if (IsValid(closestEnemy))
+	if (!AI || !AI->GridManager.IsValid() || !Enemy.IsValid())
 	{
-		//if (!AI->bIsRangedUnit)
-		//{
-			float Distance = FVector2D::Distance(AI->CurrentGridPosition, closestEnemy->CurrentGridPosition);
+		UE_LOG(LogTemp, Error, TEXT("Invalid references in MoveToClosestPossibleTile"));
+		return;
+	}
 
-			if (Distance < AI->MovementSpeed + 1)
-			{
-				UE_LOG(LogTemp, Error, TEXT("AI trying to Attack"));
-				this->Attack(closestEnemy);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Error, TEXT("AI moving to closest possible tile"));
-				this->MoveToClosestPossibleTile(closestEnemy);
-			}
-		//}
-		//else
-		//{
-		//	this->RandedAttack(closestEnemy);
-		//}
+	FVector2D CurrentPosition = AI->CurrentGridPosition;
+	FVector2D EnemyPosition = Enemy->CurrentGridPosition;
+	const int32 MovementRange = AI->MovementSpeed;
+	TArray<TWeakObjectPtr<AGridTile>> PossibleTiles = AI->GridManager->GetMovableTiles(CurrentPosition.X, CurrentPosition.Y, MovementRange);
+
+	AGridTile* BestTile = nullptr;
+	float BestDistanceToEnemy = FLT_MAX;
+
+	for (auto Tile : PossibleTiles)
+	{
+		if (!Tile.IsValid() || Tile->bIsOccupied)
+			continue;
+		float DistanceToEnemy = AI->ChebyshevDistance(Tile->GridPosition, EnemyPosition);
+		if (DistanceToEnemy < BestDistanceToEnemy)
+		{
+			BestDistanceToEnemy = DistanceToEnemy;
+			BestTile = Tile.Get();
+		}
+	}
+
+	if (BestTile)
+	{
+		AI->MoveToTile(BestTile->GridPosition);
+		return;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("No valid enemy found"));
-
+		UE_LOG(LogTemp, Warning, TEXT("No reachable position found near enemy |EnemyAiController.cpp|"));
+		AI->FinishTurn();
 	}
 }
 
-APlayerUnit* AEnemyAIController::FindEnemyunit()
+void AEnemyAIController::MoveToMostTacticalTile(TWeakObjectPtr<APlayerUnit> Enemy)
 {
-	FVector2D closestUnitPos = FVector2D::ZeroVector;
-	APlayerUnit* closestUnit = nullptr;
-
 	APlayerUnit* AI = Cast<APlayerUnit>(GetPawn());
+	if (!AI || !AI->GridManager.IsValid() || !Enemy.IsValid())
+		return;
+	if (!bIsRanged)
+	{
+		MoveToClosestPossibleTile(Enemy);
+		return;
+	}
 
+	FVector2D CurrentPosition = AI->CurrentGridPosition;
+	FVector2D EnemyPosition = Enemy->CurrentGridPosition;
+
+	TArray<TWeakObjectPtr<AGridTile>> PossibleTiles = AI->GridManager->GetMovableTiles(CurrentPosition.X, CurrentPosition.Y, AI->MovementSpeed);
+	AGridTile* BestTile = nullptr;
+	float BestScore = FLT_MAX;
+
+
+	for (auto Tile : PossibleTiles)
+	{
+		if (!Tile.IsValid() || Tile->bIsOccupied)
+			continue;
+
+		float DistanceToEnemy = AI->ChebyshevDistance(Tile->GridPosition, EnemyPosition);
+
+		float TotalScore = 0.f;
+
+		if (bIsRanged)
+		{
+			// Prefer keeping distance but staying in range (e.g., range = 3)
+			const float IdealDistance = AI->AttackRange;
+			TotalScore = FMath::Abs(IdealDistance - DistanceToEnemy); // Minimize distance deviation from ideal range
+		}
+		else
+		{
+		}
+
+		if (TotalScore < BestScore)
+		{
+			BestScore = TotalScore;
+			BestTile = Tile.Get();
+		}
+	}
+
+	if (BestTile)
+	{
+		AI->MoveToTile(BestTile->GridPosition);
+	}
+}
+
+
+void AEnemyAIController::ChooseAction()
+{
+	switch (Difficulty)
+	{
+	case EEnemyAIDifficulty::Easy:
+		Target = FindClosestEnemy();
+		break;
+	case EEnemyAIDifficulty::Normal:
+		Target = FindEnemyByThreat();
+		break;
+	case EEnemyAIDifficulty::Hard:
+		Target = FindMostVulnerableEnemy();
+		break;
+	}
+	//Log the target
+	if (Target.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Target found: %s"), *Target->GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No target found"));
+		return;
+	}
+	if (bIsRanged)
+	{
+		RangedAttack();
+	}
+	else
+	{
+		MeleeAttack();
+	}
+
+}
+
+void AEnemyAIController::MeleeAttack()
+{
+	APlayerUnit* AI = Cast<APlayerUnit>(GetPawn());
+	if (AI->GridManager.IsValid() && Target.IsValid())
+	{
+		FVector2D AIPosition = AI->CurrentGridPosition;
+		FVector2D EnemyPosition = Target->CurrentGridPosition;
+		float DistanceToEnemy = AI->ChebyshevDistance(AIPosition, EnemyPosition);
+
+		// If the AI can reach the target within its movement range
+		if (DistanceToEnemy <= AI->MovementSpeed + 1)
+		{
+			AI->EnemyToAttack = Target;
+			TArray<TWeakObjectPtr<AGridTile>> Neighbors = AI->GridManager->GetNeighbourTiles(Target->CurrentGridPosition.X, Target->CurrentGridPosition.Y);
+			switch (Difficulty)
+			{
+			case EEnemyAIDifficulty::Easy:
+				
+				if (DistanceToEnemy == 1)
+				{
+					AI->AttackAfterMovement();
+					AI->FinishTurn();
+					return;
+				}
+				AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
+				MoveToClosestPossibleTile(Target);
+				break;
+
+			case EEnemyAIDifficulty::Normal:
+				if (FMath::RandRange(0, 1) == 0)
+				{
+					ScoreMeleeTiles(Neighbors, Target);
+					if (TileOptions.Num() > 0 && TileOptions[0].Tile)
+					{
+						
+						// Check if AI is not on the same tile it's already occupying
+						if (TileOptions[0].Tile == AI->GridManager->GetTileAtPosition(AI->CurrentGridPosition.X, AI->CurrentGridPosition.Y).Get())
+						{
+							AI->AttackAfterMovement();
+							AI->FinishTurn();
+							return;
+						}
+						AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
+						AI->MoveToTile(TileOptions[0].Tile->GridPosition);
+						return;
+					}
+					else
+					{
+						if (DistanceToEnemy == 1)
+						{
+							AI->AttackAfterMovement();
+							AI->FinishTurn();
+							return;
+						}
+						AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
+						MoveToClosestPossibleTile(Target);
+					}
+				}
+				else
+				{
+					AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
+					MoveToClosestPossibleTile(Target);
+				}
+				break;
+
+			case EEnemyAIDifficulty::Hard:
+				ScoreMeleeTiles(Neighbors, Target);
+				if (TileOptions.Num() > 0 && TileOptions[0].Tile)
+				{
+					
+					// Check if AI is not on the same tile it's already occupying
+					if (TileOptions[0].Tile == AI->GridManager->GetTileAtPosition(AI->CurrentGridPosition.X, AI->CurrentGridPosition.Y).Get())
+					{
+						AI->AttackAfterMovement();
+						AI->FinishTurn();
+						return;
+					}
+					AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
+					AI->MoveToTile(TileOptions[0].Tile->GridPosition);
+					return;
+				}
+				else
+				{
+					if (DistanceToEnemy == 1)
+					{
+						
+						AI->AttackAfterMovement();
+						AI->FinishTurn();
+						return;
+					}
+					AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
+					MoveToClosestPossibleTile(Target);
+				}
+				break;
+			}
+
+			return;
+		}
+
+		// If the AI is too far from the target, make a move based on difficulty
+		switch (Difficulty)
+		{
+		case EEnemyAIDifficulty::Easy:
+			MoveToClosestPossibleTile(Target);
+			break;
+		case EEnemyAIDifficulty::Normal:
+			if (FMath::RandRange(0, 1) == 0)
+				MoveToClosestPossibleTile(Target);
+			else
+				MoveToMostTacticalTile(Target);
+			break;
+		case EEnemyAIDifficulty::Hard:
+			MoveToMostTacticalTile(Target);
+			break;
+		}
+	}
+	else
+	{
+		if (!AI->GridManager.IsValid()) UE_LOG(LogTemp, Error, TEXT("GridManager is invalid"));
+		if (!Target.IsValid()) UE_LOG(LogTemp, Error, TEXT("Target is null"));
+	}
+}
+
+
+
+void AEnemyAIController::RangedAttack()
+{
+	APlayerUnit* AI = Cast<APlayerUnit>(GetPawn());
+	if (AI->GridManager.IsValid() && Target.IsValid())
+	{
+		FVector2D AIPosition = AI->CurrentGridPosition;
+		FVector2D EnemyPosition = Target->CurrentGridPosition;
+		float DistanceToEnemy = AI->ChebyshevDistance(AIPosition, EnemyPosition);
+		if (DistanceToEnemy <= AI->AttackRange)
+		{
+			AI->EnemyToAttack = Target;
+			AI->AttackAfterMovement();
+			AI->ShootProjectile(Target->GetActorLocation());
+			AI->FinishTurn();
+		}
+		else
+		{
+			switch (Difficulty)
+			{
+			case EEnemyAIDifficulty::Easy:
+				MoveToClosestPossibleTile(Target);
+				break;
+			case EEnemyAIDifficulty::Normal:
+				if (FMath::RandRange(0, 1) == 0)
+				{
+					MoveToClosestPossibleTile(Target);
+				}
+				else
+				{
+					MoveToMostTacticalTile(Target);
+				}
+				break;
+			case EEnemyAIDifficulty::Hard:
+				MoveToMostTacticalTile(Target);
+				break;
+			}
+		
+		}
+	}
+	else
+	{
+		if (!AI->GridManager.IsValid()) UE_LOG(LogTemp, Error, TEXT("GridManager is invalid"));
+		if (!Target.IsValid()) UE_LOG(LogTemp, Error, TEXT("Target is null"));
+	}
+}
+
+TWeakObjectPtr<APlayerUnit> AEnemyAIController::FindClosestEnemy()
+{
+	//Find the closest enemy unit or tile closest to the playerunit 
+	APlayerUnit* AI = Cast<APlayerUnit>(GetPawn());
 	if (!AI->GridManager.IsValid())
 	{
 		UE_LOG(LogTemp, Error, TEXT("GridManager is not valid or has not been possessed"));
 		return nullptr;
 	}
 
-	int numTilesChecked = 0;
-
-	for (const auto& TilePair : AI->GridManager->GridTiles)
+	if (AI->bIsRangedUnit)
 	{
-		// Cast the AActor* value to AGridTile*
-		AGridTile* Tile = Cast<AGridTile>(TilePair.Value);
-		if (!Tile)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Invalid tile found in GridTiles"));
-			continue;
-		}
-		APlayerUnit* Unit = Tile->unitRefrence.Get();
-
-		if (!Unit)
-		{
-			UE_LOG(LogTemp, Verbose, TEXT("Tile at position %s has no unit reference"), *TilePair.Key.ToString());
-			continue;
-		}
-
-		if (Unit == AI)
-		{
-			UE_LOG(LogTemp, Verbose, TEXT("Skipping self"));
-			continue;
-		}
-
-		if (!Unit->bIsPlayerUnit)
-		{
-			UE_LOG(LogTemp, Verbose, TEXT("Skipping enemy unit: %s"), *Unit->GetName());
-			continue;
-
-		}
-
-		if (!closestUnit || FVector2D::Distance(AI->CurrentGridPosition, Unit->CurrentGridPosition) < FVector2D::Distance(AI->CurrentGridPosition, closestUnitPos))
-		{
-			closestUnitPos = Unit->CurrentGridPosition;
-			closestUnit = Unit;
-			UE_LOG(LogTemp, Log, TEXT("Found a closer FriendlyUnit: %s at location: %s"), *Unit->GetName(), *closestUnitPos.ToString());
-		}
-
-		numTilesChecked++;
+		bIsRanged = true;
+	}
+	else
+	{
+		bIsRanged = false;
 	}
 
-	if (!closestUnit)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No FriendlyUnit found in the grid after checking %d tiles"), numTilesChecked);
-	}
-
-	return closestUnit;
+	TWeakObjectPtr<APlayerUnit> ClosestEnemy = nullptr;
+	float ClosestDistance = FLT_MAX;
+		for (const auto& TilePair : AI->GridManager->GridTiles)
+		{
+			AGridTile* Tile = Cast<AGridTile>(TilePair.Value);
+			if (!Tile)
+			{
+				continue;
+			}
+			APlayerUnit* Unit = Tile->unitRefrence.Get();
+			if (!Unit || Unit == AI || !Unit->bIsPlayerUnit)
+			{
+				continue;
+			}
+			float Distance = AI->ChebyshevDistance(AI->CurrentGridPosition, Unit->CurrentGridPosition);
+			if (Distance < ClosestDistance)
+			{
+				ClosestDistance = Distance;
+				ClosestEnemy = Unit;
+			}
+		}
+		if (ClosestEnemy.IsValid())
+			return ClosestEnemy;
+		else
+			return nullptr; 
 }
 
-void AEnemyAIController::MoveToClosestPossibleTile(TWeakObjectPtr<APlayerUnit> Enemy)
+TWeakObjectPtr<APlayerUnit> AEnemyAIController::FindEnemyByThreat()
 {
 
 	APlayerUnit* AI = Cast<APlayerUnit>(GetPawn());
-	if (AI->GridManager.IsValid() && Enemy.IsValid())
+	if (AI->bIsRangedUnit)
 	{
-		FVector2D CurrentPosition = AI->CurrentGridPosition;
-		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
-		 
-		TArray<TWeakObjectPtr<AGridTile>> PossibleTiles;
-		PossibleTiles = AI->GridManager->GetNeighbourTiles(AI->CurrentGridPosition.X, AI->CurrentGridPosition.Y);
+		bIsRanged = true;
+	}
+	else
+	{
+		bIsRanged = false;
+	}
+	if (AI->GridManager.IsValid())
+	{
+		TWeakObjectPtr<APlayerUnit> MostThreateningEnemy;
+		float HighestThreatLevel = -FLT_MAX; // Start with the lowest possible value to find the max threat
 
-		AGridTile* BestTile = nullptr;
-		float BestScore = FLT_MAX;
-
-		for (auto Tile : PossibleTiles)
+		// Iterate over all potential enemies
+		for (TObjectIterator<APlayerUnit> It; It; ++It)
 		{
-			float DistanceToTile = FVector2D::Distance(CurrentPosition, Tile->GridPosition);
-
-			if (DistanceToTile <= AI->MovementSpeed && !Tile->bIsOccupied)
+			APlayerUnit* Enemy = *It;
+			if (Enemy && Enemy != AI && Enemy->bIsPlayerUnit)
 			{
-				float DistanceToEnemyFromTile = FVector2D::Distance(Tile->GridPosition, EnemyPosition);
-				float TotalScore = DistanceToTile + DistanceToEnemyFromTile;
+				float Distance = AI->ChebyshevDistance(AI->CurrentGridPosition, Enemy->CurrentGridPosition);
+				float ThreatLevel = 0.0f;
 
-				if (TotalScore < BestScore)
+				ThreatLevel += 100 / (Distance + 1); 
+
+				ThreatLevel += Enemy->Damage * (1 + Enemy->Attack / 10); 
+					if (Enemy->Weapon.IsValid())
+					{
+						ThreatLevel += Enemy->Weapon->Damage;
+					}
+
+				if (ThreatLevel > HighestThreatLevel)
 				{
-					BestScore = TotalScore;
-					BestTile = Tile.Get();
+					HighestThreatLevel = ThreatLevel;
+					MostThreateningEnemy = Enemy;
 				}
 			}
 		}
 
-		if (BestTile && !AI->bIsPlayerUnit)
-		{
-			AI->MoveToTile(BestTile->GridPosition);
-		}
-		else
-		{
-			AI->FinishTurn();
-			UE_LOG(LogTemp, Warning, TEXT("No valid tile found within range"));
+		return MostThreateningEnemy;
+	}
 
-		}
+	// If no valid AI or grid manager, return null
+	return TWeakObjectPtr<APlayerUnit>();
+}
+
+TWeakObjectPtr<APlayerUnit> AEnemyAIController::FindMostVulnerableEnemy()
+{
+	APlayerUnit* AI = Cast<APlayerUnit>(GetPawn());
+	if (AI->bIsRangedUnit)
+	{
+		bIsRanged = true;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("GridManager or Enemy is not valid"));
-
+		bIsRanged = false;
 	}
-}
-
-void AEnemyAIController::Attack(TWeakObjectPtr<APlayerUnit> Enemy)
-{
-	APlayerUnit* AI = Cast<APlayerUnit>(GetPawn());
-
-	if (AI->GridManager.IsValid() && !AI->bIsPlayerUnit && Enemy.IsValid())
+	if (AI->GridManager.IsValid())
 	{
-		FVector2D AIPosition = AI->CurrentGridPosition;
-		FVector2D EnemyPosition = Enemy->CurrentGridPosition;
+		TWeakObjectPtr<APlayerUnit> MostVulnerableEnemy;
+		float LowestHealth = FLT_MAX; 
 
-		TArray<TWeakObjectPtr<AGridTile>> NeighbourTiles = AI->GridManager->GetNeighbourTiles(EnemyPosition.X, EnemyPosition.Y);
-
-		AGridTile* BestTile = nullptr;
-		float ClosestDistanceToEnemy = FLT_MAX;
-
-		for (auto Tile : NeighbourTiles)
+		// Iterate over all potential enemies
+		for (TObjectIterator<APlayerUnit> It; It; ++It)
 		{
-			if (Tile.IsValid() && !Tile->bIsOccupied)
+			APlayerUnit* Enemy = *It;
+			if (Enemy && Enemy != AI && Enemy->bIsPlayerUnit)
 			{
-				float DistanceToEnemy = FVector2D::Distance(Tile->GridPosition, EnemyPosition);
-
-				if (DistanceToEnemy < ClosestDistanceToEnemy && Tile->GridPosition != EnemyPosition)
+				float Health = Enemy->Health; 
+				if (Health < LowestHealth)
 				{
-					ClosestDistanceToEnemy = DistanceToEnemy;
-					BestTile = Tile.Get();
+					LowestHealth = Health;
+					MostVulnerableEnemy = Enemy;
 				}
 			}
 		}
 
-		if (BestTile && Enemy->bIsPlayerUnit)
-		{
-			UE_LOG(LogTemp, Error, TEXT("AI moving to tile (%f, %f) to attack the enemy"), BestTile->GridPosition.X, BestTile->GridPosition.Y);
-			AI->MoveToTile(BestTile->GridPosition); 
-			AI->EnemyToAttack = Enemy;
-			AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("No valid tiles directly adjacent to the enemy. Moving closer instead."));
-			MoveToClosestPossibleTile(Enemy);
-		}
+		return MostVulnerableEnemy;
 	}
-	else
-	{
-		if (!AI->GridManager.IsValid()) UE_LOG(LogTemp, Error, TEXT("GridManager is invalid"));
-		if (!Enemy.IsValid()) UE_LOG(LogTemp, Error, TEXT("Enemy is null"));
-		if (AI->bIsPlayerUnit) UE_LOG(LogTemp, Warning, TEXT("Player-controlled units cannot use this AI logic"));
-	}
+	return TWeakObjectPtr<APlayerUnit>();
 }
 
-void AEnemyAIController::RandedAttack(TWeakObjectPtr<APlayerUnit> Enemy)
+
+void AEnemyAIController::ScoreMeleeTiles(TArray<TWeakObjectPtr<AGridTile>> NeighbourTiles, TWeakObjectPtr<APlayerUnit> Enemy)
 {
 	APlayerUnit* AI = Cast<APlayerUnit>(GetPawn());
-	//Attack the enemy
+	if (!AI->GridManager.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("GridManager is not valid or has not been possessed"));
+		return;
+	}
+	TileOptions.Empty();
+	for (auto& Tile : NeighbourTiles)
+	{
+		if (!Tile.IsValid() || Tile->bIsOccupied) continue;
 
-	AI->EnemyToAttack = Enemy;
-	AI->AttackAfterMovement();
-	AI->FinishTurn();
+		float Score = 0;
+
+		//  Tiles with adjacent Tiles occupied by envirement
+			TArray<TWeakObjectPtr<AGridTile>> TilesToCheck = AI->GridManager->GetNeighbourTiles(Tile->GridPosition.X, Tile->GridPosition.Y);
+			int EnemyCount = 0; 
+			for (auto& AdjTile : TilesToCheck)
+			{
+				if (AdjTile.IsValid() && AdjTile->bIsOccupied && AdjTile->unitRefrence == nullptr)
+				{
+					Score -= 10;
+				}
+				else if (AdjTile.IsValid() && AdjTile->bIsOccupied && AdjTile->unitRefrence != nullptr)
+				{
+					EnemyCount++;
+				}
+
+			}
+			Score += EnemyCount * 10; // Higher = worse
+
+			if (TilesToCheck.Num() < 3)
+			{
+				Score += 15; //corner Tile
+			}
+
+		TileOptions.Add({ Tile.Get(), Score });
+	}
+	// Sort the tile options based on score lower is better
+	TileOptions.Sort([](const FMeleeTileOption& A, const FMeleeTileOption& B)
+		{
+			return A.Score < B.Score;
+		});
 }
+

@@ -72,9 +72,9 @@ public:
     UPROPERTY()
     bool bIsGridScanned = false;
 
-private:
     UPROPERTY(EditAnywhere, Category = "Grid")
     FVector2D GridSize;
+private:
 
     // The class type of the tiles to spawn
     UPROPERTY(EditAnywhere, Category = "Grid")
