@@ -77,6 +77,12 @@ void AItem::InitializeItem()
          ItemDataB->ItemAssetData = ItemData->ItemAssetData;
 
         Damage = ItemDataB->ItemStatistics.Damage;
+		Attack = ItemDataB->ItemStatistics.Attack;
+		Defence = ItemDataB->ItemStatistics.Defence;
+		Health = ItemDataB->ItemStatistics.MaxHealth;
+		Movement = ItemDataB->ItemStatistics.MovementSpeed;
+        Range = ItemDataB->ItemStatistics.Range;
+		Initiative = ItemDataB->ItemStatistics.Initiative;
         bIsMelee = ItemDataB->ItemStatistics.bIsMelee;
         if (ItemDataB->ItemAssetData.Mesh)
         {

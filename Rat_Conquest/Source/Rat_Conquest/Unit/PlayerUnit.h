@@ -116,6 +116,16 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
     FName UnitName;
 
+    int DamageFromItems = 0;
+	int DefenceFromItems = 0;
+	int AttackFromItems = 0;
+	int RangeFromItems = 0;
+	int InitiativeFromItems = 0;
+	int SpeedFromItems = 0;
+	int HealthFromItems = 0;
+	int MaxHealthFromItems = 0;
+
+
     // Inventory & Equipment
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
     TSubclassOf<AItem> StartWeapon;

@@ -56,6 +56,9 @@ struct FItemStatistics
 	UPROPERTY(EditAnywhere)
 	float Luck;
 
+	UPROPERTY(EditAnywhere)
+	float Initiative;
+
 
 
 	UPROPERTY(EditAnywhere)

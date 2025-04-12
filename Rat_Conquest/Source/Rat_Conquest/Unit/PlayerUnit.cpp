@@ -1078,12 +1078,58 @@ void APlayerUnit::CheckForItems()
 
 		UE_LOG(LogTemp, Log, TEXT("Player picked up item at tile (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);
 	}
+	CalculateStats();
 	UpdateInteractableData();
 
 }
 
 void APlayerUnit::CalculateStats()
 {
+	// Calculate stats based on equipped items
+	DamageFromItems = 0;
+	DefenceFromItems = 0;
+	AttackFromItems = 0;
+	RangeFromItems = 0;
+	InitiativeFromItems = 0;
+	SpeedFromItems = 0;
+	MaxHealthFromItems = 0;
+
+
+
+	if (ItemSlots[0].IsValid())
+	{
+		AItem* CurrentItem = ItemSlots[0].Get();
+		if (CurrentItem)
+		{
+			DamageFromItems += CurrentItem->Damage;
+			DefenceFromItems += CurrentItem->Defence;
+			AttackFromItems += CurrentItem->Attack;
+			RangeFromItems += CurrentItem->Range;
+			InitiativeFromItems += CurrentItem->Initiative;
+			SpeedFromItems += CurrentItem->Movement;
+			MaxHealthFromItems += CurrentItem->Health;
+			
+
+
+
+
+		}
+	}
+	if (ItemSlots[1].IsValid()) {
+		AItem* CurrentItem = ItemSlots[1].Get();
+		if (CurrentItem)
+		{
+			DamageFromItems += CurrentItem->Damage;
+			DefenceFromItems += CurrentItem->Defence;
+			AttackFromItems += CurrentItem->Attack;
+			RangeFromItems += CurrentItem->Range;
+			InitiativeFromItems += CurrentItem->Initiative;
+			SpeedFromItems += CurrentItem->Movement;
+			MaxHealthFromItems += CurrentItem->Health;
+		}
+
+	}
+	
 
 }
 
@@ -1461,16 +1507,21 @@ void APlayerUnit::UpdateInteractableData()
 		InstanceInteractableData.UnitName = FText::FromString("Rat");
 		this->UnitName = FName("Rat");
 	}
+	CalculateStats();
 
 	InstanceInteractableData.UnitHealth = Health;
-	InstanceInteractableData.maxHealth = maxHealth;
-	InstanceInteractableData.Range = AttackRange;
-	InstanceInteractableData.Attack = Attack;
+	InstanceInteractableData.maxHealth = maxHealth + HealthFromItems;
+	InstanceInteractableData.Range = AttackRange + RangeFromItems;
+	InstanceInteractableData.Attack = Attack + AttackFromItems;
 	InstanceInteractableData.UnitDamage = Damage;
 	InstanceInteractableData.UnitMovementSpeed = MovementSpeed;
-	InstanceInteractableData.Defense = Defence;
-	InstanceInteractableData.MinDamage = FMath::Max(1, Damage - 2);
-	InstanceInteractableData.MaxDamage = Damage + 2;
+	InstanceInteractableData.Defense = Defence + DefenceFromItems;
+	InstanceInteractableData.MinDamage = FMath::Max(1, Damage + DamageFromItems - 2);
+	InstanceInteractableData.MaxDamage = Damage + DamageFromItems + 2;
+
+	MinDamage = InstanceInteractableData.MinDamage;
+
+	MaxDamage = InstanceInteractableData.MaxDamage;
 
 }
 

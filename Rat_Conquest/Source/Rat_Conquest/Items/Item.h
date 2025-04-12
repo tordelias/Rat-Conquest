@@ -55,6 +55,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	int Defence = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
+	int Attack = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
+	int Initiative = 0;
+
 	//rotation variables
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	float YawRotationSpeed = 1.0f;
