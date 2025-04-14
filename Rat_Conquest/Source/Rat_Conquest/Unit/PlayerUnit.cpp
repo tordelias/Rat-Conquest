@@ -1496,6 +1496,27 @@ void APlayerUnit::ApplyMutation(TArray<int> statsToAdd)
 	}
 }
 
+void APlayerUnit::Seticon(int num)
+{
+	UnitIcon = UnitIcons[num];
+
+	//set the material from UnitMaterials to num
+	if (UnitMaterials.IsValidIndex(num))
+	{
+		UMaterialInstanceDynamic* MaterialInstance = UMaterialInstanceDynamic::Create(UnitMaterials[num], this);
+		UMaterialInstanceDynamic* MaterialInstanceEye = UMaterialInstanceDynamic::Create(UnitEyeMaterials[num], this);
+		if (SkeletalMesh)
+		{
+			SkeletalMesh->SetMaterial(0, MaterialInstanceEye);
+			SkeletalMesh->SetMaterial(1, MaterialInstance);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Invalid material index: %d"), num);
+	}
+}
+
 
 void APlayerUnit::UpdateInteractableData()
 {

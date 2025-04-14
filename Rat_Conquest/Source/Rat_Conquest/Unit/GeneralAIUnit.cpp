@@ -17,4 +17,38 @@ void AGeneralAIUnit::RandomizeStats()
 	Attack = FMath::RandRange(1, 5);
 	AttackRange = FMath::RandRange(4, 8);
 	Initiative = FMath::RandRange(1, 5);
+
+	if (IsFrog)
+	{
+		int randomTexture = FMath::RandRange(0, 4);
+		SetTexcture(randomTexture);
+	}
+}
+
+void AGeneralAIUnit::SetTexcture(int num)
+{
+	if (UnitMaterials.IsValidIndex(num))
+	{
+		UMaterialInterface* Material = UnitMaterials[num];
+		if (Material)
+		{
+			SkeletalMesh->SetMaterial(0, Material);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Material is NULL!"));
+		}
+		if (UnitIcons.IsValidIndex(num))
+		{
+			UnitIcon = UnitIcons[num];
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Invalid icon index!"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid material index!"));
+	}
 }

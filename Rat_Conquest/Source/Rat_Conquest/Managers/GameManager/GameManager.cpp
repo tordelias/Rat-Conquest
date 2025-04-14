@@ -85,6 +85,7 @@ void AGameManager::InitalizeUnits()
   
     PlayerUnits.Empty();
     EnemyUnits.Empty();
+	int UnitNum = 0;
     for (TActorIterator<APlayerUnit> It(GetWorld()); It; ++It)
     {
         APlayerUnit* Unit = *It;
@@ -92,6 +93,8 @@ void AGameManager::InitalizeUnits()
         {
             
             PlayerUnits.Add(Unit);
+            Unit->Seticon(UnitNum); 
+			++UnitNum;
             UE_LOG(LogTemp, Warning, TEXT("Player unit added"));
         }
         else if (Unit)

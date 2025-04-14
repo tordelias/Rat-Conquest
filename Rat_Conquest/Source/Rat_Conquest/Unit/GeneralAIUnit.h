@@ -17,5 +17,13 @@ class RAT_CONQUEST_API AGeneralAIUnit : public APlayerUnit
 	AGeneralAIUnit();
 
 	void RandomizeStats() override;
+	void SetTexcture(int num);
+
+public: 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	bool IsFrog = false; 
+
+
+
 	
 };

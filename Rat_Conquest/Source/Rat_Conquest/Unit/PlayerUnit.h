@@ -48,6 +48,16 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Icon")
     TObjectPtr<UTexture2D> UnitIcon;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Icon")
+    TArray<TObjectPtr<UTexture2D>> UnitIcons;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Icon")
+	TArray<TObjectPtr<UMaterialInterface>> UnitMaterials;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Icon")
+    TArray<TObjectPtr<UMaterialInterface>> UnitEyeMaterials;
+
+
     // Grid Variables
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
     FVector2D CurrentGridPosition;
@@ -205,6 +215,8 @@ public:
     TArray<int> GetMutationC3();
     float GetMouseRotationToEnemy(TWeakObjectPtr<APlayerCamera> Camera);
     void ApplyMutation(TArray<int>);
+
+    void Seticon(int num); 
 
     void BeginFocus();
     void EndFocus();
