@@ -742,6 +742,14 @@ void APlayerUnit::AttackAfterMovement()
 
 	if (EnemyToAttack.IsValid())
 	{
+		//check distance to enemy
+		const float DistanceToEnemy = ChebyshevDistance(CurrentGridPosition, EnemyToAttack->CurrentGridPosition);
+		if (DistanceToEnemy > 1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Enemy is out of range for attack"));
+			this->OnMovementComplete.Unbind();
+			return;
+		}
 		if (SB_Attack)
 		{
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), SB_Attack, GetActorLocation(), GetActorRotation());

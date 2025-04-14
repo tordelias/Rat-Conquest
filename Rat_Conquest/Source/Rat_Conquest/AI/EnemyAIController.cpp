@@ -8,6 +8,7 @@
 #include "Rat_Conquest/Unit/PlayerUnit.h"
 #include "Rat_Conquest/Managers/GridManager/GridManager.h"
 #include "Rat_Conquest/GridTile/GridTile.h"
+#include "Rat_Conquest/Managers/GameManager/GameManager.h"
 #include "Rat_Conquest/Managers/CombatManager/CombatManager.h"
 #include "Rat_Conquest/Items/Item.h"
 
@@ -40,6 +41,12 @@ void AEnemyAIController::MoveToClosestPossibleTile(TWeakObjectPtr<APlayerUnit> E
 
 	for (auto Tile : PossibleTiles)
 	{
+		if (Tile->bIsOccupied && (!Tile->unitRefrence.IsValid() || Tile->unitRefrence->Health <= 0))
+		{
+			// Treat as not occupied if it's a ghost
+			Tile->bIsOccupied = false;
+			Tile->unitRefrence = nullptr;
+		}
 		if (!Tile.IsValid() || Tile->bIsOccupied)
 			continue;
 		float DistanceToEnemy = AI->ChebyshevDistance(Tile->GridPosition, EnemyPosition);
@@ -83,6 +90,12 @@ void AEnemyAIController::MoveToMostTacticalTile(TWeakObjectPtr<APlayerUnit> Enem
 
 	for (auto Tile : PossibleTiles)
 	{
+		if (Tile->bIsOccupied && (!Tile->unitRefrence.IsValid() || Tile->unitRefrence->Health <= 0))
+		{
+			// Treat as not occupied if it's a ghost
+			Tile->bIsOccupied = false;
+			Tile->unitRefrence = nullptr;
+		}
 		if (!Tile.IsValid() || Tile->bIsOccupied)
 			continue;
 
@@ -111,27 +124,33 @@ void AEnemyAIController::MoveToMostTacticalTile(TWeakObjectPtr<APlayerUnit> Enem
 	{
 		AI->MoveToTile(BestTile->GridPosition);
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No reachable position found near enemy |EnemyAiController.cpp|"));
+		AI->FinishTurn();
+		}
 }
 
 
 void AEnemyAIController::ChooseAction()
 {
+	this->Target = nullptr;
 	switch (Difficulty)
 	{
 	case EEnemyAIDifficulty::Easy:
-		Target = FindClosestEnemy();
+		this->Target = FindClosestEnemy();
 		break;
 	case EEnemyAIDifficulty::Normal:
-		Target = FindEnemyByThreat();
+		this->Target = FindEnemyByThreat();
 		break;
 	case EEnemyAIDifficulty::Hard:
-		Target = FindMostVulnerableEnemy();
+		this->Target = FindMostVulnerableEnemy();
 		break;
 	}
 	//Log the target
-	if (Target.IsValid())
+	if (this->Target.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Target found: %s"), *Target->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Target found: %s"), *this->Target->GetName());
 	}
 	else
 	{
@@ -170,7 +189,6 @@ void AEnemyAIController::MeleeAttack()
 				if (DistanceToEnemy == 1)
 				{
 					AI->AttackAfterMovement();
-					AI->FinishTurn();
 					return;
 				}
 				AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
@@ -188,7 +206,6 @@ void AEnemyAIController::MeleeAttack()
 						if (TileOptions[0].Tile == AI->GridManager->GetTileAtPosition(AI->CurrentGridPosition.X, AI->CurrentGridPosition.Y).Get())
 						{
 							AI->AttackAfterMovement();
-							AI->FinishTurn();
 							return;
 						}
 						AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
@@ -200,7 +217,6 @@ void AEnemyAIController::MeleeAttack()
 						if (DistanceToEnemy == 1)
 						{
 							AI->AttackAfterMovement();
-							AI->FinishTurn();
 							return;
 						}
 						AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
@@ -223,7 +239,6 @@ void AEnemyAIController::MeleeAttack()
 					if (TileOptions[0].Tile == AI->GridManager->GetTileAtPosition(AI->CurrentGridPosition.X, AI->CurrentGridPosition.Y).Get())
 					{
 						AI->AttackAfterMovement();
-						AI->FinishTurn();
 						return;
 					}
 					AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
@@ -236,7 +251,6 @@ void AEnemyAIController::MeleeAttack()
 					{
 						
 						AI->AttackAfterMovement();
-						AI->FinishTurn();
 						return;
 					}
 					AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
@@ -262,6 +276,7 @@ void AEnemyAIController::MeleeAttack()
 			break;
 		case EEnemyAIDifficulty::Hard:
 			MoveToMostTacticalTile(Target);
+			UE_LOG(LogTemp, Warning, TEXT("AI is too far from target, moving to tactical tile"));
 			break;
 		}
 	}
@@ -428,13 +443,22 @@ TWeakObjectPtr<APlayerUnit> AEnemyAIController::FindMostVulnerableEnemy()
 	}
 	if (AI->GridManager.IsValid())
 	{
+		TWeakObjectPtr<AGameManager> gameManager = AI->GameManager; 
+		if (!gameManager.IsValid())
+		{
+			UE_LOG(LogTemp, Error, TEXT("GameManager is not valid or has not been possessed"));
+			return nullptr;
+		}
+		TArray<TObjectPtr<APlayerUnit>> playerUnits = gameManager->PlayerUnits;
 		TWeakObjectPtr<APlayerUnit> MostVulnerableEnemy;
-		float LowestHealth = FLT_MAX; 
+		float LowestHealth = FLT_MAX;
 
 		// Iterate over all potential enemies
-		for (TObjectIterator<APlayerUnit> It; It; ++It)
+		for (auto Enemy : playerUnits)
 		{
-			APlayerUnit* Enemy = *It;
+			if (!Enemy)
+				continue;
+
 			if (Enemy && Enemy != AI && Enemy->bIsPlayerUnit)
 			{
 				float Health = Enemy->Health; 
@@ -468,7 +492,7 @@ void AEnemyAIController::ScoreMeleeTiles(TArray<TWeakObjectPtr<AGridTile>> Neigh
 		float Score = 0;
 
 		//  Tiles with adjacent Tiles occupied by envirement
-			TArray<TWeakObjectPtr<AGridTile>> TilesToCheck = AI->GridManager->GetNeighbourTiles(Tile->GridPosition.X, Tile->GridPosition.Y);
+			TArray<TWeakObjectPtr<AGridTile>> TilesToCheck = AI->GridManager->GetMovableTiles(Tile->GridPosition.X, Tile->GridPosition.Y, AI->MovementSpeed);
 			int EnemyCount = 0; 
 			for (auto& AdjTile : TilesToCheck)
 			{
