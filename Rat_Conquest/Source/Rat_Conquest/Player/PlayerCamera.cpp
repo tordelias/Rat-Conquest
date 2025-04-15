@@ -108,7 +108,6 @@ void APlayerCamera::Tick(float DeltaTime)
     }
 }
 
-// In your cpp file
 void APlayerCamera::UpdateIgnoreActorsCache()
 {
     CachedPlayerUnits.Empty();
