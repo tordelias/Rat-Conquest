@@ -10,6 +10,7 @@ AItem::AItem()
 	PrimaryActorTick.bCanEverTick = true;
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
 	RingMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RingMesh"));
+	
 	RootComponent = ItemMesh;
 }
 

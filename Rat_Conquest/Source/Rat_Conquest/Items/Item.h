@@ -6,7 +6,10 @@
 #include "Rat_Conquest/Items/ItemBase.h"
 #include "GameFramework/Actor.h"
 #include "Rat_Conquest/Abilites/AbilityComponent.h" 
+#include "NiagaraSystem.h"
+#include "NiagaraComponent.h"
 #include "Item.generated.h"
+
 
 UCLASS()
 class RAT_CONQUEST_API AItem : public AActor
@@ -32,6 +35,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	UStaticMeshComponent* RingMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
+	UNiagaraSystem* ItemEffect;
+
+	UPROPERTY()
+	UNiagaraComponent* NiagaraComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	UDataTable* ItemDataTable;
