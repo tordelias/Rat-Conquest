@@ -102,8 +102,8 @@ struct FItemAssetData
 	UTexture2D* UnitIcon;
 
 	//blendspace for animations
-	UPROPERTY(EditAnywhere) 
-	UAnimBlueprint* AnimBlueprint;
+	UPROPERTY(EditAnywhere)
+	UBlendSpace* BlendSpace;
 };
 
 USTRUCT()

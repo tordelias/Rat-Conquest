@@ -166,10 +166,10 @@ public:
 
     //current blend space
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlendSpace")
-    TObjectPtr<UAnimBlueprint> CurrentAnimInstance;
+    TObjectPtr<UBlendSpace> CurrentAnimInstance;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlendSpace")
-    TObjectPtr<UAnimBlueprint> AnimBlueprint;
+    TObjectPtr<UBlendSpace> AnimBlueprint;
 
     //Sound & Effects
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")

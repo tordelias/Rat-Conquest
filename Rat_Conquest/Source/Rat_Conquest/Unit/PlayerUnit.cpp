@@ -332,7 +332,7 @@ void APlayerUnit::ResetRotation()
 
 void APlayerUnit::NotifyBlendSpaceChange()
 {
- 
+	UE_LOG(LogTemp, Display, TEXT("NotifyBlendSpaceChange called"));
 		this->OnBlendSpaceChange.Broadcast();
 }
 
@@ -1058,9 +1058,9 @@ void APlayerUnit::CheckForItems()
 		
 
 
-		if(NewItem->ItemDataB->ItemAssetData.AnimBlueprint)
+		if(NewItem->ItemDataB->ItemAssetData.BlendSpace)
 		{
-			CurrentAnimInstance = NewItem->ItemDataB->ItemAssetData.AnimBlueprint;
+			CurrentAnimInstance = NewItem->ItemDataB->ItemAssetData.BlendSpace;
 			this->NotifyBlendSpaceChange();
 		}
 
