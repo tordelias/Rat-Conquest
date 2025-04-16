@@ -21,6 +21,7 @@
 #include "Components/WidgetComponent.h"
 #include "Rat_Conquest/Items/ItemBase.h"
 #include "Rat_Conquest/Widgets/HealthBar.h"
+#include "Rat_Conquest/LevelObjects/InteractableGridObject.h"
 #include "Sound/SoundBase.h"
 
 
@@ -845,6 +846,7 @@ void APlayerUnit::FinishTurn()
 	}
 
 	CheckForItems();
+	CheckForGridObjects();
 	GameManager->EndUnitTurn();
 
 	bHasFinishedTurn = true; // Prevent duplicate turn endings
@@ -966,10 +968,11 @@ void APlayerUnit::CheckForGridObjects()
 		UE_LOG(LogTemp, Warning, TEXT("No item at tile (%f, %f)"), CurrentGridPosition.X, CurrentGridPosition.Y);
 		return;
 	}
-	AGridTile* Tile = Cast<AGridTile>(TargetTile);
-	if (Tile /* && Tile->Gridobj*/) {
+	TWeakObjectPtr<AGridTile> Tile = Cast<AGridTile>(TargetTile);
+	TWeakObjectPtr<AInteractableGridObject> InteractableObject = Cast<AInteractableGridObject>(Tile->InteractableObjectSlot);
+	if (Tile.IsValid() && Tile->InteractableObjectSlot.IsValid()) {
 		UE_LOG(LogTemp, Error, TEXT("Found Grid object"));
-
+		InteractableObject->InteractWithObject(this);
 	}
 }
 

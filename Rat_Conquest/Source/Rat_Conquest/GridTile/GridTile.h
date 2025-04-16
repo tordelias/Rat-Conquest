@@ -9,7 +9,9 @@
 
 class APlayerUnit;
 class AItem;
+class AInteractableGridObject;
 class UStaticMeshComponent;
+
 
 UCLASS()
 class RAT_CONQUEST_API AGridTile : public AActor, public IInteractionInterface
@@ -56,6 +58,9 @@ public:
 
     UPROPERTY()
     TWeakObjectPtr<AItem> ItemSlot;
+
+    UPROPERTY()
+	TWeakObjectPtr<AInteractableGridObject> InteractableObjectSlot;
 
     void AddOccupant(TWeakObjectPtr<AActor> TileObj);
     void RemoveOccupant(TWeakObjectPtr<AActor> TileObj);

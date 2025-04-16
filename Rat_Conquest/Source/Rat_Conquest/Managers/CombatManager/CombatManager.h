@@ -21,6 +21,7 @@ public:
     void ApplyKnockback(TWeakObjectPtr<APlayerUnit> Attackerunit, TWeakObjectPtr<APlayerUnit> Defenderunit);
     void ResetKnockbackPosition(TWeakObjectPtr<APlayerUnit> Defenderunit);
     void HandleUnitDamage(TWeakObjectPtr<APlayerUnit> unit, int amount);
+    void HealUnit(TWeakObjectPtr<APlayerUnit> unit, int amount);
     void KillUnit(TWeakObjectPtr<APlayerUnit> unit);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
@@ -31,6 +32,10 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
     TObjectPtr<USoundBase> SB_Impact;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound & Effects")
+	TObjectPtr<USoundBase> SB_Heal;
+
 
 private: 
 	FTimerHandle DelayTimerHandle;

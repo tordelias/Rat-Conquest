@@ -17,6 +17,7 @@ class AItem;
 class AGenericProjectile;
 class MutationData;
 class AWeapon;
+class AInteractableGridObject;
 
 DECLARE_DELEGATE(FOnMovementCompleteSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHealthChanged);

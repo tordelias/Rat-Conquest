@@ -1,6 +1,7 @@
 #include "GridManager.h"
 #include "Rat_Conquest/GridTile/GridTile.h"
 #include "Rat_Conquest/Items/Item.h"
+#include "Rat_Conquest/LevelObjects/InteractableGridObject.h"
 
 // Sets default values
 AGridManager::AGridManager()
@@ -142,6 +143,8 @@ void AGridManager::ScanWorldForObjects()
             AGridTile* OverlappingTile = Cast<AGridTile>(Actor);
             UStaticMeshComponent* StaticMeshComp = Actor->FindComponentByClass<UStaticMeshComponent>();
             AItem* Item = Cast<AItem>(Actor);
+			AInteractableGridObject* InteractableObj = Cast<AInteractableGridObject>(Actor);
+
             if (StaticMeshComp && Actor->ActorHasTag(TEXT("GridObj")))
             {
                 // The overlapping actor has a StaticMeshComponent
@@ -167,9 +170,10 @@ void AGridManager::ScanWorldForObjects()
                 UE_LOG(LogTemp, Error, TEXT("FOUND ENEMY POS at Row:"));
 
             }
-			if (StaticMeshComp && Actor->ActorHasTag(TEXT("InteractObj")))
+			if (StaticMeshComp && Actor->ActorHasTag(TEXT("InteractObj")) && InteractableObj)
 			{
-				UE_LOG(LogTemp, Display, TEXT("Found interactable object at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
+                Tile->InteractableObjectSlot = InteractableObj;
+                UE_LOG(LogTemp, Display, TEXT("Found interactable object at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
 			}
 
         }

@@ -4,6 +4,7 @@
 #include "Rat_Conquest/Player/PlayerCamera.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
 #include "Rat_Conquest/Items/Item.h"
+#include "Rat_Conquest/LevelObjects/InteractableGridObject.h"
 
 // Sets default values
 AGridTile::AGridTile()

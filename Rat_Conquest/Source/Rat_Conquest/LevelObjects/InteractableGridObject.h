@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "InteractableGridObject.generated.h"
 
+class APlayerUnit;
+class ACombatManager;
+
 
 UENUM(BlueprintType)
 enum class EObjectType : uint8
@@ -28,7 +31,7 @@ public:
 	// Sets default values for this actor's properties
 	AInteractableGridObject();
 
-	void InteractWithObject();
+	void InteractWithObject(TWeakObjectPtr<APlayerUnit> InteractingUnit);
 
 	void Heal();
 
@@ -37,6 +40,8 @@ public:
 	void DealAoEDamage();
 
 	void MovePlayer();
+
+	void DestroyObject();
 
 
 protected:
@@ -49,4 +54,19 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Properties")
 	EObjectType ObjectType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Properties")
+	UStaticMeshComponent* ObjectMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Properties")
+	int HealingAmount = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Properties")
+	bool bIsConsumable = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat Manager")
+	TWeakObjectPtr<ACombatManager> CombatManager;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Unit")
+	TWeakObjectPtr<APlayerUnit> unitRefrence;
 };

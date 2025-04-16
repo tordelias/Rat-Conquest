@@ -147,6 +147,25 @@ void ACombatManager::HandleUnitDamage(TWeakObjectPtr<APlayerUnit> unit, int amou
 	}
 }
 
+void ACombatManager::HealUnit(TWeakObjectPtr<APlayerUnit> unit, int amount)
+{
+	if (!unit.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("HealUnit failed: Unit is null!"));
+		return;
+	}
+	unit->Health += amount;
+	if (unit->Health > unit->maxHealth)
+	{
+		unit->Health = unit->maxHealth;
+	}
+	unit->OnHealthChanged.Broadcast();
+	unit->UpdateHealthBar();
+	if (SB_Heal) {
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SB_Heal, unit->GetActorLocation());
+	}
+}
+
 void ACombatManager::KillUnit(TWeakObjectPtr<APlayerUnit> unit)
 {
     if (!unit.IsValid())
