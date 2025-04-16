@@ -575,36 +575,57 @@ void ALevelGenerator::CheckOpenDoors()
 
 void ALevelGenerator::PlaceEndRooms()
 {
-    for (const TObjectPtr<ARoom>& Room : RoomInstances)
+    // Create a copy to prevent iterator invalidation
+    const TArray<TObjectPtr<ARoom>> CurrentCopyRooms = RoomInstances;
+
+    for (const TObjectPtr<ARoom>& Room : CurrentCopyRooms)
     {
         if (!IsValid(Room)) continue;
 
-        // Check all four door directions
+        // Verify door directions are within valid range
         for (int32 DirIndex = 0; DirIndex < 4; DirIndex++)
         {
+            //if (!IsValid(Room->DoorDirections(DirIndex))) // Add this safety check
+            //{
+            //    UE_LOG(LogTemp, Error, TEXT("Invalid door direction %d in room at (%d,%d)"),
+            //        DirIndex,
+            //        FMath::RoundToInt(Room->GetGridPosition().X),
+            //        FMath::RoundToInt(Room->GetGridPosition().Y));
+            //    continue;
+            //}
+
             if (Room->GetDoorDirection(DirIndex))
             {
-                // Calculate potential end room position
                 const FVector2D NewPos = Room->GetGridPosition() + GetDirectionVector(DirIndex);
 
                 if (IsPositionValid(NewPos))
                 {
-                    // Try to find matching end room template
+                    // Validate end room templates before use
                     for (TSubclassOf<ARoom> EndRoomClass : EndRoomTemplates)
                     {
+                        if (!EndRoomClass)
+                        {
+                            UE_LOG(LogTemp, Warning, TEXT("Null end room class in templates"));
+                            continue;
+                        }
+
                         if (ARoom* DefaultEndRoom = EndRoomClass->GetDefaultObject<ARoom>())
                         {
-                            // Check for matching door in opposite direction
-                            int32 OppositeDir = GetOppositeDirection(DirIndex);
+                            const int32 OppositeDir = GetOppositeDirection(DirIndex);
+                            if (OppositeDir < 0 || OppositeDir >= 4)
+                            {
+                                UE_LOG(LogTemp, Error, TEXT("Invalid opposite direction %d"), OppositeDir);
+                                continue;
+                            }
+
                             if (DefaultEndRoom->GetDoorDirection(OppositeDir))
                             {
-                                // Spawn and register the end room
-                                if (ARoom* EndRoom = SpawnRoom(NewPos, EndRoomClass))
+                                if (TObjectPtr<ARoom> EndRoom = SpawnRoom(NewPos, EndRoomClass))
                                 {
                                     UE_LOG(LogTemp, Warning, TEXT("Placed end room at (%d,%d)"),
                                         FMath::RoundToInt(NewPos.X),
                                         FMath::RoundToInt(NewPos.Y));
-                                    break; // Exit template loop after successful placement
+                                    break;
                                 }
                             }
                         }
