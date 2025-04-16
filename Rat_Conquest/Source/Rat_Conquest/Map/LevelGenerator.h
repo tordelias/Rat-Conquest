@@ -29,7 +29,7 @@ protected:
 	TArray<TSubclassOf<ARoom>> RoomTemplates;
 
 	UPROPERTY(EditAnywhere, Category = "Room Settings")
-	TArray<ARoom*> EndRoomTemplates;
+	TArray<TSubclassOf<ARoom>> EndRoomTemplates;
 
 	UPROPERTY(EditAnywhere, Category = "Grid Settings")
 	FVector2D RoomSize = FVector2D(1408, 768);

@@ -499,6 +499,7 @@ void ALevelGenerator::RegenerateRooms()
     RoomInstances.Empty();
     GridPositions.Empty();
     GenerateInitialRooms();
+	
 }
 
 void ALevelGenerator::GenerateRooms(TObjectPtr<ARoom> _CurrentRoom)
@@ -528,6 +529,7 @@ void ALevelGenerator::GenerateRooms(TObjectPtr<ARoom> _CurrentRoom)
     {
         //PlaceEndRooms();
     }
+    PlaceEndRooms();
     if (GameManager) {
         GameManager->bLevelFinishedGenerating = true;
     }
@@ -573,8 +575,44 @@ void ALevelGenerator::CheckOpenDoors()
 
 void ALevelGenerator::PlaceEndRooms()
 {
-    // Implementation for placing end rooms similar to Godot logic
-  
+    for (const TObjectPtr<ARoom>& Room : RoomInstances)
+    {
+        if (!IsValid(Room)) continue;
+
+        // Check all four door directions
+        for (int32 DirIndex = 0; DirIndex < 4; DirIndex++)
+        {
+            if (Room->GetDoorDirection(DirIndex))
+            {
+                // Calculate potential end room position
+                const FVector2D NewPos = Room->GetGridPosition() + GetDirectionVector(DirIndex);
+
+                if (IsPositionValid(NewPos))
+                {
+                    // Try to find matching end room template
+                    for (TSubclassOf<ARoom> EndRoomClass : EndRoomTemplates)
+                    {
+                        if (ARoom* DefaultEndRoom = EndRoomClass->GetDefaultObject<ARoom>())
+                        {
+                            // Check for matching door in opposite direction
+                            int32 OppositeDir = GetOppositeDirection(DirIndex);
+                            if (DefaultEndRoom->GetDoorDirection(OppositeDir))
+                            {
+                                // Spawn and register the end room
+                                if (ARoom* EndRoom = SpawnRoom(NewPos, EndRoomClass))
+                                {
+                                    UE_LOG(LogTemp, Warning, TEXT("Placed end room at (%d,%d)"),
+                                        FMath::RoundToInt(NewPos.X),
+                                        FMath::RoundToInt(NewPos.Y));
+                                    break; // Exit template loop after successful placement
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 void ALevelGenerator::EnsureAllDoorsFilled()
