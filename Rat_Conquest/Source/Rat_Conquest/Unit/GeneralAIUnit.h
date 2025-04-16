@@ -19,6 +19,8 @@ class RAT_CONQUEST_API AGeneralAIUnit : public APlayerUnit
 	void RandomizeStats() override;
 	void SetTexcture(int num);
 
+	void SetStatsBasedOnColorID(int32 FrogColorID);
+
 public: 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	bool IsFrog = false; 

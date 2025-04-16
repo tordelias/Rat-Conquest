@@ -22,6 +22,7 @@ void AGeneralAIUnit::RandomizeStats()
 	{
 		int randomTexture = FMath::RandRange(0, 4);
 		SetTexcture(randomTexture);
+		SetStatsBasedOnColorID(randomTexture);
 	}
 }
 
@@ -51,4 +52,60 @@ void AGeneralAIUnit::SetTexcture(int num)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Invalid material index!"));
 	}
+}
+
+void AGeneralAIUnit::SetStatsBasedOnColorID(int32 FrogColorID)
+{
+	// Base stats
+	float mHealth = FMath::RandRange(10.f, 15.f);
+	float Defense = FMath::RandRange(2.f, 5.f);
+	float Speed = FMath::RandRange(2.f, 5.f);
+	float damage = FMath::RandRange(2.f, 3.f);
+	float initiative = FMath::RandRange(1.f, 3.f);
+
+	switch (FrogColorID)
+	{
+	case 2: // Green - Normal
+		// No changes
+		break;
+
+	case 3: // Brown - +Health, +Defense, -Speed, -Damage
+		mHealth += 15.f;
+		Defense += 5.f;
+		Speed -= 2.f;
+		damage -= 3.f;
+		break;
+
+	case 1: // Purple - +Damage, -Health
+		damage += 5.f;
+		mHealth -= 10.f;
+		break;
+
+	case 4: // Blue - +Speed, -Health, +Initiative
+		Speed += 10.f;
+		mHealth -= 7.f;
+		initiative += 5.f;
+		break;
+
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("Invalid FrogColorID passed: %d"), FrogColorID);
+		break;
+	}
+
+	// Clamp to prevent stats from dropping too low
+	mHealth = FMath::Max(5.f, mHealth);
+	Defense = FMath::Max(1.f, Defense);
+	Speed = FMath::Max(1.f, Speed);
+	damage = FMath::Max(1.f, damage);
+	initiative = FMath::Max(1.f, initiative);
+
+	// Apply to unit
+	maxHealth = mHealth;
+	Health = mHealth;
+	Defence = Defense;
+	MovementSpeed = Speed;
+	Damage = damage;
+	Initiative = initiative;
+
+	UE_LOG(LogTemp, Log, TEXT("Stats set for FrogColorID %d"), FrogColorID);
 }
