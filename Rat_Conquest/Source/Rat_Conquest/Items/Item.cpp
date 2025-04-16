@@ -2,6 +2,7 @@
 
 
 #include "Item.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 AItem::AItem()
@@ -12,6 +13,9 @@ AItem::AItem()
 	RingMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RingMesh"));
 	
 	RootComponent = ItemMesh;
+    //spawn the effect
+	
+   
 }
 
 void AItem::EquipItem(AActor* UnitOwner)
@@ -33,7 +37,11 @@ void AItem::EquipItem(AActor* UnitOwner)
     SetActorRelativeLocation(Offset);
 	ItemMesh->SetVisibility(false);
 	RingMesh->SetVisibility(false);
-    bIsEquipped = true;    
+    bIsEquipped = true;
+    if (ActiveEffect)
+    {
+        ActiveEffect->Deactivate();
+    }
 }
 
 void AItem::DropItem()
@@ -45,6 +53,10 @@ void AItem::DropItem()
     ItemMesh->SetRenderCustomDepth(false);
     ItemMesh->SetCustomDepthStencilValue(0);
     bIsEquipped = false;
+    if (ActiveEffect)
+    {
+        ActiveEffect->Activate();
+    }
 }
 
 void AItem::UseItem()
@@ -112,6 +124,25 @@ void AItem::InitializeItem()
 
 	
         // Assign the item to this actor or elsewhere
+    }
+    if (ItemEffect)
+    {
+        FVector Offset = FVector(0.0f, 0.0f, -35.0f);
+        ActiveEffect = UNiagaraFunctionLibrary::SpawnSystemAttached(
+            ItemEffect,
+            ItemMesh,                // Attach to this mesh
+            NAME_None,               // Optional socket name
+            Offset,     // Relative offset
+            FRotator::ZeroRotator,
+            EAttachLocation::KeepRelativeOffset,
+            true                     // Auto-destroy? Set to false if you want it to persist
+        );
+
+        if (ActiveEffect)
+        {
+            ActiveEffect->SetAutoActivate(true); // Optional: ensure it's activated
+            ActiveEffect->Activate(true);
+        }
     }
 }
 

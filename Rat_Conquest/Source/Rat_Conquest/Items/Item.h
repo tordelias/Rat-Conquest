@@ -39,8 +39,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	UNiagaraSystem* ItemEffect;
 
+
 	UPROPERTY()
-	UNiagaraComponent* NiagaraComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
+	UNiagaraComponent* ActiveEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	UDataTable* ItemDataTable;
