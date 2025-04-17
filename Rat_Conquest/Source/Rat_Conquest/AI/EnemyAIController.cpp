@@ -18,7 +18,7 @@ void AEnemyAIController::OnPossess(APawn* InPawn)
 	Super::OnPossess(InPawn);
 
 	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEnemyAIController::InitializeDifficulty, 3.f, false);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEnemyAIController::InitializeDifficulty, 0.1f, false);
 
 }
 
@@ -31,28 +31,19 @@ void AEnemyAIController::InitializeDifficulty()
 	AGeneralAIUnit* AI = Cast<AGeneralAIUnit>(GetPawn());
 	if (AI)
 	{
-
-		FString DebugMessage = FString::Printf(TEXT("AI Difficulty: %d"), AI->AIDifficulty);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, DebugMessage);
-
-
 		switch (AI->AIDifficulty)
 		{
 		case 0: // Easy
 			Difficulty = EEnemyAIDifficulty::Easy;
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("AI Difficulty: Easy"));
 			break;
 		case 1: // Normal
 			Difficulty = EEnemyAIDifficulty::Normal;
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("AI Difficulty: Normal"));
 			break;
 		case 2: // Hard
 			Difficulty = EEnemyAIDifficulty::Hard;
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("AI Difficulty: Hard"));
 			break;
 		default:
 			Difficulty = EEnemyAIDifficulty::Easy;
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("AI Difficulty: Default (Easy)"));
 			break;
 		}
 	}

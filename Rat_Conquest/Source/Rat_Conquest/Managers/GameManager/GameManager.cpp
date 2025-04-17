@@ -85,7 +85,6 @@ void AGameManager::SetGameDifficulty(int difficulty)
 {
     //Print difficulty to screen
 	GameDifficulty = difficulty;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Game Difficulty: ") + FString::FromInt(GameDifficulty));
 }
 
 void AGameManager::InitalizeUnits()
@@ -458,7 +457,6 @@ void AGameManager::StartEncounter()
             );
             if (NewEnemy->GridManager.IsValid() && NewEnemy->GridManager->bIsGridScanned) 
             {
-                GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Game Difficulty: ") + FString::FromInt(GameDifficulty));
                 Cast<AGeneralAIUnit>(NewEnemy)->AIDifficulty = GameDifficulty;
                 NewEnemy->SpawnDefaultController();
 

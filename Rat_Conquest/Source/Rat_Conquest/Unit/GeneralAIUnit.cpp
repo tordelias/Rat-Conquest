@@ -82,7 +82,7 @@ void AGeneralAIUnit::SetStatsBasedOnColorID(int32 FrogColorID)
 		break;
 
 	case 3: // Blue - +Speed, -Health, +Initiative
-		Speed += 10.f;
+		Speed += 5.f;
 		mHealth -= 7.f;
 		initiative += 5.f;
 		break;
@@ -94,8 +94,8 @@ void AGeneralAIUnit::SetStatsBasedOnColorID(int32 FrogColorID)
 
 	// Clamp to prevent stats from dropping too low
 	mHealth = FMath::Max(5.f, mHealth);
-	Defense = FMath::Max(1.f, Defense);
-	Speed = FMath::Max(1.f, Speed);
+	Defense = FMath::Max(0.f, Defense);
+	Speed = FMath::Max(2.f, Speed);
 	damage = FMath::Max(1.f, damage);
 	initiative = FMath::Max(1.f, initiative);
 

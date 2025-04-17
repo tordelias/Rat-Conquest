@@ -68,7 +68,7 @@ public:
 
 	int RoomsExplored = 0;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int GameDifficulty = 2;
 
 	bool hasSpawned = false;
