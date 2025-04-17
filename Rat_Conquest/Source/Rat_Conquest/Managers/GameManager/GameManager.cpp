@@ -451,7 +451,7 @@ void AGameManager::StartEncounter()
             if (NewEnemy->GridManager.IsValid() && NewEnemy->GridManager->bIsGridScanned) {
 
                 NewEnemy->SpawnDefaultController();
-                NewEnemy->DelayedInitalPosition();
+                
                 UE_LOG(LogTemp, Error, TEXT("SET POSITON enemy"));
             }
             else {

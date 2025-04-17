@@ -77,7 +77,7 @@ void AItem::InitializeItem()
     FItemData* ItemData = ItemDataTable->FindRow<FItemData>(RowName, TEXT(""));
     for (const auto& RowNames : ItemDataTable->GetRowNames())
     {
-        UE_LOG(LogTemp, Warning, TEXT("Row Name: %s"), *RowNames.ToString());
+        //UE_LOG(LogTemp, Warning, TEXT("Row Name: %s"), *RowNames.ToString());
     }
     if (ItemData)
     {
@@ -115,7 +115,7 @@ void AItem::InitializeItem()
 				ItemMesh->SetCustomDepthStencilValue(3);
             }
             ItemMesh->SetVisibility(true);
-            UE_LOG(LogTemp, Warning, TEXT("Static Mesh Set Successfully: %s"), *ItemDataB->ItemAssetData.Mesh->GetName());
+            //UE_LOG(LogTemp, Warning, TEXT("Static Mesh Set Successfully: %s"), *ItemDataB->ItemAssetData.Mesh->GetName());
         }
         else
         {

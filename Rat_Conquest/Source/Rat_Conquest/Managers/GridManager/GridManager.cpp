@@ -68,7 +68,7 @@ void AGridManager::GenerateGrid(int32 Rows, int32 Columns, float Size)
                 if (GridTile != nullptr)
                 {
                     GridTile->GridPosition = LogicalGridPosition;
-                    UE_LOG(LogTemp, Display, TEXT("Spawned tile at LogicalGridPosition: (%f, %f)"), LogicalGridPosition.X, LogicalGridPosition.Y);
+                   // UE_LOG(LogTemp, Display, TEXT("Spawned tile at LogicalGridPosition: (%f, %f)"), LogicalGridPosition.X, LogicalGridPosition.Y);
                 }
                 else
                 {
@@ -149,31 +149,31 @@ void AGridManager::ScanWorldForObjects()
             {
                 // The overlapping actor has a StaticMeshComponent
                 Tile->AddOccupant(Actor);
-                UE_LOG(LogTemp, Display, TEXT("Found actor with StaticMesh at Row: %f, Column: %f, Name: %s"), Tile->GridPosition.X, Tile->GridPosition.Y, *Actor->GetName());
+               // UE_LOG(LogTemp, Display, TEXT("Found actor with StaticMesh at Row: %f, Column: %f, Name: %s"), Tile->GridPosition.X, Tile->GridPosition.Y, *Actor->GetName());
                 
             }
 			if (StaticMeshComp && Item)
 			{
 				
 				Tile->ItemSlot = Item;
-				UE_LOG(LogTemp, Error, TEXT("Found item at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
+				//UE_LOG(LogTemp, Error, TEXT("Found item at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
 			}
             if (StaticMeshComp && Actor->ActorHasTag(TEXT("PlayerPos"))) {
 				PlayerPositions.Add(FVector2D(Tile->GridPosition.X, Tile->GridPosition.Y));
 
-                UE_LOG(LogTemp, Error, TEXT("FOUND PLAYER POS at Row:"));
+                //UE_LOG(LogTemp, Error, TEXT("FOUND PLAYER POS at Row:"));
 
             }
             if (StaticMeshComp && Actor->ActorHasTag(TEXT("EnemyPos"))) {
                 EnemyPositions.Add(FVector2D(Tile->GridPosition.X, Tile->GridPosition.Y));
  
-                UE_LOG(LogTemp, Error, TEXT("FOUND ENEMY POS at Row:"));
+               // UE_LOG(LogTemp, Error, TEXT("FOUND ENEMY POS at Row:"));
 
             }
 			if (StaticMeshComp && Actor->ActorHasTag(TEXT("InteractObj")) && InteractableObj)
 			{
                 Tile->InteractableObjectSlot = InteractableObj;
-                UE_LOG(LogTemp, Display, TEXT("Found interactable object at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
+                //UE_LOG(LogTemp, Display, TEXT("Found interactable object at Row: %f, Column: %f"), Tile->GridPosition.X, Tile->GridPosition.Y);
 			}
 
         }
@@ -278,9 +278,20 @@ TWeakObjectPtr<AActor> AGridManager::SetStartingPositions(bool _bPlayerUnit)
     }
     else {
 
-        for (int i = 0; i < EnemyPositions.Num(); ++i)
+        // Make a copy of the EnemyPositions array
+        TArray<FVector2D> ShuffledPositions = EnemyPositions;
+
+        // Shuffle the array
+        for (int32 i = 0; i < ShuffledPositions.Num(); ++i)
         {
-            FVector2D GridPosition = EnemyPositions[i];
+            int32 SwapIndex = FMath::RandRange(i, ShuffledPositions.Num() - 1);
+            ShuffledPositions.Swap(i, SwapIndex);
+        }
+
+        // Iterate over the shuffled positions
+        for (int i = 0; i < ShuffledPositions.Num(); ++i)
+        {
+            FVector2D GridPosition = ShuffledPositions[i];
             AGridTile* Tile = GetTileAtPosition(GridPosition.X, GridPosition.Y).Get();
             if (Tile && !Tile->bIsOccupied)
             {
