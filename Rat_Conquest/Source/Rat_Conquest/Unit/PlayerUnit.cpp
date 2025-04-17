@@ -932,13 +932,14 @@ void APlayerUnit::UseCurrentItem()
 		AWeapon* currentWeapon = Cast<AWeapon>(ItemSlots[0]);
 		if (currentWeapon && IsValid(EnemyToAttack.Get())) {
 			currentWeapon->SetEnemyLocation(EnemyToAttack->GetActorLocation());
+			currentWeapon->SetUnitRefrence(this, EnemyToAttack);
 			currentWeapon->UseItem();
 			if (bIsRangedUnit) {
 				float CurrentDelay = currentWeapon->ProjectileTime;
 				
 				if (IsValid(CombatManager.Get()) && IsValid(EnemyToAttack.Get())) {
-					CombatManager->DealDamageToUnit(this, EnemyToAttack.Get());
-					FinishTurn();
+					//CombatManager->DealDamageToUnit(this, EnemyToAttack.Get());
+					//FinishTurn();
 				}
 			}
 			else {

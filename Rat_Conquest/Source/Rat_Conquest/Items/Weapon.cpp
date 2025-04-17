@@ -2,6 +2,7 @@
 
 
 #include "Weapon.h"
+#include "Rat_Conquest/Unit/PlayerUnit.h"
 
 AWeapon::AWeapon()
 {
@@ -54,6 +55,12 @@ void AWeapon::UseArrowShot()
 		{
 			// Initialize the projectile with a curve
 			Projectile->InitializeProjectileWithCurve(SpawnLocation, EnemyLocation);
+			if (UnitRef.IsValid() && EnemyRef.IsValid())
+			{
+				// Set the projectile's damage and unit reference
+				Projectile->SetProjectileUnitRefrence(UnitRef, EnemyRef);
+			}
+			
 			ProjectileTime = Projectile->TimeToTarget;
 		}
 	}
@@ -75,7 +82,13 @@ void AWeapon::UseCrossBowShot()
 		if (Projectile)
 		{
 			// Initialize the projectile with a curve
+
 			Projectile->InitializeProjectileWithStraightPath(SpawnLocation, EnemyLocation);
+			if (UnitRef.IsValid() && EnemyRef.IsValid())
+			{
+				// Set the projectile's damage and unit reference
+				Projectile->SetProjectileUnitRefrence(UnitRef, EnemyRef);
+			}
 			ProjectileTime = Projectile->TimeToTarget;
 		}
 	}
@@ -89,4 +102,11 @@ void AWeapon::SetEnemyLocation(FVector CurrentLocation)
 {
 	_EnemyLocation = CurrentLocation;
 	
+}
+
+void AWeapon::SetUnitRefrence(TWeakObjectPtr<APlayerUnit> _UnitRef, TWeakObjectPtr<APlayerUnit> _EnemyRef)
+{
+	UnitRef = _UnitRef;
+	EnemyRef = _EnemyRef;
+
 }

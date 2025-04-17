@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "GenericProjectile.generated.h"
 
+class ACombatManager;
+class APlayerUnit;
+
 UCLASS()
 class RAT_CONQUEST_API AGenericProjectile : public AActor
 {
@@ -25,6 +28,15 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UStaticMeshComponent* ProjectileMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat Manager")
+	TWeakObjectPtr<ACombatManager> CombatManager;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Unit")
+	TWeakObjectPtr<APlayerUnit> UnitRef;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Unit")
+	TWeakObjectPtr<APlayerUnit> EnemyRef;
+
 	FVector Direction;
 	// Target location for the projectile
 	FVector TargetLocation;
@@ -41,6 +53,8 @@ public:
 	// Internal timer to control the curve
 	float ElapsedTime = 0.0f;
 
+	int damage = 0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
 	bool bUseStraightPath = false;
 
@@ -50,8 +64,9 @@ public:
 	void InitializeProjectileWithCurve(const FVector& _StartLocation, const FVector& Target);
 	void InitializeProjectileWithStraightPath(const FVector& _StartLocation, const FVector& Target);
 	void InitializeProjectile(const FVector& ShootDirection);
+	void SetProjectileUnitRefrence(TWeakObjectPtr<APlayerUnit> _unitref, TWeakObjectPtr<APlayerUnit> _enemy);
 	void StraightShot();
-
+	void DealDamage();
 
 
 	UFUNCTION()
