@@ -461,12 +461,7 @@ void AGameManager::StartEncounter()
                 GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Game Difficulty: ") + FString::FromInt(GameDifficulty));
                 Cast<AGeneralAIUnit>(NewEnemy)->AIDifficulty = GameDifficulty;
                 NewEnemy->SpawnDefaultController();
-<<<<<<< Updated upstream
-                
-                UE_LOG(LogTemp, Error, TEXT("SET POSITON enemy"));
-=======
 
->>>>>>> Stashed changes
             }
             else {
                 UE_LOG(LogTemp, Error, TEXT("Failed to get GM for enemy"));
