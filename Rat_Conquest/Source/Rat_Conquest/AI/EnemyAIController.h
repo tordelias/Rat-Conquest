@@ -39,6 +39,8 @@ public:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 
+	void InitializeDifficulty();
+
 	void MoveToClosestPossibleTile(TWeakObjectPtr<APlayerUnit> Enemy);
 	void MoveToMostTacticalTile(TWeakObjectPtr<APlayerUnit> Enemy);
 

@@ -20,7 +20,7 @@ void AGeneralAIUnit::RandomizeStats()
 
 	if (IsFrog)
 	{
-		int randomTexture = FMath::RandRange(0, 4);
+		int randomTexture = FMath::RandRange(0, 3);
 		SetTexcture(randomTexture);
 		SetStatsBasedOnColorID(randomTexture);
 	}
@@ -65,23 +65,23 @@ void AGeneralAIUnit::SetStatsBasedOnColorID(int32 FrogColorID)
 
 	switch (FrogColorID)
 	{
-	case 2: // Green - Normal
+	case 1: // Green - Normal
 		// No changes
 		break;
 
-	case 3: // Brown - +Health, +Defense, -Speed, -Damage
+	case 2: // Brown - +Health, +Defense, -Speed, -Damage
 		mHealth += 15.f;
 		Defense += 5.f;
 		Speed -= 2.f;
 		damage -= 3.f;
 		break;
 
-	case 1: // Purple - +Damage, -Health
+	case 0: // Purple - +Damage, -Health
 		damage += 5.f;
 		mHealth -= 10.f;
 		break;
 
-	case 4: // Blue - +Speed, -Health, +Initiative
+	case 3: // Blue - +Speed, -Health, +Initiative
 		Speed += 10.f;
 		mHealth -= 7.f;
 		initiative += 5.f;

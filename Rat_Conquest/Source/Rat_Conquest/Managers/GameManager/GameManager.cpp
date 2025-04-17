@@ -15,6 +15,7 @@
 #include "Rat_Conquest/AI/EnemyAIController.h"
 #include "Sound/SoundBase.h"
 #include "Rat_Conquest/Unit/UnitMarker.h"
+#include "Rat_Conquest/Unit/GeneralAIUnit.h"
 // Sets default values
 AGameManager::AGameManager()
 {
@@ -78,6 +79,13 @@ void AGameManager::TogglePlayerTurn()
 {
     bisPlayersturn = true;
 
+}
+
+void AGameManager::SetGameDifficulty(int difficulty)
+{
+    //Print difficulty to screen
+	GameDifficulty = difficulty;
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Game Difficulty: ") + FString::FromInt(GameDifficulty));
 }
 
 void AGameManager::InitalizeUnits()
@@ -448,11 +456,17 @@ void AGameManager::StartEncounter()
                 SpawnRotation,
                 SpawnParams
             );
-            if (NewEnemy->GridManager.IsValid() && NewEnemy->GridManager->bIsGridScanned) {
-
+            if (NewEnemy->GridManager.IsValid() && NewEnemy->GridManager->bIsGridScanned) 
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Game Difficulty: ") + FString::FromInt(GameDifficulty));
+                Cast<AGeneralAIUnit>(NewEnemy)->AIDifficulty = GameDifficulty;
                 NewEnemy->SpawnDefaultController();
+<<<<<<< Updated upstream
                 
                 UE_LOG(LogTemp, Error, TEXT("SET POSITON enemy"));
+=======
+
+>>>>>>> Stashed changes
             }
             else {
                 UE_LOG(LogTemp, Error, TEXT("Failed to get GM for enemy"));

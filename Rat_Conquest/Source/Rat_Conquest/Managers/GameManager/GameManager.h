@@ -25,6 +25,9 @@ public:
 	// Add a public function to toggle the turn between players
 	void TogglePlayerTurn();
 
+	UFUNCTION(BlueprintCallable, Category = "GameManager")
+	void SetGameDifficulty(int difficulty);
+
 	void InitalizeUnits();
 
 	void StartTurnOrder();
@@ -64,6 +67,9 @@ public:
 	const int32 TurnBufferSize = 10;
 
 	int RoomsExplored = 0;
+
+	UPROPERTY()
+	int GameDifficulty = 2;
 
 	bool hasSpawned = false;
 	bool bLevelFinishedGenerating = false;
