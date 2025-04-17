@@ -27,7 +27,7 @@ void AGameManager::BeginPlay()
 {
     Super::BeginPlay();
     
-	
+	//UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 2.0f); // Reset time dilation to normal speed
     //InitalizeUnits();
     TArray<AActor*> FoundGridManagers;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGridManager::StaticClass(), FoundGridManagers);
