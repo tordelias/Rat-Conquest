@@ -955,6 +955,16 @@ void APlayerUnit::UseCurrentItem()
 	}
 }
 
+void APlayerUnit::TakeDamageFromEnemy(int DamageTaken)
+{
+	if (!CombatManager.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("CombatManager is null"));
+		return;
+	}
+	CombatManager->HandleUnitDamage(this, DamageTaken);
+}
+
 void APlayerUnit::CheckForGridObjects()
 {
 	if (!IsValid(GridManager.Get())) {

@@ -44,8 +44,8 @@ public:
 	void MoveToClosestPossibleTile(TWeakObjectPtr<APlayerUnit> Enemy);
 	void MoveToMostTacticalTile(TWeakObjectPtr<APlayerUnit> Enemy);
 
-	void ChooseAction();
-	void MeleeAttack();
+	virtual void ChooseAction();
+	virtual void MeleeAttack();
 	void RangedAttack();
 
 	TWeakObjectPtr<APlayerUnit> FindClosestEnemy();
@@ -53,9 +53,10 @@ public:
 	TWeakObjectPtr<APlayerUnit> FindMostVulnerableEnemy();
 
 
-private: 
 	UPROPERTY()
 	TWeakObjectPtr<APlayerUnit> Target;
+
+private: 
 	FVector2d TargetGridPosition;
 
 	TArray<FMeleeTileOption> TileOptions;

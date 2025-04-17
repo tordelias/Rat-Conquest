@@ -210,6 +210,8 @@ public:
     void EquipStartWeapon(TWeakObjectPtr<AItem> ItemToAdd);
     void UseCurrentItem();
 
+	void TakeDamageFromEnemy(int DamageTaken);
+
     void Mutate();
     TArray<int> GetMutationC1();
     TArray<int> GetMutationC2();

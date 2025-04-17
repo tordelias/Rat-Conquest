@@ -5,6 +5,8 @@
 
 AGeneralAIUnit::AGeneralAIUnit()
 {
+	TongueWorldTarget = FVector::ZeroVector;
+	animationToPlay = FVector2D(0, 75);
 }
 
 void AGeneralAIUnit::RandomizeStats()
@@ -76,12 +78,12 @@ void AGeneralAIUnit::SetStatsBasedOnColorID(int32 FrogColorID)
 		damage -= 3.f;
 		break;
 
-	case 0: // Purple - +Damage, -Health
+	case 0: // Purple - +Damage, -Health //bodyslam
 		damage += 5.f;
 		mHealth -= 10.f;
 		break;
 
-	case 3: // Blue - +Speed, -Health, +Initiative
+	case 3: // Blue - +Speed, -Health, +Initiative //bodyslam
 		Speed += 5.f;
 		mHealth -= 7.f;
 		initiative += 5.f;

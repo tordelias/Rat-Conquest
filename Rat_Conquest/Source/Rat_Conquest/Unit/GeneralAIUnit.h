@@ -27,7 +27,17 @@ public:
 	bool IsFrog = false; 
 	int AIDifficulty = 5; // 0 = Easy, 1 = Medium, 2 = Hard
 
+	UPROPERTY(BlueprintReadWrite)
+	FVector TongueWorldTarget;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool ToungeState = false;
+
+	void SetToungeWorldTarget(FVector Target) { TongueWorldTarget = Target; OnBoneMoved.Broadcast(); }
+
+
+	UPROPERTY(BlueprintAssignable, Category = "Animation")
+	FOnBlendSpaceChange OnBoneMoved;
 
 	
 };
