@@ -16,6 +16,7 @@
 #include "Sound/SoundBase.h"
 #include "Rat_Conquest/Unit/UnitMarker.h"
 #include "Rat_Conquest/Unit/GeneralAIUnit.h"
+#include "Rat_Conquest/LevelObjects/InteractableGridObject.h"
 // Sets default values
 AGameManager::AGameManager()
 {
@@ -144,10 +145,10 @@ void AGameManager::StartTurnOrder()
 
     // Sort by Initiative, with PlayerUnits going first in case of ties
     AllUnits.Sort([](const APlayerUnit& A, const APlayerUnit& B) {
-        if (A.Initiative == B.Initiative) {
+        if (A.Initiative + A.InitiativeFromItems == B.Initiative + B.InitiativeFromItems) {
             return A.bIsPlayerUnit && !B.bIsPlayerUnit; // Player goes first in tie
         }
-        return A.Initiative > B.Initiative; // Higher Initiative goes first
+        return A.Initiative + A.InitiativeFromItems > B.Initiative + B.InitiativeFromItems; // Higher Initiative goes first
         });
 
     // Fill turn queue ensuring all units go before any repeat turns
@@ -277,10 +278,10 @@ void AGameManager::EndUnitTurn()
                 MainHUD->ShowVictoryWidget();
             }
         }
-        if (LevelGenerator && RoomsExplored < 2 && !bTestEncounter) {
+        if (LevelGenerator && RoomsExplored < 5 && !bTestEncounter) {
             LevelGenerator->SetupRoomSelectUI();
         }
-        else if (RoomsExplored >= 2 && !bTestEncounter) {
+        else if (RoomsExplored >= 5 && !bTestEncounter) {
             //Show victory screen
             if (MainHUD) {
                 MainHUD->ShowVictoryWidget();
@@ -425,6 +426,7 @@ void AGameManager::LoadExploredEncounter()
     if (LevelGenerator) {
         LevelGenerator->SetupRoomSelectUI();
     }
+	UE_LOG(LogTemp, Warning, TEXT("Loading explored encounter"));
 }
 
 
@@ -515,7 +517,9 @@ void AGameManager::StartEncounter()
 
        
     }
-    SpawnLoot();
+   
+	SpawnLoot();
+    SpawnInteractableObjects();
     GetWorldTimerManager().SetTimerForNextTick(this, &AGameManager::InitalizeUnits);
     //// Initialize the player and enemy units
    
@@ -659,6 +663,40 @@ void AGameManager::SpawnLoot()
     );
    
     GridManager->ScanWorldForObjects();
+}
+
+void AGameManager::SpawnInteractableObjects()
+{
+    if (!GridManager || InteractObjPool.Num() == 0)
+        return; // Ensure GridManager and Pool exist
+
+	FVector SpawnLocation = GridManager->GetRandomPositionInGrid();
+	if (SpawnLocation == FVector())
+		return; // No valid unoccupied positions available
+	//SpawnLocation.Z += 45;
+	int RandomIndex = FMath::RandRange(0, InteractObjPool.Num() - 1);
+	FRotator SpawnRotation = FRotator::ZeroRotator;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	AInteractableGridObject* NewInteractable = GetWorld()->SpawnActor<AInteractableGridObject>(
+		InteractObjPool[RandomIndex],
+		SpawnLocation,
+		SpawnRotation,
+		SpawnParams
+	);
+	if (NewInteractable)
+	{
+		NewInteractable->SetActorLocation(SpawnLocation);
+		NewInteractable->SetActorRotation(SpawnRotation);
+		GridManager->ScanWorldForObjects();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to spawn interactable object"));
+	}
+
 }
 
 void AGameManager::RotateUnits(float roation)

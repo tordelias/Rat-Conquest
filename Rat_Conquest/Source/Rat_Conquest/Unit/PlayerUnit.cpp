@@ -79,7 +79,7 @@ APlayerUnit::APlayerUnit()
 	GridManager = nullptr;
 	CombatManager = nullptr;
 	bIsRangedUnit = false;
-	Health = maxHealth; 
+	Health = maxHealth;
 
 	UE_LOG(LogTemp, Warning, TEXT("APlayerUnit Constructor - End"));
 }
@@ -392,7 +392,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 
 	// Check if the target tile is within movement range
 	float distance = ChebyshevDistance(GridTile->GridPosition, OldGridTile->GridPosition);
-	if (distance > MovementSpeed)
+	if (distance > MovementSpeed + SpeedFromItems)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Target tile is out of movement range |MoveToTile_PlayerUnit.cpp|"));
 		if (!bIsPlayerUnit)
@@ -531,7 +531,7 @@ TArray<FVector2D> APlayerUnit::GetPathToTile(FVector2D InTargetGridPosition, FVe
 
 			float TentativeG = CurrentTile->G + ChebyshevDistance(CurrentTile->GridPosition, Neighbour->GridPosition);
 
-			if (TentativeG > MovementSpeed)
+			if (TentativeG > MovementSpeed + SpeedFromItems)
 			{
 				continue;
 			}
@@ -644,7 +644,7 @@ void APlayerUnit::PlayerAttack(TWeakObjectPtr<APlayerCamera> PlayerCharacter)
 	// Handle ranged attack
 	if (PlayerUnit->bIsRangedUnit)
 	{
-		if (DistanceToEnemy > AttackRange)
+		if (DistanceToEnemy > AttackRange + RangeFromItems)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Enemy is out of range for ranged attack"));
 			return;
@@ -656,7 +656,7 @@ void APlayerUnit::PlayerAttack(TWeakObjectPtr<APlayerCamera> PlayerCharacter)
 	}
 
 	// Handle melee attack
-	if (DistanceToEnemy > PlayerUnit->MovementSpeed + ADJACENT_TILE_RANGE)
+	if (DistanceToEnemy > PlayerUnit->MovementSpeed + PlayerUnit->SpeedFromItems + ADJACENT_TILE_RANGE)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Enemy out of movement range"));
 		return;
@@ -694,7 +694,7 @@ void APlayerUnit::PlayerAttack(TWeakObjectPtr<APlayerCamera> PlayerCharacter)
 		return;
 	}
 
-	if (ChebyshevDistance(PlayerPosition, AttackTileGridPos) > PlayerUnit->MovementSpeed + ADJACENT_TILE_RANGE)
+	if (ChebyshevDistance(PlayerPosition, AttackTileGridPos) > PlayerUnit->MovementSpeed + SpeedFromItems + ADJACENT_TILE_RANGE)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Attack tile out of range"));
 		return;
@@ -1020,11 +1020,15 @@ void APlayerUnit::CheckForItems()
 		else if (NewItem->ItemDataB->ItemType == EItemType::Armor)
 		{
 			SlotIndex = 1; // Armor slot
+			if (!bIsPlayerUnit)
+				return;
 			UE_LOG(LogTemp, Error, TEXT("Player picked up armor"));
 		}
 		else if (NewItem->ItemDataB->ItemType == EItemType::Artifact)
 		{
 			SlotIndex = 2; // Consumable slot
+			if (!bIsPlayerUnit)
+				return;
 			UE_LOG(LogTemp, Error, TEXT("Player picked up consumable"));
 		}
 		else
@@ -1167,7 +1171,7 @@ void APlayerUnit::DropItem(TWeakObjectPtr<AItem> OldItem, FVector2D CurrentPosit
 	
 	// Determine the world location to drop the item
 	FVector DropLocation = GetActorLocation(); // Adjust the offset as needed
-
+	DropLocation.Z += 45;
 	// Spawn parameters
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
@@ -1232,7 +1236,7 @@ void APlayerUnit::BeginFocus()
 	//	SkeletalMesh->SetRenderCustomDepth(true);
 	}
 	// Store movement tiles in MovementTiles
-	MovedTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed);
+	MovedTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed + SpeedFromItems);
 	for (auto tile : MovedTiles)
 	{
 		//if (bIsPlayerUnit)
@@ -1286,7 +1290,7 @@ void APlayerUnit::BeginMouseHoverFocus()
 		}
 
 		// Get new movable tiles
-		HoverTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed);
+		HoverTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed + SpeedFromItems);
 
 		// Highlight tiles based on unit type
 		for (auto& Tile : HoverTiles)
@@ -1553,11 +1557,11 @@ void APlayerUnit::UpdateInteractableData()
 	CalculateStats();
 
 	InstanceInteractableData.UnitHealth = Health;
-	InstanceInteractableData.maxHealth = maxHealth + HealthFromItems;
+	InstanceInteractableData.maxHealth = maxHealth + MaxHealthFromItems;
 	InstanceInteractableData.Range = AttackRange + RangeFromItems;
 	InstanceInteractableData.Attack = Attack + AttackFromItems;
 	InstanceInteractableData.UnitDamage = Damage;
-	InstanceInteractableData.UnitMovementSpeed = MovementSpeed;
+	InstanceInteractableData.UnitMovementSpeed = MovementSpeed + SpeedFromItems;
 	InstanceInteractableData.Defense = Defence + DefenceFromItems;
 	InstanceInteractableData.MinDamage = FMath::Max(1, Damage + DamageFromItems - 2);
 	InstanceInteractableData.MaxDamage = Damage + DamageFromItems + 2;
@@ -1576,7 +1580,7 @@ void APlayerUnit::UpdateHealthBar()
 		return;
 	}
 
-	float HealthPercent = static_cast<float>(Health) / static_cast<float>(maxHealth);
+	float HealthPercent = static_cast<float>(Health) / static_cast<float>(maxHealth + MaxHealthFromItems);
 	HealthBarWidget->SetHealthBarPercentage(HealthPercent);
 
 }

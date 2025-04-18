@@ -425,9 +425,13 @@ void ALevelGenerator::MoveToRoom(int32 DirectionIndex)
                 GameManager->LoadExploredEncounter();
                 return;
             }
-            int RandAmountOfItems = FMath::RandRange(1, 2);
+            int RandAmountOfItems = FMath::RandRange(2, 3);
             for (int i = 0; i < RandAmountOfItems; ++i) {
                 GameManager->SpawnLoot();
+            }
+            int RandAmountOfGridObjects = FMath::RandRange(1, 2);
+            for (int i = 0; i < RandAmountOfGridObjects; ++i) {
+                GameManager->SpawnInteractableObjects();
             }
             TargetRoom->bIsExplored = true;
             GameManager->RoomsExplored += 1;

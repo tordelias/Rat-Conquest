@@ -532,7 +532,7 @@ FVector AGridManager::GetRandomPositionInGrid()
     {
       
         AGridTile* CurrentTile = Cast<AGridTile>(TilePair.Value);
-        if (CurrentTile && !CurrentTile->bIsOccupied)  // Ensure the tile exists and is not occupied
+        if (CurrentTile && !CurrentTile->bIsOccupied && !CurrentTile->ItemSlot.IsValid() && !CurrentTile->InteractableObjectSlot.IsValid())  // Ensure the tile exists and is not occupied
         {
             AvailableTiles.Add(CurrentTile);
         }

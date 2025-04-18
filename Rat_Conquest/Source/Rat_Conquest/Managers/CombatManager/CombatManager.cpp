@@ -155,9 +155,9 @@ void ACombatManager::HealUnit(TWeakObjectPtr<APlayerUnit> unit, int amount)
 		return;
 	}
 	unit->Health += amount;
-	if (unit->Health > unit->maxHealth)
+	if (unit->Health > unit->maxHealth + unit->MaxHealthFromItems)
 	{
-		unit->Health = unit->maxHealth;
+		unit->Health = unit->maxHealth + unit->MaxHealthFromItems;
 	}
 	unit->OnHealthChanged.Broadcast();
 	unit->UpdateHealthBar();

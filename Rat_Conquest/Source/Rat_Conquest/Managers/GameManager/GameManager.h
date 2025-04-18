@@ -12,6 +12,7 @@ class AMainHUD;
 class AGridManager;
 class ALevelGenerator;
 class AItem;
+class AInteractableGridObject;
 
 UCLASS()
 class RAT_CONQUEST_API AGameManager : public AActor
@@ -61,6 +62,8 @@ public:
 
 	void SpawnLoot();
 
+	void SpawnInteractableObjects();
+
 	void RotateUnits(float roation);
 
 	TArray<TObjectPtr<APlayerUnit>> MasterTurnQueue;
@@ -98,6 +101,10 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Items")
 	TArray<TSubclassOf<AItem>> ItemPool;
+	
+
+	UPROPERTY(EditAnywhere, Category = "Grid Objects")
+	TArray<TSubclassOf<AInteractableGridObject>> InteractObjPool;
 
 	UPROPERTY()
 	TObjectPtr<APlayerUnit> CurrentUnit;
