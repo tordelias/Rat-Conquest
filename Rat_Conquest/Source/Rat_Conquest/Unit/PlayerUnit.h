@@ -46,6 +46,10 @@ public:
     UPROPERTY(EditAnywhere, Category = "Mesh")
     TObjectPtr<UStaticMeshComponent> OutfitMesh;
 
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	TObjectPtr<UStaticMeshComponent> HelmetMesh;
+
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Icon")
     TObjectPtr<UTexture2D> UnitIcon;
 
@@ -84,6 +88,9 @@ public:
 
     UPROPERTY()
     TWeakObjectPtr<AItem> Armour;
+
+    UPROPERTY()
+    TWeakObjectPtr<AItem> Helmet;
 
     UPROPERTY()
     TWeakObjectPtr<AItem> Artifact;

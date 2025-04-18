@@ -27,6 +27,7 @@ enum class EItemType : uint8
 	Shield UMETA(DisplayName = "Shield"),
 	Spell UMETA(DisplayName = "Spell"),
 	Artifact UMETA(DisplayName = "Artifact"),
+	Helmet UMETA(DisplayName = "Helmet"),
 	Consumable UMETA(DisplayName = "Consumable")
 };
 

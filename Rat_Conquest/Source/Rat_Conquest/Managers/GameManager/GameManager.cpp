@@ -518,11 +518,11 @@ void AGameManager::StartEncounter()
        
     }
    
-	SpawnLoot();
-    SpawnInteractableObjects();
+	
     GetWorldTimerManager().SetTimerForNextTick(this, &AGameManager::InitalizeUnits);
     //// Initialize the player and enemy units
-   
+    SpawnLoot();
+    SpawnInteractableObjects();
 
 }
 

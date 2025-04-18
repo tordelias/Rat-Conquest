@@ -63,6 +63,10 @@ APlayerUnit::APlayerUnit()
 	OutfitMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OutfitMesh"));
 	OutfitMesh->SetupAttachment(SkeletalMesh, TEXT("Chest"));
 
+	HelmetMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HelmetMesh"));
+	HelmetMesh->SetupAttachment(SkeletalMesh, TEXT("Head"));
+
+
 	ArmorMesh->SetRelativeScale3D(FVector(1.0f));
 	HealthBarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidgetComponent"));
 	HealthBarWidgetComponent->SetupAttachment(RootComponent);
@@ -1024,7 +1028,7 @@ void APlayerUnit::CheckForItems()
 				return;
 			UE_LOG(LogTemp, Error, TEXT("Player picked up armor"));
 		}
-		else if (NewItem->ItemDataB->ItemType == EItemType::Artifact)
+		else if (NewItem->ItemDataB->ItemType == EItemType::Helmet)
 		{
 			SlotIndex = 2; // Consumable slot
 			if (!bIsPlayerUnit)
@@ -1068,10 +1072,11 @@ void APlayerUnit::CheckForItems()
 			// Set the armor mesh
 			OutfitMesh->SetStaticMesh(NewItem->ItemMesh->GetStaticMesh());
 		}
-		else if (NewItem->ItemDataB->ItemType == EItemType::Artifact)
+		else if (NewItem->ItemDataB->ItemType == EItemType::Helmet)
 		{
 			// Set the artifact mesh
 			//ItemMesh->SetStaticMesh(NewItem->ItemMesh->GetStaticMesh());
+			HelmetMesh->SetStaticMesh(NewItem->ItemMesh->GetStaticMesh());
 		}
 		
 
