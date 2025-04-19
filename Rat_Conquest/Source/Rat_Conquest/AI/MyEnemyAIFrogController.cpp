@@ -77,6 +77,8 @@ void AMyEnemyAIFrogController::BodySlam()
 		Tile->bIsOccupied = true;
 		Tile->unitRefrence = PlayerUnit;
 
+		PlayerUnit->CurrentGridPosition = Tile->GridPosition;
+
 		PlayerUnit->TakeDamageFromEnemy(int(AI->Damage/2));
 
 		FKnockbackLerpData LerpData;
@@ -125,6 +127,7 @@ void AMyEnemyAIFrogController::ToungeGrab()
 			// Reserve tile
 			tile->bIsOccupied = true;
 			tile->unitRefrence = Target;
+			Target->CurrentGridPosition = tile->GridPosition;
 			break;
 		}
 	}
