@@ -1094,11 +1094,11 @@ void APlayerUnit::CheckForItems()
 		//}
 		Tile->ItemSlot = nullptr;
 		//set the unit according to the item
-		if (NewItem->bIsMelee) {
+		if (NewItem->bIsMelee && NewItem->ItemDataB->ItemType == EItemType::Weapon) {
 			bIsRangedUnit = false;
 
 		}
-		else {
+		else if (!NewItem->bIsMelee && NewItem->ItemDataB->ItemType == EItemType::Weapon) {
 			bIsRangedUnit = true;
 		}
 		

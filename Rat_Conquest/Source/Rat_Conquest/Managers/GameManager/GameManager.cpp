@@ -17,6 +17,9 @@
 #include "Rat_Conquest/Unit/UnitMarker.h"
 #include "Rat_Conquest/Unit/GeneralAIUnit.h"
 #include "Rat_Conquest/LevelObjects/InteractableGridObject.h"
+#include "Components/AudioComponent.h"
+
+
 // Sets default values
 AGameManager::AGameManager()
 {
@@ -204,10 +207,16 @@ void AGameManager::ExecuteTurn()
         }
         CurrentUnit->ExecutePlayerTurn();
         UE_LOG(LogTemp, Warning, TEXT("Player unit turn executed"));
-		if (SB_PlayerTurn)
-		{
-			UGameplayStatics::PlaySound2D(GetWorld(), SB_PlayerTurn);
-		}
+        if (SB_PlayerTurn)
+        {
+            float RandomPitch = FMath::FRandRange(0.95f, 1.1f); // Slight random pitch shift
+            UAudioComponent* AudioComp = UGameplayStatics::SpawnSound2D(GetWorld(), SB_PlayerTurn);
+
+            if (AudioComp)
+            {
+                AudioComp->SetPitchMultiplier(RandomPitch);
+            }
+        }
     }
     else
     {
@@ -227,7 +236,14 @@ void AGameManager::ExecuteTurn()
         );
 		if (SB_EnemyTurn)
 		{
-			UGameplayStatics::PlaySound2D(GetWorld(), SB_EnemyTurn);
+
+            float RandomPitch = FMath::FRandRange(0.95f, 1.05f); // Slight random pitch shift
+            UAudioComponent* AudioComp = UGameplayStatics::SpawnSound2D(GetWorld(), SB_EnemyTurn);
+
+            if (AudioComp)
+            {
+                AudioComp->SetPitchMultiplier(RandomPitch);
+            }
 		}
     }
 
@@ -438,7 +454,7 @@ void AGameManager::StartEncounter()
     bisPlayersturn = true;
     GridManager->ScanWorldForObjects();
     //Spawn new enemies
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < FMath::RandRange(1,2 + GameDifficulty); ++i)
 	{
 		if (EnemyList.Num() > 0)
 		{
