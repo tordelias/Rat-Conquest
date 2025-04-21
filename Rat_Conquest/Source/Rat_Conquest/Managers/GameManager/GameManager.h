@@ -64,6 +64,8 @@ public:
 
 	void SpawnInteractableObjects();
 
+	void SpawnNewPlayerUnit(FVector2D Gridposition);
+
 	void RotateUnits(float roation);
 
 	TArray<TObjectPtr<APlayerUnit>> MasterTurnQueue;
@@ -98,6 +100,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Enemies")
 	TArray<TSubclassOf<APlayerUnit>> EnemyList;
+
+	UPROPERTY(EditAnywhere, Category = "Player Units")
+	TArray<TSubclassOf<APlayerUnit>> NewPlayerUnitList;
 
 	UPROPERTY(EditAnywhere, Category = "Items")
 	TArray<TSubclassOf<AItem>> ItemPool;

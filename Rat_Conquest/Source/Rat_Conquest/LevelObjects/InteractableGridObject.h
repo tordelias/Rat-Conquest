@@ -8,6 +8,7 @@
 
 class APlayerUnit;
 class ACombatManager;
+class AGameManager;
 
 
 UENUM(BlueprintType)
@@ -18,7 +19,8 @@ enum class EObjectType : uint8
 	ExplosiveBarrel,
 	Battery,
 	Tunnel,
-	Tower
+	Tower,
+	CagedRat,
 
 };
 
@@ -40,6 +42,8 @@ public:
 	void DealAoEDamage();
 
 	void MovePlayer();
+
+	void GetCagedRat();
 
 	void DestroyObject();
 
@@ -66,6 +70,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat Manager")
 	TWeakObjectPtr<ACombatManager> CombatManager;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Manager")
+	TWeakObjectPtr<AGameManager> GameManager;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Unit")
 	TWeakObjectPtr<APlayerUnit> unitRefrence;

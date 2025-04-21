@@ -5,6 +5,7 @@
 #include "Rat_Conquest/Managers/GridManager/GridManager.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
 #include "Rat_Conquest/Managers/CombatManager/CombatManager.h"
+#include "Rat_Conquest/Managers/GameManager/GameManager.h"
 #include "Rat_Conquest/Unit/PlayerUnit.h"
 #include <Kismet/GameplayStatics.h>
 
@@ -72,6 +73,20 @@ void AInteractableGridObject::MovePlayer()
 {
 }
 
+void AInteractableGridObject::GetCagedRat()
+{
+	// Get the player unit and move it to a new position
+	if (unitRefrence.IsValid() && GameManager.IsValid())
+	{
+		FVector2D GridPositon = unitRefrence->CurrentGridPosition; // Example new position
+		GameManager->SpawnNewPlayerUnit(GridPositon);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Unit reference is invalid!"));
+	}
+}
+
 void AInteractableGridObject::DestroyObject()
 {
 	// Destroy the object
@@ -100,6 +115,21 @@ void AInteractableGridObject::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("No CombatManager found in the level!"));
 	}
+	TArray<AActor*> FoundGameManagers;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGameManager::StaticClass(), FoundGameManagers);
+	if (FoundGameManagers.Num() > 0)
+	{
+		GameManager = Cast<AGameManager>(FoundGameManagers[0]);
+		if (FoundGameManagers.Num() > 1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Multiple GameManagers found! Using first instance."));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("No GameManager found in the level!"));
+	}
+
 }
 
 // Called every frame

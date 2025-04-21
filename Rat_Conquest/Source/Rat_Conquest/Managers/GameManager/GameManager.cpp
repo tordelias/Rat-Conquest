@@ -715,6 +715,45 @@ void AGameManager::SpawnInteractableObjects()
 
 }
 
+void AGameManager::SpawnNewPlayerUnit(FVector2D Gridposition)
+{
+	if (!GridManager) return;
+	TWeakObjectPtr<AActor> GridTile = GridManager->GetClosestAvailableTile(Gridposition);
+	if (!GridTile.IsValid())
+		return; // No valid unoccupied positions available
+	// Check if the tile is valid and not occupied
+	AGridTile* GridTileActor = Cast<AGridTile>(GridTile.Get());
+	if (!GridTileActor || GridTileActor->bIsOccupied)
+		return; // No valid unoccupied positions available
+	// Check if the tile is valid and not occupied
+	if (GridTileActor->bIsOccupied)
+		return; // No valid unoccupied positions available
+	FVector SpawnLocation = GridTileActor->GetActorLocation();
+	FVector2D GridPosition = GridTileActor->GridPosition;
+	if (SpawnLocation == FVector())
+		return; // No valid unoccupied positions available
+	//SpawnLocation.Z += 4;
+	FRotator SpawnRotation = FRotator::ZeroRotator;
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	APlayerUnit* NewPlayerUnit = GetWorld()->SpawnActor<APlayerUnit>(
+        NewPlayerUnitList[0],
+		SpawnLocation,
+		SpawnRotation,
+		SpawnParams
+	);
+	if (NewPlayerUnit)
+	{
+		NewPlayerUnit->SetActorLocation(SpawnLocation);
+		NewPlayerUnit->SetActorRotation(SpawnRotation);
+		NewPlayerUnit->CurrentGridPosition = GridPosition;
+		PlayerUnits.Add(NewPlayerUnit);
+		NewPlayerUnit->Seticon(PlayerUnits.Num() - 1);
+		UE_LOG(LogTemp, Warning, TEXT("New player unit spawned: %s"), *NewPlayerUnit->GetName());
+	}
+}
+
 void AGameManager::RotateUnits(float roation)
 {
 
