@@ -28,22 +28,6 @@ AGenericProjectile::AGenericProjectile()
     // Set defaults
     StartLocation = GetActorLocation();
 
-    TArray<AActor*> FoundCombatManagers;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACombatManager::StaticClass(), FoundCombatManagers);
-
-    if (FoundCombatManagers.Num() > 0)
-    {
-        CombatManager = Cast<ACombatManager>(FoundCombatManagers[0]);
-        if (FoundCombatManagers.Num() > 1)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("Multiple Combatmanagers found! Using first instance."));
-        }
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("No CombatManager found in the level!"));
-    }
-    
 }
 
 void AGenericProjectile::InitializeProjectileWithCurve(const FVector& _StartLocation, const FVector& Target)
@@ -138,6 +122,22 @@ void AGenericProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 	
+    TArray<AActor*> FoundCombatManagers;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACombatManager::StaticClass(), FoundCombatManagers);
+
+    if (FoundCombatManagers.Num() > 0)
+    {
+        CombatManager = Cast<ACombatManager>(FoundCombatManagers[0]);
+        if (FoundCombatManagers.Num() > 1)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Multiple Combatmanagers found! Using first instance."));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("No CombatManager found in the level!"));
+    }
+
 }
 
 // Called every frame
