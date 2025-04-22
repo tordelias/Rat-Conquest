@@ -13,9 +13,9 @@ void AMyEnemyAIFrogController::StartBodySlam()
 	APlayerUnit* AI = Cast<AGeneralAIUnit>(GetPawn());
 	if (AI)
 	{
-		AI->animationToPlay = FVector2D(0, 75); 
+		AI->animationToPlay = FVector2D(75, 0); 
 		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMyEnemyAIFrogController::BodySlam, 0.5f, false);
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMyEnemyAIFrogController::BodySlam, 1.2f, false);
 	}
 }
 
@@ -27,6 +27,7 @@ void AMyEnemyAIFrogController::BodySlam()
 	AGeneralAIUnit* AI = Cast<AGeneralAIUnit>(GetPawn());
 	if (AI)
 	{
+		AI->SpawnVFX();
 
 		auto PlayerUnits = AI->GameManager->PlayerUnits; 
 		//check distance is within 2 tiles
@@ -66,25 +67,14 @@ void AMyEnemyAIFrogController::BodySlam()
 			continue;
 		}
 
-		AGridTile* oldTile = AI->GridManager->GetTileAtPosition(PlayerUnit->CurrentGridPosition.X, PlayerUnit->CurrentGridPosition.Y).Get();
-		if (oldTile)
-		{
-			oldTile->bIsOccupied = false;
-			oldTile->unitRefrence = nullptr;
-		}
-		else
-			continue; 
-		Tile->bIsOccupied = true;
-		Tile->unitRefrence = PlayerUnit;
-
-		PlayerUnit->CurrentGridPosition = Tile->GridPosition;
-
 		PlayerUnit->TakeDamageFromEnemy(int(AI->Damage/2));
 
 		FKnockbackLerpData LerpData;
 		LerpData.Unit = PlayerUnit;
 		LerpData.StartLocation = PlayerUnit->GetActorLocation();
 		LerpData.TargetLocation = Tile->GetActorLocation();
+		PlayerUnit->SetNewPosition(Tile->GridPosition);
+
 		LerpData.Alpha = 0.0f;
 
 		KnockbackUnits.Add(LerpData);
@@ -111,23 +101,11 @@ void AMyEnemyAIFrogController::ToungeGrab()
 			PullData.Unit = Target;
 			PullData.StartLocation = Target->GetActorLocation();
 			PullData.TargetLocation = tile->GetActorLocation();
+			PullData.TargetGridPosition = tile->GridPosition;
 			PullData.Alpha = 0.0f;
 			PullData.BoneTargetPtr = &AI->TongueWorldTarget;
 
 			TonguePullUnits.Add(PullData);
-
-			//Remove oldTile
-			AGridTile* oldTile = AI->GridManager->GetTileAtPosition(Target->CurrentGridPosition.X, Target->CurrentGridPosition.Y).Get();
-			if (oldTile)
-			{
-				oldTile->bIsOccupied = false;
-				oldTile->unitRefrence = nullptr;
-			}
-
-			// Reserve tile
-			tile->bIsOccupied = true;
-			tile->unitRefrence = Target;
-			Target->CurrentGridPosition = tile->GridPosition;
 			break;
 		}
 	}
@@ -160,7 +138,7 @@ void AMyEnemyAIFrogController::ChooseAction()
 	}
 	AGeneralAIUnit* AI = Cast<AGeneralAIUnit>(GetPawn());
 	if (!AI) return;
-	if (AI->ChebyshevDistance(AI->CurrentGridPosition, Target->CurrentGridPosition) >= AI->MovementSpeed)
+	if (AI->ChebyshevDistance(AI->CurrentGridPosition, Target->CurrentGridPosition) >= AI->MovementSpeed && FMath::RandRange(0, 1) == 0)
 	{
 		ToungeGrab();
 		return;
@@ -171,8 +149,10 @@ void AMyEnemyAIFrogController::ChooseAction()
 		StartBodySlam();
 		return;
 	}
-
+	else
+	{
 		MeleeAttack();
+	}
 
 }
 
@@ -206,15 +186,11 @@ void AMyEnemyAIFrogController::Tick(float DeltaTime)
 		if (Data.Alpha >= 1.0f)
 		{
 			Data.Unit->SetActorLocation(Data.TargetLocation);
-			if (Data.Unit->GridManager.IsValid())
-			{
-			FVector2D NewGrid = Data.Unit->GridManager->WorldToGridPosition(Data.TargetLocation);
-			Data.Unit->CurrentGridPosition = NewGrid;
-			}
 			KnockbackUnits.RemoveAt(i);
 		}
 	}
 
+	// Tongue pull logic
 	for (int32 i = TonguePullUnits.Num() - 1; i >= 0; --i)
 	{
 		FTonguePullData& Data = TonguePullUnits[i];
@@ -241,6 +217,7 @@ void AMyEnemyAIFrogController::Tick(float DeltaTime)
 			{
 				FVector2D GridPos = Data.Unit->GridManager->WorldToGridPosition(Data.TargetLocation);
 				Data.Unit->CurrentGridPosition = GridPos;
+				Data.Unit->SetNewPosition(Data.TargetGridPosition);
 			}
 
 			TonguePullUnits.RemoveAt(i);

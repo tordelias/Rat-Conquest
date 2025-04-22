@@ -22,9 +22,16 @@ class RAT_CONQUEST_API AGeneralAIUnit : public APlayerUnit
 	void SetStatsBasedOnColorID(int32 FrogColorID);
 
 
+
 public: 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	bool IsFrog = false; 
+	//Niagara VFX
+	UPROPERTY(EditAnywhere, Category = "VFX")
+	class UNiagaraSystem* BodySlamVFX;
+
+	void SpawnVFX();
+
 	int AIDifficulty = 5; // 0 = Easy, 1 = Medium, 2 = Hard
 
 	UPROPERTY(BlueprintReadWrite)

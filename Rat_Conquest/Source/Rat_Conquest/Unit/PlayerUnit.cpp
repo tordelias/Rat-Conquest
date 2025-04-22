@@ -1627,3 +1627,44 @@ void APlayerUnit::RandomizeStats()
 	// Update the interactable data
 	UpdateInteractableData();
 }
+
+void APlayerUnit::SetNewPosition(FVector2D NewPosition)
+{
+	if (!GridManager.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("NO MANAGER |SetNewPosition_PlayerUnit.cpp|"));
+		return;
+	}
+
+	// Get the old tile and mark it as unoccupied
+	AGridTile* OldGridTile = GridManager->GetTileAtPosition(CurrentGridPosition.X, CurrentGridPosition.Y).Get();
+	if (OldGridTile)
+	{
+		OldGridTile->bIsOccupied = false;
+		OldGridTile->RemoveUnitReference();
+	}
+
+	// Get the new tile and mark it as occupied
+	AGridTile* NewGridTile = GridManager->GetTileAtPosition(NewPosition.X, NewPosition.Y).Get();
+	if (!NewGridTile)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to cast NewTile to AGridTile |SetNewPosition_PlayerUnit.cpp|"));
+		return;
+	}
+
+	if (NewGridTile->bIsOccupied)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("New tile is already occupied |SetNewPosition_PlayerUnit.cpp|"));
+		return;
+	}
+
+	NewGridTile->bIsOccupied = true;
+	NewGridTile->SetUnitReference(this);
+
+	// Update position references
+	CurrentGridPosition = NewPosition;
+
+	UE_LOG(LogTemp, Display, TEXT("Position updated to (%f, %f) |SetNewPosition_PlayerUnit.cpp|"), NewPosition.X, NewPosition.Y);
+}
+
+

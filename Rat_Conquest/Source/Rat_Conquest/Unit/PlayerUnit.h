@@ -245,6 +245,8 @@ public:
 
     virtual void RandomizeStats();
 
+	void SetNewPosition(FVector2D NewPosition);
+
     FVector2D GetCardinalDirection(FVector2D FromGridPos, FVector2D ToGridPos);
     FVector2D GetMousePosition(FVector WorldLocation, FVector WorldDirection);
 

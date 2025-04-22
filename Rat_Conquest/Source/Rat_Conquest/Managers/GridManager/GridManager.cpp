@@ -383,17 +383,17 @@ TWeakObjectPtr<AGridTile> AGridManager::GetTileAtPosition(int32 Row, int32 Colum
     if (GridTiles.Contains(GridPosition))
     {
         AActor* Tile = GridTiles[GridPosition].Get();
-		//cast to GridTile
-		AGridTile* GridTile = Cast<AGridTile>(Tile);
-        return GridTile;
-    }
-    else
-    {
-        // UE_LOG(LogTemp, Warning, TEXT("No tile found at Row: %d, Column: %d"), Row, Column);
-        return nullptr;
+        AGridTile* GridTile = Cast<AGridTile>(Tile);
+        if (GridTile)
+        {
+            return TWeakObjectPtr<AGridTile>(GridTile);
+        }
     }
 
+    UE_LOG(LogTemp, Warning, TEXT("No tile found or cast failed at Row: %d, Column: %d"), Row, Column);
+    return nullptr;
 }
+
 
 TArray<TWeakObjectPtr<AGridTile>> AGridManager::GetNeighbourTiles(int32 Row, int32 Column)
 {

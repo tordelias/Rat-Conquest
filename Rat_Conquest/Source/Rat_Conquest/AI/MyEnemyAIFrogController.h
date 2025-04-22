@@ -14,6 +14,7 @@ struct FKnockbackLerpData
 	TWeakObjectPtr<APlayerUnit> Unit;
 	FVector StartLocation;
 	FVector TargetLocation;
+	FVector2D TargetGridPosition;
 	float Alpha;
 
 	FKnockbackLerpData()
@@ -30,6 +31,7 @@ struct FTonguePullData
 	TWeakObjectPtr<APlayerUnit> Unit;
 	FVector StartLocation;
 	FVector TargetLocation;
+	FVector2D TargetGridPosition;
 	float Alpha;
 
 	FVector* BoneTargetPtr = nullptr;

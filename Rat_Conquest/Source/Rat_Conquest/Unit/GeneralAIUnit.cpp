@@ -2,6 +2,7 @@
 
 
 #include "GeneralAIUnit.h"
+#include "NiagaraFunctionLibrary.h"
 
 AGeneralAIUnit::AGeneralAIUnit()
 {
@@ -110,4 +111,20 @@ void AGeneralAIUnit::SetStatsBasedOnColorID(int32 FrogColorID)
 	Initiative = initiative;
 
 	UE_LOG(LogTemp, Log, TEXT("Stats set for FrogColorID %d"), FrogColorID);
+}
+
+void AGeneralAIUnit::SpawnVFX()
+{
+	if (BodySlamVFX)
+	{
+		FVector SpawnLocation = GetActorLocation();
+		//SpawnLocation.Z = 6.0f; // Adjust Z position if needed
+		FRotator SpawnRotation = GetActorRotation();
+		FVector Scale = FVector(10.0f);
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BodySlamVFX, SpawnLocation, SpawnRotation, Scale);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BodySlamVFX is null!"));
+	}
 }

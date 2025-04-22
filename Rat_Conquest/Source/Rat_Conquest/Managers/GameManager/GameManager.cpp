@@ -196,7 +196,7 @@ void AGameManager::ExecuteTurn()
 
     // Reset turn state for the unit
     CurrentUnit->bHasFinishedTurn = false;
-	MarkCurrentUnit();
+	//MarkCurrentUnit();
     APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
     if (CurrentUnit->bIsPlayerUnit)
     {
@@ -320,7 +320,11 @@ void AGameManager::EndUnitTurn()
             if (IsValid(CurrentUnit))
             {
                 HighlightUnitAndTiles(CurrentUnit);
-                ExecuteTurn();
+                MarkCurrentUnit();
+				//Add a 1 secound delay before executing the next tur*Æ
+				FTimerHandle NextTurnTimerHandle;
+				GetWorld()->GetTimerManager().SetTimer(NextTurnTimerHandle, this, &AGameManager::ExecuteTurn,1.7f, false);
+                //ExecuteTurn();
             }
         }
         else
@@ -813,8 +817,8 @@ void AGameManager::MarkCurrentUnit()
             MainHUD->HighlightPlayerUnit(CurrentUnit);
         }
 
-        if (CurrentUnit->bIsPlayerUnit)
-        {
+        //if (CurrentUnit->bIsPlayerUnit)
+        //{
             // Cast to playerCamera
             APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
             if (PlayerCharacter)
@@ -832,7 +836,7 @@ void AGameManager::MarkCurrentUnit()
                     false
                 );
             }
-        }
+        //}
     }
     else
     {
