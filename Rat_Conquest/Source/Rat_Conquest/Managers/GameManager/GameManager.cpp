@@ -458,7 +458,7 @@ void AGameManager::StartEncounter()
     bisPlayersturn = true;
     GridManager->ScanWorldForObjects();
     //Spawn new enemies
-    if (RoomsExplored >= 5) {
+    if (RoomsExplored > 5) {
 		//Spawn boss Enemy instead of normal enemies
 
         if (BossList.Num() > 0) {
