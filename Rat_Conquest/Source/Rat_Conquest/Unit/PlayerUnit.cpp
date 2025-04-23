@@ -396,7 +396,7 @@ void APlayerUnit::MoveToTile(FVector2D NewGridPosition)
 
 	// Check if the target tile is within movement range
 	float distance = ChebyshevDistance(GridTile->GridPosition, OldGridTile->GridPosition);
-	if (distance > MovementSpeed + SpeedFromItems)
+	if (distance > FMath::Max(1,MovementSpeed + SpeedFromItems))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Target tile is out of movement range |MoveToTile_PlayerUnit.cpp|"));
 		if (!bIsPlayerUnit)
@@ -535,7 +535,7 @@ TArray<FVector2D> APlayerUnit::GetPathToTile(FVector2D InTargetGridPosition, FVe
 
 			float TentativeG = CurrentTile->G + ChebyshevDistance(CurrentTile->GridPosition, Neighbour->GridPosition);
 
-			if (TentativeG > MovementSpeed + SpeedFromItems)
+			if (TentativeG > FMath::Max(1, MovementSpeed + SpeedFromItems))
 			{
 				continue;
 			}
@@ -660,7 +660,7 @@ void APlayerUnit::PlayerAttack(TWeakObjectPtr<APlayerCamera> PlayerCharacter)
 	}
 
 	// Handle melee attack
-	if (DistanceToEnemy > PlayerUnit->MovementSpeed + PlayerUnit->SpeedFromItems + ADJACENT_TILE_RANGE)
+	if (DistanceToEnemy > FMath::Max(1,PlayerUnit->MovementSpeed + PlayerUnit->SpeedFromItems + ADJACENT_TILE_RANGE))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Enemy out of movement range"));
 		return;
@@ -698,7 +698,7 @@ void APlayerUnit::PlayerAttack(TWeakObjectPtr<APlayerCamera> PlayerCharacter)
 		return;
 	}
 
-	if (ChebyshevDistance(PlayerPosition, AttackTileGridPos) > PlayerUnit->MovementSpeed + SpeedFromItems + ADJACENT_TILE_RANGE)
+	if (ChebyshevDistance(PlayerPosition, AttackTileGridPos) > FMath::Max(1,PlayerUnit->MovementSpeed + SpeedFromItems + ADJACENT_TILE_RANGE))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Attack tile out of range"));
 		return;
@@ -1270,7 +1270,7 @@ void APlayerUnit::BeginFocus()
 	//	SkeletalMesh->SetRenderCustomDepth(true);
 	}
 	// Store movement tiles in MovementTiles
-	MovedTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed + SpeedFromItems);
+	MovedTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, FMath::Max(1,MovementSpeed + SpeedFromItems));
 	for (auto tile : MovedTiles)
 	{
 		//if (bIsPlayerUnit)
@@ -1324,7 +1324,7 @@ void APlayerUnit::BeginMouseHoverFocus()
 		}
 
 		// Get new movable tiles
-		HoverTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, MovementSpeed + SpeedFromItems);
+		HoverTiles = GridManager->GetMovableTiles(CurrentGridPosition.X, CurrentGridPosition.Y, FMath::Max(1, MovementSpeed + SpeedFromItems));
 
 		// Highlight tiles based on unit type
 		for (auto& Tile : HoverTiles)
@@ -1595,7 +1595,7 @@ void APlayerUnit::UpdateInteractableData()
 	InstanceInteractableData.Range = AttackRange + RangeFromItems;
 	InstanceInteractableData.Attack = Attack + AttackFromItems;
 	InstanceInteractableData.UnitDamage = Damage;
-	InstanceInteractableData.UnitMovementSpeed = MovementSpeed + SpeedFromItems;
+	InstanceInteractableData.UnitMovementSpeed = FMath::Max(1,MovementSpeed + SpeedFromItems);
 	InstanceInteractableData.Defense = Defence + DefenceFromItems;
 	InstanceInteractableData.MinDamage = FMath::Max(1, Damage + DamageFromItems - 2);
 	InstanceInteractableData.MaxDamage = Damage + DamageFromItems + 2;
