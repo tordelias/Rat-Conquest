@@ -1160,6 +1160,20 @@ void APlayerUnit::CalculateStats()
 		}
 
 	}
+	if (ItemSlots[2].IsValid()) {
+		AItem* CurrentItem = ItemSlots[2].Get();
+		if (CurrentItem)
+		{
+			DamageFromItems += CurrentItem->Damage;
+			DefenceFromItems += CurrentItem->Defence;
+			AttackFromItems += CurrentItem->Attack;
+			RangeFromItems += CurrentItem->Range;
+			InitiativeFromItems += CurrentItem->Initiative;
+			SpeedFromItems += CurrentItem->Movement;
+			MaxHealthFromItems += CurrentItem->Health;
+		}
+
+	}
 	
 
 }

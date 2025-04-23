@@ -59,22 +59,22 @@ void UItemToolTipWidget::SetData(AItem* _Item)
 			Initiative->SetVisibility(ESlateVisibility::Collapsed);
 			
 		}
-		else if (Item->ItemDataB->ItemType == EItemType::Artifact)
+		else if (Item->ItemDataB->ItemType == EItemType::Helmet)
 		{
 			//Initative, Attack, Health
-			Initiative->SetText(FText::FromString(FString::FromInt(Item->ItemDataB->ItemStatistics.Luck)));
+			Damage->SetText(FText::FromString(FString::FromInt(Item->ItemDataB->ItemStatistics.Damage)));
 			Attack->SetText(FText::FromString(FString::FromInt(Item->ItemDataB->ItemStatistics.Attack)));
-			Health->SetText(FText::FromString(FString::FromInt(Item->ItemDataB->ItemStatistics.MaxHealth)));
+			Range->SetText(FText::FromString(FString::FromInt(Item->ItemDataB->ItemStatistics.Range)));
 
+			Damage->SetVisibility(ESlateVisibility::Visible);
 			Attack->SetVisibility(ESlateVisibility::Visible);
-			Initiative->SetVisibility(ESlateVisibility::Visible);
-			Health->SetVisibility(ESlateVisibility::Visible);
+			Range->SetVisibility(ESlateVisibility::Visible);
 
 			//Remove the rest of the stats from viewport
+			Health->SetVisibility(ESlateVisibility::Collapsed);
 			Defense->SetVisibility(ESlateVisibility::Collapsed);
 			Speed->SetVisibility(ESlateVisibility::Collapsed);
-			Damage->SetVisibility(ESlateVisibility::Collapsed);
-			Range->SetVisibility(ESlateVisibility::Collapsed);
+			Initiative->SetVisibility(ESlateVisibility::Collapsed);
 		}
 		else
 		{
