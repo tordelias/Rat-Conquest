@@ -36,6 +36,7 @@ void AItem::EquipItem(AActor* UnitOwner)
     FVector Offset(0.f, 0.f, 80.f); // Adjust the offset as needed
     SetActorRelativeLocation(Offset);
 	ItemMesh->SetVisibility(false);
+    SetActorEnableCollision(false);
 	RingMesh->SetVisibility(false);
     bIsEquipped = true;
     if (ActiveEffect)
@@ -52,6 +53,7 @@ void AItem::DropItem()
     RingMesh->SetVisibility(true);
     ItemMesh->SetRenderCustomDepth(false);
     ItemMesh->SetCustomDepthStencilValue(0);
+    SetActorEnableCollision(true);
     bIsEquipped = false;
     if (ActiveEffect)
     {

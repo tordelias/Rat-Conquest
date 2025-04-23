@@ -932,7 +932,7 @@ void APlayerUnit::EquipStartWeapon(TWeakObjectPtr<AItem> ItemToAdd)
 void APlayerUnit::UseCurrentItem()
 {
 
-	if (ItemSlots[0].IsValid()) { // use weapon to attack
+	if (ItemSlots[0].IsValid() && !bIsMoving) { // use weapon to attack
 		AWeapon* currentWeapon = Cast<AWeapon>(ItemSlots[0]);
 		if (currentWeapon && IsValid(EnemyToAttack.Get())) {
 			currentWeapon->SetEnemyLocation(EnemyToAttack->GetActorLocation());
@@ -1192,7 +1192,22 @@ void APlayerUnit::DropItem(TWeakObjectPtr<AItem> OldItem, FVector2D CurrentPosit
 		UE_LOG(LogTemp, Error, TEXT("Failed to spawn dropped item"));
 		return;
 	}
-	ItemSlots[0] = nullptr;
+	if (DroppedItem->ItemDataB->ItemType == EItemType::Weapon) {
+
+		ItemSlots[0] = nullptr;
+	}
+	else if (DroppedItem->ItemDataB->ItemType == EItemType::Armor) {
+		ItemSlots[1] = nullptr;
+	}
+	else if (DroppedItem->ItemDataB->ItemType == EItemType::Helmet) {
+		ItemSlots[2] = nullptr;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Unknown item type"));
+		return;
+
+	}
 	if (OldItem->IsValidLowLevel())
 	{
 		OldItem->Destroy();
