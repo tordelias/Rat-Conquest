@@ -138,13 +138,13 @@ void AMyEnemyAIFrogController::ChooseAction()
 	}
 	AGeneralAIUnit* AI = Cast<AGeneralAIUnit>(GetPawn());
 	if (!AI) return;
-	if (AI->ChebyshevDistance(AI->CurrentGridPosition, Target->CurrentGridPosition) >= AI->MovementSpeed && FMath::RandRange(0, 1) == 0 && AI->bIsSlowFrog)
+	if (AI->ChebyshevDistance(AI->CurrentGridPosition, Target->CurrentGridPosition) > AI->MovementSpeed && FMath::RandRange(0, 1) == 0 && AI->bIsSlowFrog)
 	{
 		ToungeGrab();
 		return;
 	}
 	//25% chance to use body slam
-	if (FMath::RandRange(0, 3) == 0 && !AI->bIsSlowFrog)
+	if (AI->ChebyshevDistance(AI->CurrentGridPosition, Target->CurrentGridPosition) <= 2 && FMath::RandRange(0, 3) == 0 && !AI->bIsSlowFrog)
 	{
 		StartBodySlam();
 		return;

@@ -65,7 +65,7 @@ void AMyBossAI::FrogAction()
 		return;
 	}
 	//25% chance to use body slam
-	if (FMath::RandRange(0, 3) == 0)
+	if (AI->ChebyshevDistance(AI->CurrentGridPosition, Target->CurrentGridPosition) <= 2 && FMath::RandRange(0, 3) == 0)
 	{
 		StartBodySlam();
 		return;

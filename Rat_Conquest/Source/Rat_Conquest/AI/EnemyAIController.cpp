@@ -224,66 +224,79 @@ void AEnemyAIController::MeleeAttack()
 				break;
 
 			case EEnemyAIDifficulty::Normal:
-				if (FMath::RandRange(0, 1) == 0)
+				//if (FMath::RandRange(0, 1) == 0)
+				//{
+				//	ScoreMeleeTiles(Neighbors, Target);
+				//	if (TileOptions.Num() > 0 && TileOptions[0].Tile)
+				//	{
+				//		
+				//		// Check if AI is not on the same tile it's already occupying
+				//		if (TileOptions[0].Tile == AI->GridManager->GetTileAtPosition(AI->CurrentGridPosition.X, AI->CurrentGridPosition.Y).Get())
+				//		{
+				//			AI->AttackAfterMovement();
+				//			return;
+				//		}
+				//		AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
+				//		AI->MoveToTile(TileOptions[0].Tile->GridPosition);
+				//		return;
+				//	}
+				//	else
+				//	{
+				//		if (DistanceToEnemy == 1)
+				//		{
+				//			AI->AttackAfterMovement();
+				//			return;
+				//		}
+				//		AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
+				//		MoveToClosestPossibleTile(Target);
+				//	}
+				//}
+				//else
+				//{
+				if (DistanceToEnemy == 1)
 				{
-					ScoreMeleeTiles(Neighbors, Target);
-					if (TileOptions.Num() > 0 && TileOptions[0].Tile)
-					{
-						
-						// Check if AI is not on the same tile it's already occupying
-						if (TileOptions[0].Tile == AI->GridManager->GetTileAtPosition(AI->CurrentGridPosition.X, AI->CurrentGridPosition.Y).Get())
-						{
-							AI->AttackAfterMovement();
-							return;
-						}
-						AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
-						AI->MoveToTile(TileOptions[0].Tile->GridPosition);
-						return;
-					}
-					else
-					{
-						if (DistanceToEnemy == 1)
-						{
-							AI->AttackAfterMovement();
-							return;
-						}
-						AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
-						MoveToClosestPossibleTile(Target);
-					}
+					AI->AttackAfterMovement();
+					return;
 				}
-				else
-				{
-					AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
-					MoveToClosestPossibleTile(Target);
-				}
+				AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
+				MoveToClosestPossibleTile(Target);
+				//}
 				break;
 
 			case EEnemyAIDifficulty::Hard:
-				ScoreMeleeTiles(Neighbors, Target);
-				if (TileOptions.Num() > 0 && TileOptions[0].Tile)
+				//ScoreMeleeTiles(Neighbors, Target);
+				//if (TileOptions.Num() > 0 && TileOptions[0].Tile)
+				//{
+				//	
+				//	// Check if AI is not on the same tile it's already occupying
+				//	if (TileOptions[0].Tile == AI->GridManager->GetTileAtPosition(AI->CurrentGridPosition.X, AI->CurrentGridPosition.Y).Get())
+				//	{
+				//		AI->AttackAfterMovement();
+				//		return;
+				//	}
+				//	AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
+				//	AI->MoveToTile(TileOptions[0].Tile->GridPosition);
+				//	return;
+				//}
+				//else
+				//{
+				//	if (DistanceToEnemy == 1)
+				//	{
+				//		
+				//		AI->AttackAfterMovement();
+				//		return;
+				//	}
+				//	AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
+				//	MoveToClosestPossibleTile(Target);
+				//}
+
+				if (DistanceToEnemy == 1)
 				{
-					
-					// Check if AI is not on the same tile it's already occupying
-					if (TileOptions[0].Tile == AI->GridManager->GetTileAtPosition(AI->CurrentGridPosition.X, AI->CurrentGridPosition.Y).Get())
-					{
-						AI->AttackAfterMovement();
-						return;
-					}
-					AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
-					AI->MoveToTile(TileOptions[0].Tile->GridPosition);
+					AI->AttackAfterMovement();
 					return;
 				}
-				else
-				{
-					if (DistanceToEnemy == 1)
-					{
-						
-						AI->AttackAfterMovement();
-						return;
-					}
-					AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
-					MoveToClosestPossibleTile(Target);
-				}
+				AI->OnMovementComplete.BindUObject(AI, &APlayerUnit::AttackAfterMovement);
+				MoveToClosestPossibleTile(Target);
 				break;
 			}
 
