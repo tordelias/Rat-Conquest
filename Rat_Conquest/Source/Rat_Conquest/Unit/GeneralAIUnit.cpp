@@ -70,6 +70,7 @@ void AGeneralAIUnit::SetStatsBasedOnColorID(int32 FrogColorID)
 	{
 	case 1: // Green - Normal
 		// No changes
+		bIsSlowFrog = true; 
 		break;
 
 	case 2: // Brown - +Health, +Defense, -Speed, -Damage
@@ -77,17 +78,20 @@ void AGeneralAIUnit::SetStatsBasedOnColorID(int32 FrogColorID)
 		Defense += 5.f;
 		Speed -= 2.f;
 		damage -= 3.f;
+		bIsSlowFrog = true; 
 		break;
 
 	case 0: // Purple - +Damage, -Health //bodyslam
 		damage += 5.f;
 		mHealth -= 10.f;
+		bIsSlowFrog = false; 
 		break;
 
 	case 3: // Blue - +Speed, -Health, +Initiative //bodyslam
 		Speed += 5.f;
 		mHealth -= 7.f;
 		initiative += 5.f;
+		bIsSlowFrog = false;
 		break;
 
 	default:

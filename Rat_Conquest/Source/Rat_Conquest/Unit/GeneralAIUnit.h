@@ -40,6 +40,8 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	bool ToungeState = false;
 
+	bool bIsSlowFrog = false; 
+
 	void SetToungeWorldTarget(FVector Target) { TongueWorldTarget = Target; OnBoneMoved.Broadcast(); }
 
 
