@@ -46,4 +46,14 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Widgets")
 	UUnitWidget* UnitWidgetContainer;
+
+    UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Widget")
+    class UProgressBar* HealthBar;
+
+    UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Unit Widget")
+   class  UTextBlock* bossName;
+
+    void SetHealthBarPercentage(float Percentage);
+
+    void ShowBossHealthBar(FText bossName); 
 };
