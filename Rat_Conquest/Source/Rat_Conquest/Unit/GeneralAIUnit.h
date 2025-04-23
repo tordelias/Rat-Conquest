@@ -14,16 +14,15 @@ class RAT_CONQUEST_API AGeneralAIUnit : public APlayerUnit
 {
 	GENERATED_BODY()
 
+public:
+
 	AGeneralAIUnit();
 
-	void RandomizeStats() override;
 	void SetTexcture(int num);
 
 	void SetStatsBasedOnColorID(int32 FrogColorID);
 
 
-
-public: 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	bool IsFrog = false; 
 	//Niagara VFX
@@ -31,6 +30,7 @@ public:
 	class UNiagaraSystem* BodySlamVFX;
 
 	void SpawnVFX();
+	void RandomizeStats() override;
 
 	int AIDifficulty = 5; // 0 = Easy, 1 = Medium, 2 = Hard
 

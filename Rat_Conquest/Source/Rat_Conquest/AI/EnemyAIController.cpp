@@ -421,15 +421,16 @@ TWeakObjectPtr<APlayerUnit> AEnemyAIController::FindEnemyByThreat()
 	{
 		bIsRanged = false;
 	}
-	if (AI->GridManager.IsValid())
+	if (AI->GridManager.IsValid() && AI->GameManager.IsValid())
 	{
+		
+		TArray<TObjectPtr<APlayerUnit>> playerUnits = AI->GameManager->PlayerUnits;
 		TWeakObjectPtr<APlayerUnit> MostThreateningEnemy;
 		float HighestThreatLevel = -FLT_MAX; // Start with the lowest possible value to find the max threat
 
 		// Iterate over all potential enemies
-		for (TObjectIterator<APlayerUnit> It; It; ++It)
+		for (auto Enemy : playerUnits)
 		{
-			APlayerUnit* Enemy = *It;
 			if (Enemy && Enemy != AI && Enemy->bIsPlayerUnit)
 			{
 				float Distance = AI->ChebyshevDistance(AI->CurrentGridPosition, Enemy->CurrentGridPosition);

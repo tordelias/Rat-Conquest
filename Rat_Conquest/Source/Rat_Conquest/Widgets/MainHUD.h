@@ -76,6 +76,8 @@ public:
 	void RemoveUnitFromQueue(APlayerUnit* unit);
 	void AddPlayerUnitToScreen(APlayerUnit* unit);
 	void HighlightPlayerUnit(TWeakObjectPtr<APlayerUnit> unit);
+	void SetHealthBarPercentage(float Percentage);
+	void ShowBossHealthBar(FText bossName);
 
 	//statWidget functions
 	void ShowStatWidget();

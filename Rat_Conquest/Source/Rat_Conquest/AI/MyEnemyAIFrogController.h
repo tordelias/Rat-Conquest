@@ -41,9 +41,7 @@ UCLASS()
 class RAT_CONQUEST_API AMyEnemyAIFrogController : public AEnemyAIController
 {
 	GENERATED_BODY()
-	void StartBodySlam();
-	void BodySlam();
-	void ToungeGrab();
+
 
 	void ChooseAction() override;
 
@@ -57,5 +55,9 @@ class RAT_CONQUEST_API AMyEnemyAIFrogController : public AEnemyAIController
 
 	FVector BoneLocation;
 	FVector BoneDirection;
+public:
+	void StartBodySlam();
+	void BodySlam();
+	void ToungeGrab();
 	
 };

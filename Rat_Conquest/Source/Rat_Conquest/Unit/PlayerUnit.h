@@ -238,7 +238,7 @@ public:
     virtual void BeginPlay() override;
     void UpdateInteractableData();
 
-    void UpdateHealthBar();
+   virtual void UpdateHealthBar();
     void UpdateHealthBarRotation();
 
 	void SetTurnAngle(float Angle) { TurnAngle = Angle; }

@@ -55,6 +55,7 @@ public:
 
 	UPROPERTY()
 	TWeakObjectPtr<APlayerUnit> Target;
+	bool bIsRanged = false;
 
 private: 
 	FVector2d TargetGridPosition;
@@ -62,6 +63,5 @@ private:
 	TArray<FMeleeTileOption> TileOptions;
 	void ScoreMeleeTiles(TArray<TWeakObjectPtr<AGridTile>> NeighbourTiles, TWeakObjectPtr<APlayerUnit> Enemy);
 
-	bool bIsRanged = false; 
 	
 };

@@ -212,6 +212,30 @@ void AMainHUD::HighlightPlayerUnit(TWeakObjectPtr<APlayerUnit> unit)
 	}
 }
 
+void AMainHUD::SetHealthBarPercentage(float Percentage)
+{
+	if (MainWidget)
+	{
+		MainWidget->SetHealthBarPercentage(Percentage);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("MainWidget is null!"));
+	}
+}
+
+void AMainHUD::ShowBossHealthBar(FText bossName)
+{
+	if (MainWidget)
+	{
+		MainWidget->ShowBossHealthBar(bossName);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("MainWidget is null!"));
+	}
+}
+
 void AMainHUD::ShowMutationWidget()
 {
 	if (MutationWidget)
