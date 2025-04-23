@@ -101,6 +101,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Enemies")
 	TArray<TSubclassOf<APlayerUnit>> EnemyList;
 
+	UPROPERTY(EditAnywhere, Category = "Enemies")
+	TArray<TSubclassOf<APlayerUnit>> BossList;
+
 	UPROPERTY(EditAnywhere, Category = "Player Units")
 	TArray<TSubclassOf<APlayerUnit>> NewPlayerUnitList;
 

@@ -458,11 +458,11 @@ void AGameManager::StartEncounter()
     bisPlayersturn = true;
     GridManager->ScanWorldForObjects();
     //Spawn new enemies
-	for (int i = 0; i < FMath::RandRange(1,2 + GameDifficulty); ++i)
-	{
-		if (EnemyList.Num() > 0)
-		{
-            int RandomIndex = FMath::RandRange(0, EnemyList.Num() - 1);
+    if (RoomsExplored >= 5) {
+		//Spawn boss Enemy instead of normal enemies
+
+        if (BossList.Num() > 0) {
+            int RandomIndex = FMath::RandRange(0, BossList.Num() - 1);
 
             FVector SpawnLocation = FVector(0.f, 50.f, 0.f); // Adjust as needed
             FRotator SpawnRotation = FRotator::ZeroRotator;
@@ -472,12 +472,12 @@ void AGameManager::StartEncounter()
             SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
             TObjectPtr<APlayerUnit> NewEnemy = GetWorld()->SpawnActor<APlayerUnit>(
-                EnemyList[RandomIndex],
+                BossList[RandomIndex],
                 SpawnLocation,
                 SpawnRotation,
                 SpawnParams
             );
-            if (NewEnemy->GridManager.IsValid() && NewEnemy->GridManager->bIsGridScanned) 
+            if (NewEnemy->GridManager.IsValid() && NewEnemy->GridManager->bIsGridScanned)
             {
                 Cast<AGeneralAIUnit>(NewEnemy)->AIDifficulty = GameDifficulty;
                 NewEnemy->SpawnDefaultController();
@@ -486,33 +486,74 @@ void AGameManager::StartEncounter()
             else {
                 UE_LOG(LogTemp, Error, TEXT("Failed to get GM for enemy"));
             }
-         
-
-            
             if (AEnemyAIController* AIController = Cast<AEnemyAIController>(NewEnemy->GetController()))
             {
                 AIController->Possess(NewEnemy);
             }
+
+        }
+
+
+
+    }
+    else {
+        for (int i = 0; i < FMath::RandRange(1, 2 + GameDifficulty); ++i)
+        {
+            if (EnemyList.Num() > 0)
+            {
+                int RandomIndex = FMath::RandRange(0, EnemyList.Num() - 1);
+
+                FVector SpawnLocation = FVector(0.f, 50.f, 0.f); // Adjust as needed
+                FRotator SpawnRotation = FRotator::ZeroRotator;
+
+                FActorSpawnParameters SpawnParams;
+                SpawnParams.Owner = this;
+                SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+                TObjectPtr<APlayerUnit> NewEnemy = GetWorld()->SpawnActor<APlayerUnit>(
+                    EnemyList[RandomIndex],
+                    SpawnLocation,
+                    SpawnRotation,
+                    SpawnParams
+                );
+                if (NewEnemy->GridManager.IsValid() && NewEnemy->GridManager->bIsGridScanned)
+                {
+                    Cast<AGeneralAIUnit>(NewEnemy)->AIDifficulty = GameDifficulty;
+                    NewEnemy->SpawnDefaultController();
+
+                }
+                else {
+                    UE_LOG(LogTemp, Error, TEXT("Failed to get GM for enemy"));
+                }
+
+
+
+                if (AEnemyAIController* AIController = Cast<AEnemyAIController>(NewEnemy->GetController()))
+                {
+                    AIController->Possess(NewEnemy);
+                }
+                else
+                {
+                    UE_LOG(LogTemp, Error, TEXT("Failed to get AI Controller for spawned enemy"));
+                }
+                if (NewEnemy)
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("New enemy spawned: %s"), *NewEnemy->GetName());
+
+                }
+                else
+                {
+                    UE_LOG(LogTemp, Error, TEXT("Failed to spawn enemy at index %d"), RandomIndex);
+                }
+
+            }
             else
             {
-                UE_LOG(LogTemp, Error, TEXT("Failed to get AI Controller for spawned enemy"));
+                UE_LOG(LogTemp, Warning, TEXT("No enemies in the EnemyList!"));
             }
-			if (NewEnemy)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("New enemy spawned: %s"), *NewEnemy->GetName());
-				
-			}
-            else
-            {
-                UE_LOG(LogTemp, Error, TEXT("Failed to spawn enemy at index %d"), RandomIndex);
-            }
-            
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("No enemies in the EnemyList!"));
-		}
-	}
+        }
+    }
+	
 
   
    
