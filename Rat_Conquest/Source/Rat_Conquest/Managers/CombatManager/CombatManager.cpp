@@ -24,8 +24,9 @@ void ACombatManager::DealDamageToUnit(TWeakObjectPtr<APlayerUnit> Attackerunit, 
         return;
     }
 
+    // Calculate weapon damage with random variance
     int weaponDamage = 0;
-    if (Attackerunit->ItemSlots[0].Get())
+    if (Attackerunit->ItemSlots[0].IsValid())
     {
         AItem* item = Cast<AItem>(Attackerunit->ItemSlots[0]);
         if (item)
@@ -34,33 +35,51 @@ void ACombatManager::DealDamageToUnit(TWeakObjectPtr<APlayerUnit> Attackerunit, 
             weaponDamage = FMath::Max(1, weaponDamage);
         }
     }
-    int TotalDamage = Attackerunit->Damage + weaponDamage * (1 + (Attackerunit->Attack/10));
-    TotalDamage = FMath::Max(1, TotalDamage - Defenderunit->Defence);
 
-    if (TotalDamage >= Defenderunit->Health && Attackerunit->bIsPlayerUnit)
+    // Total damage before defense
+    int rawDamage = Attackerunit->Damage + weaponDamage;
+    float damageMultiplier = 1.0f + (static_cast<float>(Attackerunit->Attack) / 10.0f);
+    int calculatedDamage = static_cast<int>(rawDamage * damageMultiplier);
+
+    // Include defender's armor if any
+    int armorDefense = 0;
+    if (Defenderunit->ItemSlots[1].IsValid())
+    {
+        AItem* armor = Cast<AItem>(Defenderunit->ItemSlots[1]);
+        if (armor)
+        {
+            armorDefense = armor->Defence;
+        }
+    }
+
+    int totalDefense = Defenderunit->Defence + armorDefense;
+    int finalDamage = FMath::Max(1, calculatedDamage - totalDefense);
+
+    // Mutate check
+    if (finalDamage >= Defenderunit->Health && Attackerunit->bIsPlayerUnit)
     {
         Attackerunit->mutationData->AddExperience(Defenderunit->experienceReward);
 
-        // Add 1-second delay before Mutate()
         GetWorld()->GetTimerManager().SetTimer(
             DelayTimerHandle,
-            [WeakAttacker = TWeakObjectPtr<APlayerUnit>(Attackerunit)]() 
+            [WeakAttacker = TWeakObjectPtr<APlayerUnit>(Attackerunit)]()
             {
                 if (WeakAttacker.IsValid())
                 {
                     WeakAttacker->Mutate();
                 }
             },
-            1.0f, 
-            false 
+            1.0f,
+            false
         );
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("Dealing %d damage to %s"), TotalDamage, *Defenderunit->GetName());
+    UE_LOG(LogTemp, Warning, TEXT("Dealing %d damage to %s"), finalDamage, *Defenderunit->GetName());
 
     ApplyKnockback(Attackerunit, Defenderunit);
-    HandleUnitDamage(Defenderunit, TotalDamage);
+    HandleUnitDamage(Defenderunit, finalDamage); 
 }
+
 
 void ACombatManager::ApplyKnockback(TWeakObjectPtr<APlayerUnit> Attackerunit, TWeakObjectPtr<APlayerUnit> Defenderunit)
 {
@@ -110,42 +129,31 @@ void ACombatManager::ResetKnockbackPosition(TWeakObjectPtr<APlayerUnit> Defender
 
 void ACombatManager::HandleUnitDamage(TWeakObjectPtr<APlayerUnit> unit, int amount)
 {
-	if (!unit.IsValid())
-	{
-		UE_LOG(LogTemp, Error, TEXT("TakeDamage failed: Unit is null!"));
-		return;
-	}
-	int armorDefense = 0;
-    if (unit->ItemSlots[1].Get())
+    if (!unit.IsValid())
     {
-        AItem* item = Cast<AItem>(unit->ItemSlots[1]);
-        if (item)
-        {
-            armorDefense = item->Defence;
-        }
+        UE_LOG(LogTemp, Error, TEXT("HandleUnitDamage failed: Unit is null!"));
+        return;
     }
-	int TotalDamage = FMath::Max(amount - (unit->Defence + armorDefense), 1);
-	unit->Health -= TotalDamage;
 
-  
-    if (SB_Impact) {
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SB_Impact, unit->GetActorLocation());
+    unit->Health -= amount;
+
+    if (SB_Impact)
+    {
+        UGameplayStatics::PlaySoundAtLocation(GetWorld(), SB_Impact, unit->GetActorLocation());
     }
+
     unit->OnHealthChanged.Broadcast();
     unit->UpdateHealthBar();
-	UE_LOG(LogTemp, Warning, TEXT("took %d damage"),amount);
 
-	if (unit->Health <= 0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("has been killed!"));
-		KillUnit(unit);
-		
-	}
-	else
-	{
-		//UE_LOG(LogTemp, Display, TEXT(" survived with %d health remaining"), unit->health);
-	}
+    UE_LOG(LogTemp, Warning, TEXT("%s took %d damage"), *unit->GetName(), amount);
+
+    if (unit->Health <= 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("%s has been killed!"), *unit->GetName());
+        KillUnit(unit);
+    }
 }
+
 
 void ACombatManager::HealUnit(TWeakObjectPtr<APlayerUnit> unit, int amount)
 {
