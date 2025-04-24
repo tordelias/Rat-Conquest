@@ -12,6 +12,7 @@ AGeneralAIUnit::AGeneralAIUnit()
 
 void AGeneralAIUnit::RandomizeStats()
 {
+	UnitName = FName("IronRat");
 	MovementSpeed = FMath::RandRange(2, 5);
 	Damage = FMath::RandRange(1, 5);
 	Defence = FMath::RandRange(0, 5);
@@ -23,6 +24,7 @@ void AGeneralAIUnit::RandomizeStats()
 
 	if (IsFrog)
 	{
+		UnitName = FName("Frog");
 		int randomTexture = FMath::RandRange(0, 3);
 		SetTexcture(randomTexture);
 		SetStatsBasedOnColorID(randomTexture);

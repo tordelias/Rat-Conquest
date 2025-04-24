@@ -204,6 +204,14 @@ void APlayerCamera::PerformInteractionCheck()
                     if (!GridTile->unitRefrence->bIsPlayerUnit)
                     {
                         SwitchMouseCursor(GridTile->unitRefrence);
+                        if (bIsRightMouseDown)
+                        {
+                            if (mainHUD.IsValid())
+                            {
+                                mainHUD->UpdateStatWidget(&GridTile->unitRefrence->InstanceInteractableData);
+                                mainHUD->ShowStatWidget();
+                            }
+                        }
                     }
                     else if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController()))
                     {
@@ -258,7 +266,7 @@ void APlayerCamera::FoundInteractable(TWeakObjectPtr<AActor> NewInteractable)
     // Handle previous interactable with full validation
     if (AActor* OldInteractable = InteractionData.CurrentInteractable.Get())
     {
-        if (IsValid(OldInteractable)) // Double-check validity
+        if (IsValid(OldInteractable))
         {
             if (auto OldInterface = TScriptInterface<IInteractionInterface>(OldInteractable))
             {
@@ -282,16 +290,9 @@ void APlayerCamera::FoundInteractable(TWeakObjectPtr<AActor> NewInteractable)
 
     InteractionData.LastInteractionCheckTime = World->GetTimeSeconds();
 
-    // Handle PlayerUnit case
-    if (APlayerUnit* PlayerUnit = Cast<APlayerUnit>(NewInteractable))
-    {
-        if (IsValid(PlayerUnit) && IsValid(mainHUD.Get()) && !PlayerUnit->bIsPlayerUnit)
-        {
-            SwitchMouseCursor(PlayerUnit);
-        }
-    }
+
     // Handle GridTile case with extreme caution
-    else if (AGridTile* GridTile = Cast<AGridTile>(NewInteractable))
+    if (AGridTile* GridTile = Cast<AGridTile>(NewInteractable))
     {
         if (IsValid(GridTile))
         {
@@ -345,11 +346,6 @@ void APlayerCamera::NoInteractableFound()
             TargetInteractable->EndMouseHoverFocus();
         }
 
-        // Close widget
-        if (mainHUD.IsValid())
-        {
-            mainHUD->CloseStatWidget();
-        }
         InteractionData.CurrentInteractable = nullptr;
         TargetInteractable = nullptr;
     }
@@ -546,6 +542,10 @@ void APlayerCamera::RMBPressed(const FInputActionValue& Value)
 void APlayerCamera::RMBReleased(const FInputActionValue& Value)
 {
     bIsRightMouseDown = false; 
+	if (mainHUD.IsValid())
+	{
+		mainHUD->CloseStatWidget();
+	}
 }
 void APlayerCamera::PauseGame(const FInputActionValue& Value)
 {

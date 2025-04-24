@@ -137,7 +137,6 @@ void APlayerUnit::BeginPlay()
 		}
 
 	DelayedInitalPosition();
-	this->UpdateInteractableData();
 
 	if (bIsPlayerUnit)
 	{
@@ -187,6 +186,7 @@ void APlayerUnit::BeginPlay()
 
 	RandomizeStats();
 	UpdateHealthBar(); // Update UI initially
+	this->UpdateInteractableData();
 }
 
 void APlayerUnit::Tick(float DeltaTime)
@@ -1585,8 +1585,7 @@ void APlayerUnit::UpdateInteractableData()
 	}
 	else
 	{
-		InstanceInteractableData.UnitName = FText::FromString("Rat");
-		this->UnitName = FName("Rat");
+		InstanceInteractableData.UnitName = FText::FromName(UnitName);
 	}
 	CalculateStats();
 
@@ -1599,6 +1598,7 @@ void APlayerUnit::UpdateInteractableData()
 	InstanceInteractableData.Defense = Defence + DefenceFromItems;
 	InstanceInteractableData.MinDamage = FMath::Max(1, Damage + DamageFromItems - 2);
 	InstanceInteractableData.MaxDamage = Damage + DamageFromItems + 2;
+	InstanceInteractableData.Initative = Initiative + InitiativeFromItems;
 
 	MinDamage = InstanceInteractableData.MinDamage;
 
