@@ -35,7 +35,7 @@ void ACombatManager::DealDamageToUnit(TWeakObjectPtr<APlayerUnit> Attackerunit, 
         }
     }
     int TotalDamage = Attackerunit->Damage + weaponDamage * (1 + (Attackerunit->Attack/10));
-    TotalDamage = FMath::Max(1, TotalDamage);
+    TotalDamage = FMath::Max(1, TotalDamage - Defenderunit->Defence);
 
     if (TotalDamage >= Defenderunit->Health && Attackerunit->bIsPlayerUnit)
     {
