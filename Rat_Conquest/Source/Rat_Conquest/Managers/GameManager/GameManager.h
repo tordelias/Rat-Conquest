@@ -64,6 +64,10 @@ public:
 
 	void SpawnInteractableObjects();
 
+	void DelayedSpawnLoot();
+
+	void DelayedSpawnInteractableObjects();
+
 	void SpawnNewPlayerUnit(FVector2D Gridposition);
 
 	void RotateUnits(float roation);
@@ -71,6 +75,7 @@ public:
 	TArray<TObjectPtr<APlayerUnit>> MasterTurnQueue;
 	const int32 TurnBufferSize = 10;
 
+	int MaxRoomsToExplore = 5;
 	int RoomsExplored = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

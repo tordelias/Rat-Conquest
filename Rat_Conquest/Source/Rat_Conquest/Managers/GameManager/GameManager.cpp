@@ -294,10 +294,10 @@ void AGameManager::EndUnitTurn()
                 MainHUD->ShowVictoryWidget();
             }
         }
-        if (LevelGenerator && RoomsExplored < 5 && !bTestEncounter) {
+        if (LevelGenerator && RoomsExplored < MaxRoomsToExplore && !bTestEncounter) {
             LevelGenerator->SetupRoomSelectUI();
         }
-        else if (RoomsExplored >= 5 && !bTestEncounter) {
+        else if (RoomsExplored > MaxRoomsToExplore && !bTestEncounter) {
             //Show victory screen
             if (MainHUD) {
                 MainHUD->ShowVictoryWidget();
@@ -458,7 +458,7 @@ void AGameManager::StartEncounter()
     bisPlayersturn = true;
     GridManager->ScanWorldForObjects();
     //Spawn new enemies
-    if (RoomsExplored > 5) {
+    if (RoomsExplored == MaxRoomsToExplore) {
 		//Spawn boss Enemy instead of normal enemies
 
         if (BossList.Num() > 0) {
@@ -502,6 +502,12 @@ void AGameManager::StartEncounter()
             if (EnemyList.Num() > 0)
             {
                 int RandomIndex = FMath::RandRange(0, EnemyList.Num() - 1);
+                if (RoomsExplored == 0) 
+                {
+                    RandomIndex = 0;
+                
+                }
+
 
                 FVector SpawnLocation = FVector(0.f, 50.f, 0.f); // Adjust as needed
                 FRotator SpawnRotation = FRotator::ZeroRotator;
@@ -582,8 +588,29 @@ void AGameManager::StartEncounter()
 	
     GetWorldTimerManager().SetTimerForNextTick(this, &AGameManager::InitalizeUnits);
     //// Initialize the player and enemy units
-    SpawnLoot();
-    SpawnInteractableObjects();
+
+    for (int i = 0; i < FMath::RandRange(1, 2); ++i) {
+
+        FTimerHandle LootSpawnTimer;
+        GetWorld()->GetTimerManager().SetTimer(
+            LootSpawnTimer,
+            this,
+            &AGameManager::DelayedSpawnLoot,
+            0.50f, // delay in seconds
+            false // no looping
+        );
+    }
+	for (int i = 0; i < FMath::RandRange(1, 2); ++i) {
+		FTimerHandle InteractableSpawnTimer;
+		GetWorld()->GetTimerManager().SetTimer(
+			InteractableSpawnTimer,
+			this,
+			&AGameManager::DelayedSpawnInteractableObjects,
+			0.50f, // delay in seconds
+			false // no looping
+		);
+	}
+  
 
 }
 
@@ -736,6 +763,9 @@ void AGameManager::SpawnInteractableObjects()
 		return; // No valid unoccupied positions available
 	//SpawnLocation.Z += 45;
 	int RandomIndex = FMath::RandRange(0, InteractObjPool.Num() - 1);
+    if (PlayerUnits.Num() > 3 && RandomIndex == 1 || RoomsExplored == 0) {
+        RandomIndex = 0;
+    }
 	FRotator SpawnRotation = FRotator::ZeroRotator;
 
 	FActorSpawnParameters SpawnParams;
@@ -758,6 +788,16 @@ void AGameManager::SpawnInteractableObjects()
 		UE_LOG(LogTemp, Error, TEXT("Failed to spawn interactable object"));
 	}
 
+}
+
+void AGameManager::DelayedSpawnLoot()
+{
+    SpawnLoot();
+}
+
+void AGameManager::DelayedSpawnInteractableObjects()
+{
+	SpawnInteractableObjects();
 }
 
 void AGameManager::SpawnNewPlayerUnit(FVector2D Gridposition)
@@ -790,12 +830,35 @@ void AGameManager::SpawnNewPlayerUnit(FVector2D Gridposition)
 	);
 	if (NewPlayerUnit)
 	{
-		NewPlayerUnit->SetActorLocation(SpawnLocation);
+		
+		//NewPlayerUnit->SetActorLocation(SpawnLocation);
 		NewPlayerUnit->SetActorRotation(SpawnRotation);
-		NewPlayerUnit->CurrentGridPosition = GridPosition;
+		//NewPlayerUnit->CurrentGridPosition = GridPosition;
 		PlayerUnits.Add(NewPlayerUnit);
 		NewPlayerUnit->Seticon(PlayerUnits.Num() - 1);
 		UE_LOG(LogTemp, Warning, TEXT("New player unit spawned: %s"), *NewPlayerUnit->GetName());
+		int UnitNum = 0;
+		GridTileActor->bIsOccupied = true;
+       /* for (TActorIterator<APlayerUnit> It(GetWorld()); It; ++It)
+        {
+            APlayerUnit* Unit = *It;
+            if (Unit && Unit->bIsPlayerUnit)
+            {
+
+                
+                Unit->Seticon(UnitNum);
+                ++UnitNum;
+                UE_LOG(LogTemp, Warning, TEXT("Player unit added"));
+            }
+        }*/
+        for (APlayerUnit* Unit : PlayerUnits)
+        {
+            if (MainHUD)
+            {
+                MainHUD->AddPlayerUnitToScreen(Unit);
+            }
+        }
+        
 	}
 }
 
@@ -905,7 +968,7 @@ void AGameManager::Tick(float DeltaTime)
 		}
         UE_LOG(LogTemp, Warning, TEXT("Size of TurnQueue: %d"), TurnQueue.Num());
         UE_LOG(LogTemp, Display, TEXT("Current Turn Queue:"));
-        //SpawnLoot();
+        SpawnLoot();
         APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
         if (PlayerCharacter) {
             PlayerCharacter->SetCameraTopDown(-90, 1000);

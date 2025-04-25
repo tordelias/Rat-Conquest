@@ -260,6 +260,7 @@ public:
     bool bFirstMove = true;
     bool bHasWeapon = false;
     bool bIsCurrentUnit = false;
+	
 
     TWeakObjectPtr<APlayerUnit> EnemyToAttack;
     FVector2D TargetEnemyLocation = FVector2D(0, 0);

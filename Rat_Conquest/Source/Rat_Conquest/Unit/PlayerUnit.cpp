@@ -605,6 +605,7 @@ void APlayerUnit::SetInitalPosition(FVector2D position)
 
 void APlayerUnit::DelayedInitalPosition()
 {
+	
 	if (GridManager.IsValid() && GridManager->IsGridFinished() && GridManager->IsGridScanned())
 	{
 		SetInitalPosition(GridStartPosition);

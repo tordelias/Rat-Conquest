@@ -39,6 +39,9 @@ void AInteractableGridObject::InteractWithObject(TWeakObjectPtr<APlayerUnit> Int
 	case EObjectType::Tower:
 		// Get better range
 		break;
+	case EObjectType::CagedRat:
+		GetCagedRat();
+		break;
 	default:
 		break;
 	}
@@ -76,7 +79,7 @@ void AInteractableGridObject::MovePlayer()
 void AInteractableGridObject::GetCagedRat()
 {
 	// Get the player unit and move it to a new position
-	if (unitRefrence.IsValid() && GameManager.IsValid())
+	if (unitRefrence.IsValid() && GameManager.IsValid() && GameManager->PlayerUnits.Num() < 4)
 	{
 		FVector2D GridPositon = unitRefrence->CurrentGridPosition; // Example new position
 		GameManager->SpawnNewPlayerUnit(GridPositon);
@@ -84,6 +87,9 @@ void AInteractableGridObject::GetCagedRat()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("Unit reference is invalid!"));
+	}
+	if (bIsConsumable) {
+		DestroyObject();
 	}
 }
 
