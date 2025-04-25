@@ -63,6 +63,9 @@ public:
 	UStaticMeshComponent* ObjectMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Properties")
+	TObjectPtr<USkeletalMeshComponent> SkeletalMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Properties")
 	int HealingAmount = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Properties")
