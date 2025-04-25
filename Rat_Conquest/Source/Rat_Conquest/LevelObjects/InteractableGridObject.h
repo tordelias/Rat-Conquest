@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/Character.h"
 #include "InteractableGridObject.generated.h"
 
 class APlayerUnit;
@@ -64,6 +65,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Properties")
 	TObjectPtr<USkeletalMeshComponent> SkeletalMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Properties")
+	TArray<TObjectPtr<UAnimMontage>> AnimToPlay;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Properties")
 	int HealingAmount = 0;

@@ -137,6 +137,7 @@ void AInteractableGridObject::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("No GameManager found in the level!"));
 	}
+	
 
 }
 
