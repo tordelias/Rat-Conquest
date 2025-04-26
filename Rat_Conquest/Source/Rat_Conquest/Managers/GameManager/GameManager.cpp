@@ -17,6 +17,7 @@
 #include "Rat_Conquest/Unit/UnitMarker.h"
 #include "Rat_Conquest/Unit/GeneralAIUnit.h"
 #include "Rat_Conquest/LevelObjects/InteractableGridObject.h"
+#include "Rat_Conquest/Unit/MyBossUnit.h"
 #include "Components/AudioComponent.h"
 
 
@@ -458,7 +459,7 @@ void AGameManager::StartEncounter()
     bisPlayersturn = true;
     GridManager->ScanWorldForObjects();
     //Spawn new enemies
-    if (RoomsExplored == MaxRoomsToExplore) {
+    if (RoomsExplored == 0) {
 		//Spawn boss Enemy instead of normal enemies
 
         if (BossList.Num() > 0) {
@@ -479,7 +480,7 @@ void AGameManager::StartEncounter()
             );
             if (NewEnemy->GridManager.IsValid() && NewEnemy->GridManager->bIsGridScanned)
             {
-                Cast<AGeneralAIUnit>(NewEnemy)->AIDifficulty = GameDifficulty;
+                Cast<AMyBossUnit>(NewEnemy)->AIDifficulty = GameDifficulty;
                 NewEnemy->SpawnDefaultController();
 
             }
