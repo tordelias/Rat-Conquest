@@ -112,7 +112,7 @@ void AMyBossUnit::UpdateHealthBar()
 	AMainHUD* hud = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 	if (hud)
 	{
-		hud->SetHealthBarPercentage(Health / maxHealth);
+		hud->SetHealthBarPercentage(float(Health / maxHealth));
 	}
 	else
 	{

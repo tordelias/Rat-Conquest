@@ -135,7 +135,7 @@ void UMainWidget::SetHealthBarPercentage(float Percentage)
 		}
 		else
 		{
-			HealthBar->SetVisibility(ESlateVisibility::Collapsed);
+			//HealthBar->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
 	else
