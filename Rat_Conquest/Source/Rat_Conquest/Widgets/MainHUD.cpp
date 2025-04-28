@@ -22,7 +22,7 @@ void AMainHUD::BeginPlay()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("MainWidget created"));
 			MainWidget->AddToViewport();
-			MainWidget->SetVisibility(ESlateVisibility::Hidden);
+			MainWidget->SetVisibility(ESlateVisibility::Collapsed);
 			MainWidget->SetUserFocus(GetOwningPlayerController());
 		}
 	}
@@ -221,6 +221,7 @@ void AMainHUD::SetHealthBarPercentage(float Percentage)
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("MainWidget is null!"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("MainWidget is null!"));
 	}
 }
 
@@ -233,6 +234,7 @@ void AMainHUD::ShowBossHealthBar(FText bossName)
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("MainWidget is null!"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("MainWidget is null!"));
 	}
 }
 

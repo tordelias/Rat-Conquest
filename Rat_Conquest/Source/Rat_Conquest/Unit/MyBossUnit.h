@@ -42,6 +42,8 @@ private:
 	void MoleStats();
 	void PlayerRatStats();
 
+	void InitalizeHealthBar();
+
 
 	
 };

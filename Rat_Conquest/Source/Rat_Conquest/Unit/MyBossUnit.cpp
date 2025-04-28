@@ -27,15 +27,10 @@ void AMyBossUnit::RandomizeStats()
 	int randomName = FMath::RandRange(0, BossNames.Num() - 1);
 	BossName = BossNames[randomName];
 
-	AMainHUD* hud = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-	if (hud)
-	{
-		hud->ShowBossHealthBar(BossName);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("HUD is null |MyBossUnit.cpp|"));
-	}
+	//Add small delay before calling InitializeHealthBar
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMyBossUnit::InitalizeHealthBar, 0.1f, false);
+
 
 }
 
@@ -106,16 +101,36 @@ void AMyBossUnit::PlayerRatStats() //Speed
 	Initiative = initiative;
 }
 
-void AMyBossUnit::UpdateHealthBar()
+void AMyBossUnit::InitalizeHealthBar()
 {
-	//cast to mainHUD
 	AMainHUD* hud = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 	if (hud)
 	{
-		hud->SetHealthBarPercentage(float(Health / maxHealth));
+		hud->ShowBossHealthBar(BossName);
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("HUD is null |MyBossUnit.cpp|"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("HUD is null |MyBossUnit.cpp|"));
+	}
+}
+
+void AMyBossUnit::UpdateHealthBar()
+{
+	AMainHUD* hud = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+	if (hud)
+	{
+		// Ensure we're using floating-point division
+		float HealthPercentage = maxHealth > 0 ? static_cast<float>(Health) / static_cast<float>(maxHealth) : 0.0f;
+
+		// Debug log the values
+		UE_LOG(LogTemp, Display, TEXT("Updating health bar - Health: %d, MaxHealth: %d, Percentage: %f"), Health, maxHealth, HealthPercentage);
+
+		hud->SetHealthBarPercentage(HealthPercentage);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("HUD is null |MyBossUnit.cpp|"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("HUD is null |MyBossUnit.cpp|"));
 	}
 }

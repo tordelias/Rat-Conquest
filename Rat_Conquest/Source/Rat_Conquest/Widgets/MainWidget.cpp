@@ -16,6 +16,7 @@ void UMainWidget::NativeConstruct()
 	if(HealthBar)
 	{
 		HealthBar->SetVisibility(ESlateVisibility::Collapsed);
+		HealthBar->SetPercent(1.f);
 	}
 	if (bossName)
 	{
@@ -129,18 +130,12 @@ void UMainWidget::SetHealthBarPercentage(float Percentage)
 	{
 		HealthBar->SetPercent(Percentage);
 		// Hide widget if full health
-		if (Percentage < 1.0f)
-		{
 			HealthBar->SetVisibility(ESlateVisibility::Visible);
-		}
-		else
-		{
-			//HealthBar->SetVisibility(ESlateVisibility::Collapsed);
-		}
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("HealthBar is null!"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("HealthBar is null!"));
 	}
 }
 
@@ -157,10 +152,12 @@ void UMainWidget::ShowBossHealthBar(FText Name)
 		else
 		{
 			UE_LOG(LogTemp, Error, TEXT("BossName is null!"));
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("BossName is null!"));
 		}
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("HealthBar is null!"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("HealthBar is null!"));
 	}
 }
