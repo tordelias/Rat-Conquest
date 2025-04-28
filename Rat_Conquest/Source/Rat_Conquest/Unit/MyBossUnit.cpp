@@ -110,7 +110,6 @@ void AMyBossUnit::InitalizeHealthBar()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("HUD is null |MyBossUnit.cpp|"));
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("HUD is null |MyBossUnit.cpp|"));
 	}
 }
@@ -123,14 +122,11 @@ void AMyBossUnit::UpdateHealthBar()
 		// Ensure we're using floating-point division
 		float HealthPercentage = maxHealth > 0 ? static_cast<float>(Health) / static_cast<float>(maxHealth) : 0.0f;
 
-		// Debug log the values
-		UE_LOG(LogTemp, Display, TEXT("Updating health bar - Health: %d, MaxHealth: %d, Percentage: %f"), Health, maxHealth, HealthPercentage);
-
 		hud->SetHealthBarPercentage(HealthPercentage);
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("HUD is null |MyBossUnit.cpp|"));
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("HUD is null |MyBossUnit.cpp|"));
+
 	}
 }

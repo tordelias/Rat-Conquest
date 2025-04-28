@@ -152,12 +152,10 @@ void UMainWidget::ShowBossHealthBar(FText Name)
 		else
 		{
 			UE_LOG(LogTemp, Error, TEXT("BossName is null!"));
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("BossName is null!"));
 		}
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("HealthBar is null!"));
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("HealthBar is null!"));
 	}
 }
