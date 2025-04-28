@@ -72,6 +72,8 @@ public:
 
 	void RotateUnits(float roation);
 
+	void RotateEnemyUnits();
+
 	TArray<TObjectPtr<APlayerUnit>> MasterTurnQueue;
 	const int32 TurnBufferSize = 10;
 

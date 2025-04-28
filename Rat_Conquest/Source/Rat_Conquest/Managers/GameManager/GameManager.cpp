@@ -459,7 +459,7 @@ void AGameManager::StartEncounter()
     bisPlayersturn = true;
     GridManager->ScanWorldForObjects();
     //Spawn new enemies
-    if (RoomsExplored == 0) {
+    if (RoomsExplored == MaxRoomsToExplore) {
 		//Spawn boss Enemy instead of normal enemies
 
         if (BossList.Num() > 0) {
@@ -611,8 +611,8 @@ void AGameManager::StartEncounter()
 			false // no looping
 		);
 	}
-  
-
+    RotateUnits(0);
+   
 }
 
 void AGameManager::UpdateTurnQueue()
@@ -875,14 +875,38 @@ void AGameManager::RotateUnits(float roation)
 			unit->SetActorRotation(FRotator(0, roation, 0));
 		}
 	}
-	for (TObjectPtr<APlayerUnit> unit : EnemyUnits)
-	{
-		if (unit)
-		{
-            unit->SetTurnAngle(roation);
-			unit->SetActorRotation(FRotator(0, roation + 180, 0));
-		}
-	}
+    FTimerHandle RotateDelayTimer;
+    GetWorld()->GetTimerManager().SetTimer(
+        RotateDelayTimer,
+        this,
+        &AGameManager::RotateEnemyUnits,
+        0.40f, // delay in seconds
+        false // no looping
+    );
+}
+
+void AGameManager::RotateEnemyUnits()
+{
+    float rotation = 0;
+
+    if (PlayerUnits.Num() > 0 && PlayerUnits[0]) // check if array has an element first
+    {
+        rotation = PlayerUnits[0]->GetActorRotation().Yaw;
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("RotateEnemyUnits called but no PlayerUnits available!"));
+        return;
+    }
+
+    for (TObjectPtr<APlayerUnit> unit : EnemyUnits)
+    {
+        if (unit && !unit->bIsPlayerUnit)
+        {
+            unit->SetTurnAngle(rotation);
+            unit->SetActorRotation(FRotator(0, rotation + 180, 0));
+        }
+    }
 }
 
 
@@ -969,12 +993,13 @@ void AGameManager::Tick(float DeltaTime)
 		}
         UE_LOG(LogTemp, Warning, TEXT("Size of TurnQueue: %d"), TurnQueue.Num());
         UE_LOG(LogTemp, Display, TEXT("Current Turn Queue:"));
-        SpawnLoot();
+        //SpawnLoot();
         APlayerCamera* PlayerCharacter = Cast<APlayerCamera>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
         if (PlayerCharacter) {
             PlayerCharacter->SetCameraTopDown(-90, 1000);
 
         }
+        RotateEnemyUnits();
       
        
     }
