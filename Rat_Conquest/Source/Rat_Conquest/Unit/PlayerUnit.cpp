@@ -806,6 +806,7 @@ void APlayerUnit::ExecutePlayerTurn()
 {
 	//some logic here
 	UE_LOG(LogTemp, Error, TEXT("Player did something"));
+	bHasAttacked = false;
 	//CheckForItems();
 	//FinishTurn();
 }
@@ -933,7 +934,7 @@ void APlayerUnit::EquipStartWeapon(TWeakObjectPtr<AItem> ItemToAdd)
 void APlayerUnit::UseCurrentItem()
 {
 
-	if (ItemSlots[0].IsValid() && !bIsMoving) { // use weapon to attack
+	if (ItemSlots[0].IsValid() && !bIsMoving && !bHasAttacked) { // use weapon to attack
 		AWeapon* currentWeapon = Cast<AWeapon>(ItemSlots[0]);
 		if (currentWeapon && IsValid(EnemyToAttack.Get())) {
 			currentWeapon->SetEnemyLocation(EnemyToAttack->GetActorLocation());
@@ -953,6 +954,7 @@ void APlayerUnit::UseCurrentItem()
 			}
 
 			EnemyToAttack = nullptr;
+			bHasAttacked = true;
 			UE_LOG(LogTemp, Error, TEXT("RANGED ATTACK"))
 		}
 		

@@ -459,7 +459,7 @@ void AGameManager::StartEncounter()
     bisPlayersturn = true;
     GridManager->ScanWorldForObjects();
     //Spawn new enemies
-    if (RoomsExplored == MaxRoomsToExplore) {
+    if (RoomsExplored == MaxRoomsToExplore + 1) {
 		//Spawn boss Enemy instead of normal enemies
 
         if (BossList.Num() > 0) {

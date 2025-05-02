@@ -260,6 +260,7 @@ public:
     bool bFirstMove = true;
     bool bHasWeapon = false;
     bool bIsCurrentUnit = false;
+	bool bHasAttacked = false;
 	
 
     TWeakObjectPtr<APlayerUnit> EnemyToAttack;
