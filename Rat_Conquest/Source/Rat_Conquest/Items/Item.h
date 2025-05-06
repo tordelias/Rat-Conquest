@@ -6,13 +6,14 @@
 #include "Rat_Conquest/Items/ItemBase.h"
 #include "GameFramework/Actor.h"
 #include "Rat_Conquest/Abilites/AbilityComponent.h" 
+#include "Rat_Conquest/Components/InteractionInterface.h"
 #include "NiagaraSystem.h"
 #include "NiagaraComponent.h"
 #include "Item.generated.h"
 
 
 UCLASS()
-class RAT_CONQUEST_API AItem : public AActor
+class RAT_CONQUEST_API AItem : public AActor, public IInteractionInterface
 {
 	GENERATED_BODY()
 	
@@ -30,6 +31,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void InitializeItem();
 
+	void initalizeInteractableData(); 
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	UStaticMeshComponent* ItemMesh;
 
@@ -42,6 +45,9 @@ public:
 
 	UPROPERTY()
 	UNiagaraComponent* ActiveEffect;
+
+	UPROPERTY()
+	FInteractableData InstanceInteractableData; 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties")
 	UDataTable* ItemDataTable;

@@ -218,6 +218,20 @@ void APlayerCamera::PerformInteractionCheck()
                         PC->UseMouseDefaultPointer();
                     }
                 }
+                else if(GridTile->ItemSlot.IsValid())
+				{
+					if (GridTile->ItemSlot->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+					{
+						if (bIsRightMouseDown)
+						{
+							if (mainHUD.IsValid())
+							{
+								mainHUD->UpdateStatWidget(&GridTile->ItemSlot->InstanceInteractableData);
+								mainHUD->ShowStatWidget();
+							}
+						}
+					}
+				}
             }
             InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
             return;

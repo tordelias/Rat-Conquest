@@ -124,7 +124,7 @@ void AItem::InitializeItem()
             UE_LOG(LogTemp, Error, TEXT("Static Mesh is null for Item ID: %s"), *ItemDataB->ID.ToString());
         }
 
-	
+        initalizeInteractableData();
         // Assign the item to this actor or elsewhere
     }
     if (ItemEffect)
@@ -146,6 +146,22 @@ void AItem::InitializeItem()
             ActiveEffect->Activate(true);
         }
     }
+}
+
+void AItem::initalizeInteractableData()
+{
+    InstanceInteractableData.InteractableType = EInteractionType::IT_Interact; 
+	InstanceInteractableData.UnitName = ItemDataB->ItemTextData.Name;
+    InstanceInteractableData.UnitHealth = Health;
+    InstanceInteractableData.maxHealth = Health; 
+    InstanceInteractableData.Range = Range;
+    InstanceInteractableData.Attack = Attack;
+    InstanceInteractableData.UnitDamage = Damage;
+    InstanceInteractableData.UnitMovementSpeed = Movement;
+    InstanceInteractableData.Defense = Defence;
+    InstanceInteractableData.MinDamage = Damage;
+    InstanceInteractableData.MaxDamage = Damage;
+    InstanceInteractableData.Initative = Initiative;
 }
 
 void AItem::InitializeAbilities()
