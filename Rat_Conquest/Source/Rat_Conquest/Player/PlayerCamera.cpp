@@ -512,16 +512,10 @@ void APlayerCamera::Zoom(const FInputActionValue& Value)
 
 void APlayerCamera::MoveCamera(const FInputActionValue& Value)
 {
-    if (!bIsMiddleMouseDown)
-    {
-        return; 
-    }
-    bIsCameraMoving = false;
     FVector2D MoveAxis = Value.Get<FVector2D>();
 
-    //const float DeadZone = 0.15f;
-    //if (FMath::Abs(MoveAxis.X) < DeadZone) MoveAxis.X = 0.f;
-    //if (FMath::Abs(MoveAxis.Y) < DeadZone) MoveAxis.Y = 0.f;
+    if (MoveAxis.IsNearlyZero())
+        return;
 
     if (!IsValid(SpringArm.Get()))
     {
@@ -537,9 +531,20 @@ void APlayerCamera::MoveCamera(const FInputActionValue& Value)
     FVector RightVector = CameraRotation.RotateVector(FVector::RightVector);
 
     FVector Movement = (RightVector * -MoveAxis.X) + (ForwardVector * -MoveAxis.Y);
-    Movement *= 10.0f; 
+    Movement *= 10.0f;
 
-    SpringArm->SetWorldLocation(SpringArm->GetComponentLocation() + Movement);
+    // Apply movement only if either MMB is down or this is WASD movement
+    if (bIsMiddleMouseDown || bIsUsingKeyboard)
+    {
+        SpringArm->SetWorldLocation(SpringArm->GetComponentLocation() + Movement);
+    }
+}
+
+void APlayerCamera::MoveCameraKeyboard(const FInputActionValue& Value)
+{
+    bIsUsingKeyboard = true;
+    MoveCamera(Value);
+    bIsUsingKeyboard = false;
 }
 void APlayerCamera::MMBPressed(const FInputActionValue& Value)
 {
@@ -598,6 +603,8 @@ void APlayerCamera::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
         EnhancedInputComponent->BindAction(IA_Zoom, ETriggerEvent::Triggered, this, &APlayerCamera::Zoom);
         EnhancedInputComponent->BindAction(IA_Interact, ETriggerEvent::Started, this, &APlayerCamera::BeginInteract);
 		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Triggered, this, &APlayerCamera::MoveCamera);
+        EnhancedInputComponent->BindAction(IA_MoveKeyboard, ETriggerEvent::Triggered, this, &APlayerCamera::MoveCameraKeyboard);
+
 
 		EnhancedInputComponent->BindAction(IA_MMB, ETriggerEvent::Started, this, &APlayerCamera::MMBPressed);
 		EnhancedInputComponent->BindAction(IA_MMB, ETriggerEvent::Completed, this, &APlayerCamera::MMBReleased);

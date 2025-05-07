@@ -69,6 +69,9 @@ public:
     TObjectPtr<UInputAction> IA_Move;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<UInputAction> IA_MoveKeyboard;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UInputAction> IA_MMB;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -82,6 +85,7 @@ private:
     void Look(const FInputActionValue& Value);
     void Zoom(const FInputActionValue& Value);
 	void MoveCamera(const FInputActionValue& Value);
+	void MoveCameraKeyboard(const FInputActionValue& Value);
 	void MMBPressed(const FInputActionValue& Value);
 	void MMBReleased(const FInputActionValue& Value);
 	void RMBPressed(const FInputActionValue& Value);
@@ -129,6 +133,7 @@ protected:
     bool bIsDeaultCursor = true;
     bool bIsMiddleMouseDown = false;
 	bool bIsRightMouseDown = false;
+	bool bIsUsingKeyboard = false;
 
     // PlayerUnit movement
     UPROPERTY()
