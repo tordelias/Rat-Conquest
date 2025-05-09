@@ -38,6 +38,9 @@ void AGameManager::BeginPlay()
     TArray<AActor*> FoundGridManagers;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGridManager::StaticClass(), FoundGridManagers);
 
+    // create the UniutMarker
+    unitMarker = GetWorld()->SpawnActor<AUnitMarker>(AUnitMarker::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+
     if (FoundGridManagers.Num() > 0)
     {
         GridManager = TObjectPtr<AGridManager>(Cast<AGridManager>(FoundGridManagers[0]));
@@ -74,10 +77,16 @@ void AGameManager::BeginPlay()
     else {
         CheckForEncounter();
     }
-  
-	// create the UniutMarker
-	unitMarker = GetWorld()->SpawnActor<AUnitMarker>(AUnitMarker::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
-
+ 
+    //Delay MarkCurrentUnit(); to next tick
+    FTimerHandle DelayTimer;
+    GetWorld()->GetTimerManager().SetTimer(
+		DelayTimer,
+		this,
+		&AGameManager::MarkCurrentUnit,
+		0.1f, // delay in seconds
+		false // no looping
+	);
 }
 
 void AGameManager::TogglePlayerTurn()

@@ -14,7 +14,7 @@ void AGeneralAIUnit::RandomizeStats()
 {
 	UnitName = FName("IronRat");
 	MovementSpeed = FMath::RandRange(2, 5);
-	Damage = FMath::RandRange(1, 5);
+	Damage = FMath::RandRange(1, 3);
 	Defence = FMath::RandRange(0, 5);
 	maxHealth = FMath::RandRange(5, 10);
 	Health = maxHealth;
