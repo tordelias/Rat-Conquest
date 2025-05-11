@@ -86,7 +86,50 @@ void ALevelGenerator::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
     if (GetWorld()->GetTimeSeconds() - LastMoveTime < InputCooldown) return;
-   
+    if (CurrentRoom)
+    {
+        // Draw persistent debug sphere over current room
+       /* const FVector RoomLocation = CurrentRoom->GetActorLocation() + FVector(0, 0, 200);
+        DrawDebugSphere(
+            GetWorld(),
+            RoomLocation,
+            100.0f,
+            12,
+            FColor::Yellow,
+            false,
+            -1.0f,
+            0,
+            5.0f
+        );*/
+
+    }
+    //if (GameManager && !GameManager->bEncounterComplete) return;
+    if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Q)) {
+        if (AMainHUD* hud = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD()))
+        {
+            hud->SetupRoomSelectWidget(this);
+			hud->ShowRoomSelectWidget();
+        }
+       
+       
+    }
+    //if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Up))
+    //{
+    //    MoveToRoom(0); // North
+
+    //}
+    //else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Right))
+    //{
+    //    MoveToRoom(1); // East
+    //}
+    //else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Down))
+    //{
+    //    MoveToRoom(2); // South
+    //}
+    //else if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(EKeys::Left))
+    //{
+    //    MoveToRoom(3); // West
+    //}
    
 }
 
