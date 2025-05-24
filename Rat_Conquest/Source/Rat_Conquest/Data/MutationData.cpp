@@ -52,19 +52,46 @@ void MutationData::Mutate()
 TArray<int> MutationData::MutateArray()
 {
 	//speed = 0, damage = 1, defense = 2, health = 3, attack = 4, range = 5, initiative = 6
-	TArray<int> mutatedArray = stats; 
+	TArray<int> mutatedArray = stats;
 
-		int positiveChange = FMath::RandRange(minChange, maxChange);
-		int negativeChange = FMath::RandRange(-minChange, -maxChange);
+	int positiveChange = FMath::RandRange(minChange, maxChange);
+	int negativeChange = FMath::RandRange(-maxChange, -minChange); 
 
-		int stat1 = FMath::RandRange(0, stats.Num() - 1);
-		int stat2 = FMath::RandRange(0, stats.Num() - 1);
-		while (stat1 == stat2)
-		{
-			stat2 = FMath::RandRange(0, stats.Num() - 1);
-		}
-		mutatedArray[stat1] += positiveChange;
-		mutatedArray[stat2] += negativeChange;
+	int stat1 = FMath::RandRange(0, stats.Num() - 1);
+	int stat2 = GetNegativeStat(stat1); 
 
-		return mutatedArray;
+	mutatedArray[stat1] += positiveChange;
+	mutatedArray[stat2] += negativeChange;
+
+	return mutatedArray;
 }
+
+int MutationData::GetNegativeStat(int positiveStat)
+{
+	//speed = 0, damage = 1, defense = 2, health = 3, attack = 4, range = 5, initiative = 6
+	TArray<int> NegativeStats;
+
+	switch (positiveStat)
+	{
+	case 0: // Speed
+		NegativeStats = { 1, 3 }; break; // Damage, Health
+	case 1: // Damage
+		NegativeStats = { 2, 3 }; break; // Defense, Health
+	case 2: // Defense
+		NegativeStats = { 0, 6 }; break; // Speed, Initiative
+	case 3: // Health
+		NegativeStats = { 0 }; break; // Speed
+	case 4: // Attack
+		NegativeStats = { 2 }; break; // Defense
+	case 5: // Range
+		NegativeStats = { 4, 6 }; break; // Attack, Initiative
+	case 6: // Initiative
+		NegativeStats = { 2, 3 }; break; // Defense, Health
+	default:
+		NegativeStats = { FMath::RandRange(0, stats.Num() - 1) };
+		break;
+	}
+
+	return NegativeStats[FMath::RandRange(0, NegativeStats.Num() - 1)];
+}
+

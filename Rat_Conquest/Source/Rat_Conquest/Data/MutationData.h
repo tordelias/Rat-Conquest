@@ -35,6 +35,8 @@ public:
 	void Mutate(); 
 	TArray<int> MutateArray();
 
+	int GetNegativeStat(int positiveStat);
+
 	void SetExperienceNeeded(int experienceNeeded) { maxExperience = experienceNeeded; };
 	void AddExperience(int experienceToAdd) { experience += experienceToAdd; };
 	int GetExperience() const { return experience; };

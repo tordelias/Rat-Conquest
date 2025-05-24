@@ -41,6 +41,7 @@ void ACombatManager::DealDamageToUnit(TWeakObjectPtr<APlayerUnit> Attackerunit, 
     float damageMultiplier = 1.0f + (static_cast<float>(Attackerunit->Attack) / 10.0f);
     int calculatedDamage = static_cast<int>(rawDamage * damageMultiplier);
 
+    Attackerunit->mutationData->AddExperience(2);
     // Include defender's armor if any
     int armorDefense = 0;
     if (Defenderunit->ItemSlots[1].IsValid())
